@@ -1,14 +1,12 @@
-import matplotlib.pyplot as plt
+import plotly.express as px
 import pandas as pd
-import numpy as np
 
 file = "data.txt"
 data = pd.read_csv(file, header=0, sep=" ")
-x = data["x"]
-u = data["u"]
 
-plt.plot(x, u, lw=5)
-plt.xlabel("x")
-plt.ylabel("y")
-plt.title("Analytical solution")
-plt.show()
+fig = px.line(data, x="x", y=data.keys()[1:], title="Analytical solutions")
+fig.update_layout(
+    font_family="Garamond",
+    font_size=25,
+)
+fig.show()
