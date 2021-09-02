@@ -18,8 +18,8 @@ double analytic_sol(double x){return 1 - (1 - exp(-10)) * x - exp(-10 * x);}
 int main(){
     double x0 = 0;
     double x1 = 1;
-    int N = 10;
-    double h = (x1 - x0) / N;
+    int N = 1001;
+    double h = (x1 - x0) / (N - 1);
     double x[N];
     double u[N];
     double a[N];
@@ -37,20 +37,21 @@ int main(){
         g[i] = pow(h, 2) * f(x[i]);
     }
     // Forward sub
-    for (int i = 1; i < N; i++){
+    for (int i = 2; i < N - 1; i++){
         b[i] = b[i] - a[i] / b[i - 1] * c[i];
-        g[i] = g[i] - a[i] / b[i - 1] * c[i];
+        g[i] = g[i] - a[i] / b[i - 1] * g[i - 1];
     }
-    for (int i = 0; i < N; i++){
-    cout << g[i] << " ";
-    // cout << c
-    }
+    // for (int i = 0; i < N; i++){
+    // cout << g[i] << " ";
+    // // cout << c
+    // }
     // Backward sub
-    g[N] = g[N] / b[N];
-    for (int i = N - 1; i > 0; i--){
+    g[N-2] = g[N-2] / b[N-2];
+    for (int i = N - 3; i > 0; i--){
         g[i] = (g[i] - c[i] * g[i + 1]) / b[i];
     }
-
+    g[N - 1] = 0;
+    g[0] = 0;
     ofstream out;
     out.open("data.txt");
     out << "x u v\n";
