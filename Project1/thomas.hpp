@@ -25,7 +25,7 @@ void init_arrays(int N, long double h, long double *x, long double *u, long doub
 
 void Fwd_Bkwd_sub(int N, long double *a, long double *b, long double *c, long double *g){
     for (int i = 2; i < N - 1; i++){
-        b[i] = b[i] - a[i] / b[i - 1] * c[i];
+        b[i] = b[i] - a[i] / b[i - 1] * c[i - 1];
         g[i] = g[i] - a[i] / b[i - 1] * g[i - 1];
     }
     for (int i = N - 2; i > 0; i--){
