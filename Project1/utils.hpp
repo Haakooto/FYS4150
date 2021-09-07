@@ -4,7 +4,6 @@
 #include <fstream>
 #include <cmath>
 #include <iomanip>
-#include <tuple>
 
 using namespace std;
 
@@ -13,7 +12,7 @@ long double analytic_sol(long double x){return 1 - (1 - exp(-10)) * x - exp(-10 
 
 void write_full(int n, long double *x, long double *u, long double *g, long double *aerr, long double *rerr, string s = "_"){
     ofstream out;
-    out.open("datas/full_data" + s + to_string(n) + ".txt");
+    out.open("datas/full" + s + to_string(n) + ".txt");
     out << "x u v abs_err rel_err\n";
     out << fixed;
     for (int i = 0; i < pow(10, n) + 1; i++){
@@ -29,7 +28,7 @@ void write_full(int n, long double *x, long double *u, long double *g, long doub
 
 void write_limited(int I, int *n, double *time, double *max_rel_err, string s="_"){
     ofstream out;
-    out.open("datas/limited_data" + s + ".txt");
+    out.open("datas/limited" + s + ".txt");
     out << "n t max_error\n";
     out << fixed;
     for (int i = 0; i < I; i++){
