@@ -29,7 +29,7 @@ void write_to_file(int n, long double *x, long double *u, long double *g, long d
 long double *rel_err(int N, long double*u, long double *v){
     long double *error = new long double[N];
     for (int i = 0; i < N; i++){
-        error[i] = log10((u[i] - v[i]) / u[i]);
+        error[i] = log10(abs((u[i] - v[i]) / u[i]));
     }
     return error;
 }
