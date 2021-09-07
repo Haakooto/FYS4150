@@ -8,13 +8,18 @@ using namespace std;
 double f(double x){return 100 * exp(-10 * x);}
 double analytic_sol(double x){return 1 - (1 - exp(-10)) * x - exp(-10 * x);}
 
-void write_to_file(int n, double *x, double *u, double *g){
+void write_to_file(int n, double *x, double *u, double *g, double *aerr, double *rerr){
     ofstream out;
-    out.open("data_" + to_string(n) + ".txt");
-    out << "x u v\n";
+    out.open("datas/data_" + to_string(n) + ".txt");
+    out << "x u v abs_err rel_err\n";
     out << fixed;
     for (int i = 0; i < pow(10, n) + 1; i++){
-        out << setprecision(10) << x[i] << " " << u[i] << " " << g[i]  << "\n";
+        out << setprecision(10) << x[i]; 
+        out << " " << u[i];
+        out << " " << g[i]; 
+        out << " " << aerr[i];
+        out << " " << rerr[i];
+        out << endl;
     }
     out.close();
 }
@@ -45,8 +50,7 @@ void Fwd_Bkwd_sub(int N, double *a, double *b, double *c, double *g){
 }
 
 double *RelErr(int N, double*u, double *g){
-    double *error = new double
-    [N];
+    double *error = new double[N];
     for (int i = 0; i < N; i++){
         error[i] = log10((u[i] - g[i]) / u[i]);
     }
@@ -63,12 +67,14 @@ double *AbsErr(int N, double*u, double *g){
 
 void Thomas(int n){
     int N = pow(10, n) + 1;
-    double x[N];
-    double u[N];
-    double a[N];
-    double b[N];
-    double c[N];
-    double g[N];
+    
+    double *x, *u, *a, *b, *c, *g;
+    x = new double[N];
+    u = new double[N];
+    a = new double[N];
+    b = new double[N];
+    c = new double[N];
+    g = new double[N];
     
     double x0 = 0;
     double x1 = 1;
@@ -77,10 +83,10 @@ void Thomas(int n){
     init_arrays(N, h, x, u, a, b, c, g);
     Fwd_Bkwd_sub(N, a, b, c, g);
 
-    double *rel_err = RelErr(N, u, g);
     double *abs_err = AbsErr(N, u, g);
+    double *rel_err = RelErr(N, u, g);
     
-    write_to_file(n, x, u, g);
+    write_to_file(n, x, u, g, abs_err, rel_err);
 
     delete[] x;
     delete[] u;
@@ -88,8 +94,11 @@ void Thomas(int n){
     delete[] b;
     delete[] c;
     delete[] g;
-
+    delete[] rel_err;
+    delete[] abs_err;
 }
+
+
 
 
 int main(int argc, char *argv[]){

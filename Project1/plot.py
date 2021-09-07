@@ -6,7 +6,7 @@ import sys
 n = int(sys.argv[1])
 
 def num_sol():
-    file = "data_1.txt"
+    file = f"data_{n}.txt"
     data = pd.read_csv(file, header=0, sep=" ")
 
     fig = px.line(data, x="x", y=["u", "v"], title=f"Numerical solution for N=10^{n}")
