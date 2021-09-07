@@ -97,7 +97,7 @@ def max_error():
         y[i] = np.min(pd.read_csv(f(i + 1), header=0, sep=" ")["rel_err"][1:])
 
     model = LR()
-    model.fit(x[:-1].reshape(-1, 1), y[:-1].reshape(-1,1))
+    model.fit(x[np.nonzero(y)].reshape(-1, 1), y[np.nonzero(y)].reshape(-1, 1))
     y_predict = model.predict(x.reshape(-1, 1))
 
     fig.add_trace(go.Scatter(x=x, y=y,
