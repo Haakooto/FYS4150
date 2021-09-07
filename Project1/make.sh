@@ -1,9 +1,6 @@
-n="$1"
-if [ "$2" ]; then
-    method="$2"
-else
-    method="Thomas"
-fi
-
 g++ main.cpp -o main.out
-./main.out "$n" "$method"
+if [ "$2" ]; then
+    ./main.out "$1" "optim"
+else
+    ./main.out "$1"
+fi
