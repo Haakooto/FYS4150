@@ -4,15 +4,16 @@
 #include <fstream>
 #include <cmath>
 #include <iomanip>
+#include <tuple>
 
 using namespace std;
 
 long double f(long double x){return 100 * exp(-10 * x);}
 long double analytic_sol(long double x){return 1 - (1 - exp(-10)) * x - exp(-10 * x);}
 
-void write_to_file(int n, long double *x, long double *u, long double *g, long double *aerr, long double *rerr){
+void write_full(int n, long double *x, long double *u, long double *g, long double *aerr, long double *rerr, string s = "_"){
     ofstream out;
-    out.open("datas/data_" + to_string(n) + ".txt");
+    out.open("datas/full_data" + s + to_string(n) + ".txt");
     out << "x u v abs_err rel_err\n";
     out << fixed;
     for (int i = 0; i < pow(10, n) + 1; i++){
@@ -26,20 +27,35 @@ void write_to_file(int n, long double *x, long double *u, long double *g, long d
     out.close();
 }
 
-long double *rel_err(int N, long double*u, long double *v){
-    long double *error = new long double[N];
-    for (int i = 0; i < N; i++){
-        error[i] = log10(abs((u[i] - v[i]) / u[i]));
+void write_limited(int I, int *n, double *time, double *max_rel_err, string s="_"){
+    ofstream out;
+    out.open("datas/limited_data" + s + ".txt");
+    out << "n t max_error\n";
+    out << fixed;
+    for (int i = 0; i < I; i++){
+        out << n[i] << " ";
+        out << setprecision(8) << time[i];
+        out << " " << max_rel_err[i];
+        out << endl;
     }
-    return error;
+    out.close();
 }
 
-long double *abs_err(int N, long double*u, long double *v){
-    long double *error = new long double[N];
+double rel_err(int N, long double *error, long double*u, long double *v){
+    double max = 0.;
+    for (int i = 0; i < N; i++){
+        error[i] = log10(abs((u[i] - v[i]) / u[i]));
+        if (error[i] < max) {
+            max = error[i];
+        }
+    }
+    return max;
+}
+
+void abs_err(int N, long double *error, long double*u, long double *v){
     for (int i = 0; i < N; i++){
         error[i] = log10(abs(u[i] - v[i]));
     }
-    return error;
 }
 
 #endif
