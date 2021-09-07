@@ -5,6 +5,6 @@ else
     method="Thomas"
 fi
 
-g++ main.cpp -o main.out
+g++ test.cpp -o main.out
 ./main.out "$n" "$method"
 python3 plot.py "$n"

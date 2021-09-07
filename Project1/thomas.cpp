@@ -1,5 +1,12 @@
-#include "thomas.hpp"
+#ifndef THOMAS_H
+#define THOMAS_H
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <iomanip>
 #include "utils.hpp"
+
+using namespace std;
 
 void init_arrays(int N, double h, double *x, double *u, double *a, double *b, double *c, double *g){
     for (int i = 0; i < N ; i++){
@@ -28,7 +35,7 @@ void Fwd_Bkwd_sub(int N, double *a, double *b, double *c, double *g){
 
 void Thomas(int n){
     int N = pow(10, n) + 1;
-    
+
     double *x, *u, *a, *b, *c, *g;
     x = new double[N];
     u = new double[N];
@@ -36,7 +43,7 @@ void Thomas(int n){
     b = new double[N];
     c = new double[N];
     g = new double[N];
-    
+
     double x0 = 0;
     double x1 = 1;
     double h = (x1 - x0) / (N - 1);
@@ -46,7 +53,7 @@ void Thomas(int n){
 
     double *abs_err = abs_err(N, u, g);
     double *rel_err = rel_err(N, u, g);
-    
+
     write_to_file(n, x, u, g, abs_err, rel_err);
 
     delete[] x;
@@ -58,3 +65,5 @@ void Thomas(int n){
     delete[] rel_err;
     delete[] abs_err;
 }
+
+#endif

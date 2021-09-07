@@ -16,9 +16,9 @@ using namespace std;
 //     out << "x u v abs_err rel_err\n";
 //     out << fixed;
 //     for (int i = 0; i < pow(10, n) + 1; i++){
-//         out << setprecision(10) << x[i]; 
+//         out << setprecision(10) << x[i];
 //         out << " " << u[i];
-//         out << " " << g[i]; 
+//         out << " " << g[i];
 //         out << " " << aerr[i];
 //         out << " " << rerr[i];
 //         out << endl;
@@ -69,7 +69,7 @@ using namespace std;
 
 // void Thomas(int n){
 //     int N = pow(10, n) + 1;
-    
+
 //     double *x, *u, *a, *b, *c, *g;
 //     x = new double[N];
 //     u = new double[N];
@@ -77,7 +77,7 @@ using namespace std;
 //     b = new double[N];
 //     c = new double[N];
 //     g = new double[N];
-    
+
 //     double x0 = 0;
 //     double x1 = 1;
 //     double h = (x1 - x0) / (N - 1);
@@ -87,7 +87,7 @@ using namespace std;
 
 //     double *abs_err = AbsErr(N, u, g);
 //     double *rel_err = RelErr(N, u, g);
-    
+
 //     write_to_file(n, x, u, g, abs_err, rel_err);
 
 //     delete[] x;
@@ -100,15 +100,15 @@ using namespace std;
 //     delete[] abs_err;
 // }
 
-
-
-
 int main(int argc, char *argv[]){
     double x0 = 0;
     double x1 = 1;
     int n;
 
     n = atoi(argv[1]);
+    // for (int i = 1; i < n; i++){
+        // Thomas(i);
+    // }
     Thomas(n);
 
     return 0;

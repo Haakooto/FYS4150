@@ -5,8 +5,9 @@ import sys
 
 n = int(sys.argv[1])
 
+
 def num_sol():
-    file = f"data_{n}.txt"
+    file = f"datas/data_{n}.txt"
     data = pd.read_csv(file, header=0, sep=" ")
 
     fig = px.line(data, x="x", y=["u", "v"], title=f"Numerical solution for N=10^{n}")
@@ -18,7 +19,7 @@ def num_sol():
         yaxis_title="v(x)",
     )
 
-    fig.write_image(f"plots/num_sol_n{n}.pdf")
+    fig.write_image(f"figures/num_sol_n{n}.pdf")
     fig.show()
 
 
@@ -42,7 +43,7 @@ def first_few_num_sols():
         yaxis_title="v(x)",
 
     )
-    fig.write_image("plots/num_sol_N123.pdf")
+    fig.write_image("figures/num_sol_N123.pdf")
     fig.show()
 
 
