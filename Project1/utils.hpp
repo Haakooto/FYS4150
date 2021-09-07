@@ -7,16 +7,16 @@
 
 using namespace std;
 
-double f(double x){return 100 * exp(-10 * x);}
-double analytic_sol(double x){return 1 - (1 - exp(-10)) * x - exp(-10 * x);}
+long double f(long double x){return 100 * exp(-10 * x);}
+long double analytic_sol(long double x){return 1 - (1 - exp(-10)) * x - exp(-10 * x);}
 
-void write_to_file(int n, double *x, double *u, double *g, double *aerr, double *rerr){
+void write_to_file(int n, long double *x, long double *u, long double *g, long double *aerr, long double *rerr){
     ofstream out;
     out.open("datas/data_" + to_string(n) + ".txt");
     out << "x u v abs_err rel_err\n";
     out << fixed;
     for (int i = 0; i < pow(10, n) + 1; i++){
-        out << setprecision(10) << x[i];
+        out << setprecision(14) << x[i];
         out << " " << u[i];
         out << " " << g[i];
         out << " " << aerr[i];
@@ -26,16 +26,16 @@ void write_to_file(int n, double *x, double *u, double *g, double *aerr, double 
     out.close();
 }
 
-double *rel_err(int N, double*u, double *v){
-    double *error = new double[N];
+long double *rel_err(int N, long double*u, long double *v){
+    long double *error = new long double[N];
     for (int i = 0; i < N; i++){
         error[i] = log10((u[i] - v[i]) / u[i]);
     }
     return error;
 }
 
-double *abs_err(int N, double*u, double *v){
-    double *error = new double[N];
+long double *abs_err(int N, long double*u, long double *v){
+    long double *error = new long double[N];
     for (int i = 0; i < N; i++){
         error[i] = log10(abs(u[i] - v[i]));
     }

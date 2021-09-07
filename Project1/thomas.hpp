@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void init_arrays(int N, double h, double *x, double *u, double *a, double *b, double *c, double *g){
+void init_arrays(int N, long double h, long double *x, long double *u, long double *a, long double *b, long double *c, long double *g){
     for (int i = 0; i < N ; i++){
         x[i] = i * h;
         u[i] = analytic_sol(x[i]);
@@ -23,7 +23,7 @@ void init_arrays(int N, double h, double *x, double *u, double *a, double *b, do
     g[N - 1] = 0;
 }
 
-void Fwd_Bkwd_sub(int N, double *a, double *b, double *c, double *g){
+void Fwd_Bkwd_sub(int N, long double *a, long double *b, long double *c, long double *g){
     for (int i = 2; i < N - 1; i++){
         b[i] = b[i] - a[i] / b[i - 1] * c[i];
         g[i] = g[i] - a[i] / b[i - 1] * g[i - 1];
@@ -36,27 +36,25 @@ void Fwd_Bkwd_sub(int N, double *a, double *b, double *c, double *g){
 void Thomas(int n){
     int N = pow(10, n) + 1;
 
-    double *x, *u, *a, *b, *c, *g;
-    x = new double[N];
-    u = new double[N];
-    a = new double[N];
-    b = new double[N];
-    c = new double[N];
-    g = new double[N];
+    long double *x, *u, *a, *b, *c, *g;
+    x = new long double[N];
+    u = new long double[N];
+    a = new long double[N];
+    b = new long double[N];
+    c = new long double[N];
+    g = new long double[N];
 
-    double x0 = 0;
-    double x1 = 1;
-    double h = (x1 - x0) / (N - 1);
+    long double x0 = 0;
+    long double x1 = 1;
+    long double h = (x1 - x0) / (N - 1);
 
-    cout << "Initializing arrays\n";
+    cout << "Starting algorithm\n";
     init_arrays(N, h, x, u, a, b, c, g);
-    cout << "Performing forward and backward substituion\n";
     Fwd_Bkwd_sub(N, a, b, c, g);
 
-    cout << "Calculating absolute error\n";
-    double *aerr = abs_err(N, u, g);
-    cout << "Calculating relative error\n";
-    double *rerr = rel_err(N, u, g);
+    cout << "Calculating errors\n";
+    long double *aerr = abs_err(N, u, g);
+    long double *rerr = rel_err(N, u, g);
 
     cout << "Writing to file\n";
     write_to_file(n, x, u, g, aerr, rerr);
