@@ -6,14 +6,16 @@ from sklearn.linear_model import LinearRegression as LR
 import sys
 
 n = int(sys.argv[1])
-
-f = lambda x: f"datas/data_{x}.txt"
-
+if len(sys.argv) == 4:
+    s = "_optim_"
+else:
+    s = ""
+f = lambda type, algo, n: f"datas/{type}{algo}" + (f"_{n}" if type == "full" else "") + ".txt"
+data = lambda type, algo, n="full": pd.read_csv(f(type, algo, n), header=0, sep=" ")
 
 def num_sol():
-    data = pd.read_csv(f(n), header=0, sep=" ")
 
-    fig = px.line(data, x="x", y=["u", "v"])
+    fig = px.line(data(n), x="x", y=["u", "v"])
     fig.update_layout(
         font_family="Garamond",
         font_size=30,
@@ -31,11 +33,11 @@ def first_few_num_sols():
 
     colors = ["seagreen", "aqua", "gold"]
     for i in range(1, n + 1):
-        data = pd.read_csv(f(i), header=0, sep=" ")
+        dat = dat(i)
 
-        fig.add_trace(go.Scatter(x=data["x"], y=data["v"], mode="lines", line=dict(width=7, color=colors[i - 1]), name=rf"N = 10\U+207{i}"))
+        fig.add_trace(go.Scatter(x=dat["x"], y=dat["v"], mode="lines", line=dict(width=7, color=colors[i - 1]), name=rf"N = 10\U+207{i}"))
 
-    fig.add_trace(go.Scatter(x=data["x"], y=data["u"], line=dict(width=7, dash="dot", color="firebrick"), name=f"Analytic solution"))
+    fig.add_trace(go.Scatter(x=dat["x"], y=dat["u"], line=dict(width=7, dash="dot", color="firebrick"), name=f"Analytic solution"))
 
     fig.update_layout(
         font_family="Garamond",
@@ -52,10 +54,10 @@ def first_few_num_sols():
 def absolute_error():
     fig = go.Figure()
     for i in range(1, n + 1):
-        data = pd.read_csv(f(i), header=0, sep=" ")
+        dat = data("full", s, i)
 
-        fig.add_trace(go.Scatter(x=data["x"][1:-1],
-                                 y=data["abs_err"][1:-1],
+        fig.add_trace(go.Scatter(x=dat["x"][1:-1],
+                                 y=dat["abs_err"][1:-1],
                                  mode="lines",
                                  line=dict(width=7),
                                  name=f"N = 10^{i}"))
@@ -71,11 +73,11 @@ def absolute_error():
 
 def relative_error():
     fig = go.Figure()
-    for i in range(1, n + 1):
-        data = pd.read_csv(f(i), header=0, sep=" ")
-
-        fig.add_trace(go.Scatter(x=data["x"][1:-1],
-                                 y=data["rel_err"][1:-1],
+    for i in range(n, n + 1):
+        dat = data("full", s, i)
+        
+        fig.add_trace(go.Scatter(x=dat["x"][1:-1],
+                                 y=dat["rel_err"][1:-1],
                                  mode="lines",
                                  line=dict(width=7),
                                  name=f"N = 10^{i}"))
@@ -91,13 +93,12 @@ def relative_error():
 
 def max_error():
     fig = go.Figure()
+    points_to_exclude = 2
     x = np.arange(n) + 1
-    y = np.zeros(n)
-    for i in range(n):
-        y[i] = np.min(pd.read_csv(f(i + 1), header=0, sep=" ")["rel_err"][1:])
-
+    y = np.asarray(data("limited", s, "This agrument is useless")["max_error"])
+    
     model = LR()
-    model.fit(x[np.nonzero(y)].reshape(-1, 1), y[np.nonzero(y)].reshape(-1, 1))
+    model.fit(x[:-points_to_exclude].reshape(-1, 1), y[:-points_to_exclude].reshape(-1, 1))
     y_predict = model.predict(x.reshape(-1, 1))
 
     fig.add_trace(go.Scatter(x=x, y=y,
@@ -118,11 +119,129 @@ def max_error():
                   )
     fig.update_layout(
         font_family="Garamond",
-        font_size=40,
-        title="Max relative error as function of N",
+        font_size=35,
+        title="Max relative error for " + ("optimized " if s == "_optim_" else "general ") + "Thomas algorithm as function of N",
         xaxis_title="Log10(N)",
         yaxis_title="Max relative error",
         legend=dict(yanchor="bottom", xanchor="left", x=0.01, y=0.01),
+    )
+    fig.show()
+
+
+def both_max_error():
+    fig = go.Figure()
+    points_to_exclude = (0, 2)
+    x = np.arange(n) + 1
+    y_norma = np.asarray(data("limited", "", "np.log10(this is a usless argument)")["max_error"])
+    y_optim = np.asarray(data("limited", "_optim_", "np.log10(this is a usless argument)")["max_error"])
+    
+    model = LR()
+    model.fit(x[:-points_to_exclude[1]].reshape(-1, 1), y_norma[:-points_to_exclude[1]].reshape(-1, 1))
+    y_predict_norma = model.predict(x.reshape(-1, 1))
+
+    fig.add_trace(go.Scatter(x=x, y=y_norma,
+                             mode="markers",
+                             marker=dict(size=20,
+                                         color="maroon"),
+                             name="General Thomas algorithm"
+                             )
+                  )
+
+    fig.add_trace(go.Scatter(x=x, y=y_predict_norma.T[0],
+                             mode="lines",
+                             line=dict(dash="dot",
+                                       width=7,
+                                       color="firebrick"),
+                             name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
+                             )
+                  )
+    
+    model = LR()
+    model.fit(x.reshape(-1, 1), y_optim.reshape(-1, 1))
+    y_predict_optim = model.predict(x.reshape(-1, 1))
+
+    fig.add_trace(go.Scatter(x=x, y=y_optim,
+                             mode="markers",
+                             marker=dict(size=20,
+                                         color="darkgreen"),
+                             name="Optimized Thomas algorithm"
+                             )
+                  )
+
+    fig.add_trace(go.Scatter(x=x, y=y_predict_optim.T[0],
+                             mode="lines",
+                             line=dict(dash="dot",
+                                       width=7,
+                                       color="mediumseagreen"),
+                             name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
+                             )
+                  )
+
+    fig.update_layout(
+        font_family="Garamond",
+        font_size=40,
+        title="Max relative error for algoritms as function of N",
+        xaxis_title="Log10(N)",
+        yaxis_title="Log10(Time)",
+        legend=dict(yanchor="bottom", xanchor="left", x=0.01, y=1-0.99),
+    )
+    fig.show()
+
+def timing():
+    fig = go.Figure()
+    x = np.arange(n) + 1
+    y_norma = np.log10(np.asarray(data("limited", "", "np.log10(this is a usless argument)")["time"]))
+    y_optim = np.log10(np.asarray(data("limited", "_optim_", "np.log10(this is a usless argument)")["time"]))
+    
+    model = LR()
+    model.fit(x.reshape(-1, 1), y_norma.reshape(-1, 1))
+    y_predict_norma = model.predict(x.reshape(-1, 1))
+
+    fig.add_trace(go.Scatter(x=x, y=y_norma,
+                             mode="markers",
+                             marker=dict(size=20,
+                                         color="maroon"),
+                             name="General Thomas algorithm"
+                             )
+                  )
+
+    fig.add_trace(go.Scatter(x=x, y=y_predict_norma.T[0],
+                             mode="lines",
+                             line=dict(dash="dot",
+                                       width=7,
+                                       color="firebrick"),
+                             name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
+                             )
+                  )
+    
+    model = LR()
+    model.fit(x.reshape(-1, 1), y_optim.reshape(-1, 1))
+    y_predict_optim = model.predict(x.reshape(-1, 1))
+
+    fig.add_trace(go.Scatter(x=x, y=y_optim,
+                             mode="markers",
+                             marker=dict(size=20,
+                                         color="darkgreen"),
+                             name="Optimized Thomas algorithm"
+                             )
+                  )
+
+    fig.add_trace(go.Scatter(x=x, y=y_predict_optim.T[0],
+                             mode="lines",
+                             line=dict(dash="dot",
+                                       width=7,
+                                       color="mediumseagreen"),
+                             name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
+                             )
+                  )
+
+    fig.update_layout(
+        font_family="Garamond",
+        font_size=40,
+        title="Running time of algoritm as function of N",
+        xaxis_title="Log10(N)",
+        yaxis_title="Log10(Time)",
+        legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99),
     )
     fig.show()
 
