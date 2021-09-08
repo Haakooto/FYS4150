@@ -10,12 +10,10 @@
 using namespace std;
 
 void init_arrays(int N, long double h, long double *x, long double *u, long double *b, long double *g){
-    b[0] = 2.;
-    // b[1] = 1.5;
     for (int i = 0; i < N ; i++){
         x[i] = i * h;
         u[i] = analytic_sol(x[i]);
-        b[i + 1] = 2 - 1 / b[i];
+        b[i] = 1 + 1 / ((double)i + 1);
         g[i] = pow(h, 2) * f(x[i]);
     }
     // Set boundary conditions
@@ -26,12 +24,10 @@ void init_arrays(int N, long double h, long double *x, long double *u, long doub
 void Fwd_Bkwd_sub(int N, long double *b, long double *g){
     long double w;
     for (int i = 2; i < N - 1; i++){
-        // w = 1 / b[i - 1];
-        // b[i] = 2 - 1 / b[i - 1]
-        g[i] = g[i] + g[i - 1] / b[i - 1];
+        g[i] = g[i] + g[i - 1] / b[i - 2];
     }
     for (int i = N - 2; i > 0; i--){
-        g[i] = (g[i] + g[i + 1]) / b[i];
+        g[i] = (g[i] + g[i + 1]) / b[i -1];
     }
 }
 
@@ -41,7 +37,7 @@ void Optimized_Thomas(int n, int cap, double *duration, double *max_rel_err){
     long double *x, *u, *b, *g, *aerr, *rerr;
     x = new long double[N];
     u = new long double[N];
-    b = new long double[N + 1];
+    b = new long double[N];
     g = new long double[N];
     aerr = new long double[N];
     rerr = new long double[N];
