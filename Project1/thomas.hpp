@@ -61,7 +61,7 @@ void Thomas(int n, int m, int maxm, int cap, double *duration, double *max_rel_e
     abs_err(N, aerr, u, g);
     max_rel_err[(n - 1) * maxm + m] = rel_err(N, rerr, u, g);
 
-    if (n < cap){
+    if (n < cap && m == 1){
         cout << "Writing to file\n";
         write_full(n, x, u, g, aerr, rerr);
     }
