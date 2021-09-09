@@ -14,7 +14,7 @@ void init_arrays(int N, long double h, long double *x, long double *u, long doub
         x[i] = i * h;
         u[i] = analytic_sol(x[i]);
         b[i] = 1 + 1 / ((double)i + 1);   //3 FLOPs
-        g[i] = pow(h, 2) * f(x[i]);  
+        g[i] = pow(h, 2) * f(x[i]);
     }
     // Set boundary conditions
     g[0] = 0;
@@ -56,7 +56,7 @@ void Optimized_Thomas(int n, int m, int maxm, int cap, double *duration, double 
     abs_err(N, aerr, u, g);
     max_rel_err[(n - 1) * maxm + m] = rel_err(N, rerr, u, g);
 
-    if (n < cap){
+    if (n < cap && m == 1){
         cout << "Writing to file\n";
         write_full(n, x, u, g, aerr, rerr, "_optim_");
     }
