@@ -212,7 +212,7 @@ def timing():
         y_o_std[i] = np.std(y_o)
 
     model = LR()
-    model.fit(x.reshape(-1, 1), y_g_mean.reshape(-1, 1))
+    model.fit(x[2:].reshape(-1, 1), y_g_mean[2:].reshape(-1, 1))
     y_predict_norma = model.predict(x.reshape(-1, 1))
 
     fig.add_trace(go.Scatter(x=x, y=y_g_mean,
@@ -234,7 +234,7 @@ def timing():
                   )
 
     model = LR()
-    model.fit(x.reshape(-1, 1), y_o_mean.reshape(-1, 1))
+    model.fit(x[2:].reshape(-1, 1), y_o_mean[2:].reshape(-1, 1))
     y_predict_optim = model.predict(x.reshape(-1, 1))
 
     fig.add_trace(go.Scatter(x=x, y=y_o_mean,
