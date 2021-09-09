@@ -10,11 +10,11 @@
 using namespace std;
 
 void init_arrays(int N, long double h, long double *x, long double *u, long double *b, long double *g){
-    for (int i = 0; i < N ; i++){
+    for (int i = 0; i < N ; i++){   //N repetitions
         x[i] = i * h;
         u[i] = analytic_sol(x[i]);
-        b[i] = 1 + 1 / ((double)i + 1);
-        g[i] = pow(h, 2) * f(x[i]);
+        b[i] = 1 + 1 / ((double)i + 1);   //3 FLOPs
+        g[i] = pow(h, 2) * f(x[i]);  
     }
     // Set boundary conditions
     g[0] = 0;
@@ -23,11 +23,11 @@ void init_arrays(int N, long double h, long double *x, long double *u, long doub
 
 void Fwd_Bkwd_sub(int N, long double *b, long double *g){
     long double w;
-    for (int i = 2; i < N - 1; i++){
-        g[i] = g[i] + g[i - 1] / b[i - 2];
+    for (int i = 2; i < N - 1; i++){   //N-3 repetitions
+        g[i] = g[i] + g[i - 1] / b[i - 2];   //2 FLOPs
     }
-    for (int i = N - 2; i > 0; i--){
-        g[i] = (g[i] + g[i + 1]) / b[i -1];
+    for (int i = N - 2; i > 0; i--){   //N-2 repetitions
+        g[i] = (g[i] + g[i + 1]) / b[i -1];   //2 FLOPs
     }
 }
 
