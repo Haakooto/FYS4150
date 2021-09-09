@@ -42,7 +42,7 @@ Exactly same as thomas.hpp, but for the optimized algorithm. Is faster and requi
 ### [utils.hpp](https://github.com/Haakooto/FYS4150/blob/main/Project1/utils.hpp)
 Utility functions.
 #### Functions:
-- f(): given source term.
+- f(): given source function.
 - analytic_sol(): analytical solution
 - write_full(): writes entire x-domain, analytic solution, numeric solution, absolute error and relative error at every point $x_i$ to file.
 - write_limited(): writes n (log10(N)), time spent on algorithm, and maximum relative error to file for all n and m.
