@@ -11,7 +11,7 @@ Compiles and links the C++ code, as well as running it for the specifed input ar
 - m: int. Number of repetitions for each n
 - algorithm: any,  optional. If present, runs optimised Thomas algorithm. Otherwise run general Thomas algorithm.
 
-Example: "`. make.sh 6 3 o`" runs optimised algorithm 3 times for each $n \in [1, 6]$ .
+Example: "`$ . make.sh 6 3 o`" runs optimised algorithm 3 times for each $n \in [1, 6]$ .
 
 ### [plot.py](https://github.com/Haakooto/FYS4150/blob/main/Project1/plot.py)
 Makes various plots of the data, dependant on input arguments. Full description of each plotting function is given below.
@@ -19,7 +19,7 @@ Makes various plots of the data, dependant on input arguments. Full description 
 - function: string, optional. Name of plotting function.  Defaults to 'num_sol'.
 - algorithm: any, optional. Same as for make.sh. Not used in all plotting functions.
 
-Example: "`python plot.py 6 timing`"
+Example: "`$ python plot.py 6 timing`"
 
 ## Code Overview
 File-by-file rundown and explanation of each function present in code.
