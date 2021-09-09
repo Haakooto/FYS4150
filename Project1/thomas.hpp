@@ -11,13 +11,13 @@ using namespace std;
 
 void init_arrays(int N, long double h, long double *x, long double *u, long double *a, long double *b, long double *c, long double *g){
     for (int i = 0; i < N ; i++){
-        x[i] = i * h;
+        x[i] = i * h;   //1 FLOP
         u[i] = analytic_sol(x[i]);
 
         a[i] = -1;
         b[i] = 2;
         c[i] = -1;
-        g[i] = pow(h, 2) * f(x[i]);
+        g[i] = pow(h, 2) * f(x[i]);  //2 FLOPs
     }
     // Set boundary conditions
     g[0] = 0;
@@ -25,12 +25,12 @@ void init_arrays(int N, long double h, long double *x, long double *u, long doub
 }
 
 void Fwd_Bkwd_sub(int N, long double *a, long double *b, long double *c, long double *g){
-    for (int i = 2; i < N - 1; i++){
-        b[i] = b[i] - a[i] / b[i - 1] * c[i - 1];
-        g[i] = g[i] - a[i] / b[i - 1] * g[i - 1];
+    for (int i = 2; i < N - 1; i++){   //N-3 repetitions
+        b[i] = b[i] - a[i] / b[i - 1] * c[i - 1];   //3 FLOPs
+        g[i] = g[i] - a[i] / b[i - 1] * g[i - 1];  //3 FLOPs
     }
-    for (int i = N - 2; i > 0; i--){
-        g[i] = (g[i] - c[i] * g[i + 1]) / b[i];
+    for (int i = N - 2; i > 0; i--){   //N-2 repetitions
+        g[i] = (g[i] - c[i] * g[i + 1]) / b[i];   //3FLOPs
     }
 }
 
@@ -49,7 +49,7 @@ void Thomas(int n, int m, int maxm, int cap, double *duration, double *max_rel_e
 
     long double x0 = 0;
     long double x1 = 1;
-    long double h = (x1 - x0) / (N - 1);
+    long double h = (x1 - x0) / (N - 1);  //3 FLOPs
 
     init_arrays(N, h, x, u, a, b, c, g);
 
