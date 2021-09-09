@@ -134,14 +134,14 @@ def max_error():
 
 def both_max_error():
     fig = go.Figure()
-    points_to_exclude = (0, 2)
+    points_to_exclude = (0, 3)
     x = np.asarray(data("limited", "", "np.log10(this is a usless argument)")["n"])
     y_norma = np.asarray(data("limited", "", "np.log10(this is a usless argument)")["max_error"])
     y_optim = np.asarray(data("limited", "_optim_", "np.log10(this is a usless argument)")["max_error"])
 
     model = LR()
     model.fit(x[:-points_to_exclude[1]].reshape(-1, 1), y_norma[:-points_to_exclude[1]].reshape(-1, 1))
-    y_predict_norma = model.predict(x.reshape(-1, 1))
+#    y_predict_norma = model.predict(x.reshape(-1, 1))
 
     fig.add_trace(go.Scatter(x=x, y=y_norma,
                              mode="markers",
@@ -151,17 +151,17 @@ def both_max_error():
                              )
                   )
 
-    fig.add_trace(go.Scatter(x=x, y=y_predict_norma.T[0],
-                             mode="lines",
-                             line=dict(dash="dot",
-                                       width=7,
-                                       color="firebrick"),
-                             name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
-                             )
-                  )
+#    fig.add_trace(go.Scatter(x=x, y=y_predict_norma.T[0],
+#                             mode="lines",
+#                             line=dict(dash="dot",
+#                                       width=7,
+#                                       color="firebrick"),
+#                             name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
+#                             )
+#                  )
 
     model = LR()
-    model.fit(x.reshape(-1, 1), y_optim.reshape(-1, 1))
+    model.fit(x[:-points_to_exclude[1]].reshape(-1, 1), y_optim[:-points_to_exclude[1]].reshape(-1, 1))
     y_predict_optim = model.predict(x.reshape(-1, 1))
 
     fig.add_trace(go.Scatter(x=x, y=y_optim,
