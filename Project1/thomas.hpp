@@ -34,7 +34,7 @@ void Fwd_Bkwd_sub(int N, long double *a, long double *b, long double *c, long do
     }
 }
 
-void Thomas(int n, int cap, double *duration, double *max_rel_err){
+void Thomas(int n, int m, int maxm, int cap, double *duration, double *max_rel_err){
     int N = pow(10, n) + 1;
 
     long double *x, *u, *a, *b, *c, *g, *aerr, *rerr;
@@ -56,10 +56,10 @@ void Thomas(int n, int cap, double *duration, double *max_rel_err){
     clock_t t1 = clock();
     Fwd_Bkwd_sub(N, a, b, c, g);
     clock_t t2 = clock();
-    duration[n - 1] = ((double)(t2 - t1) / CLOCKS_PER_SEC);
+    duration[(n - 1) * maxm + m] = ((double)(t2 - t1) / CLOCKS_PER_SEC);
 
     abs_err(N, aerr, u, g);
-    max_rel_err[n - 1] = rel_err(N, rerr, u, g);
+    max_rel_err[(n - 1) * maxm + m] = rel_err(N, rerr, u, g);
 
     if (n < cap){
         cout << "Writing to file\n";
