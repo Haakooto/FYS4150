@@ -26,9 +26,9 @@ void write_full(int n, long double *x, long double *u, long double *g, long doub
     out.close();
 }
 
-void write_limited(int I, int *n, double *time, double *max_rel_err, string s="_"){
+void write_limited(int I, int *n, double *time, double *max_rel_err, string s="_", int rep){
     ofstream out;
-    out.open("datas/limited" + s + ".txt");
+    out.open("datas/limited" + s + to_string(rep) + ".txt");
     out << "n time max_error\n";
     out << fixed;
     for (int i = 0; i < I; i++){

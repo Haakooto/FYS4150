@@ -10,7 +10,9 @@ using namespace std;
 
 int main(int argc, char *argv[]){
     int n;
+    int m;
     n = atoi(argv[1]);
+    m = atoi(argv[2]);
 
     // To not wait forever for writing full output, cap such writing for low n
     int cap = 4;
@@ -27,12 +29,12 @@ int main(int argc, char *argv[]){
     int ns[n];
     double mres[n];
     double times[n];
-
-    for (int i = 1; i < n + 1; i++){
-        cout << "starting " + name + "Thomas algorithm for n = " << i << endl;
-        Method(i, cap, times, mres);
-        ns[i - 1] = i;
-    }
-    write_limited(n, ns, times, mres, name);
+    for (int j = 0; j < m; j++){
+      for (int i = 1; i < n + 1; i++){
+          cout << "starting " + name + "Thomas algorithm for n = " << i << endl;
+          Method(i, cap, times, mres);
+          ns[i - 1] = i;
+      }
+      write_limited(n, ns, times, mres, name, j);}
     return 0;
 }

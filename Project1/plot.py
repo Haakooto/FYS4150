@@ -14,17 +14,21 @@ f = lambda type, algo, n: f"datas/{type}{algo}" + (f"_{n}" if type == "full" els
 data = lambda type, algo, n="full": pd.read_csv(f(type, algo, n), header=0, sep=" ")
 
 def num_sol():
+    fig = go.Figure()
+    dat = data("full", s, n)
+    #fig = px.line(data("full", s, n), x="x", y=["u"], line=dict(width=7))
 
-    fig = px.line(data(n), x="x", y=["u", "v"])
+    fig.add_trace(go.Scatter(x=dat["x"], y=dat["u"], line=dict(width=7, color="firebrick")))
+
     fig.update_layout(
         font_family="Garamond",
-        font_size=30,
-        title=rf"Numerical solution of N = 10 \U+207{n}",
+        font_size=35,
+        title=f"Analytical solution for N = 10^{n}",
         xaxis_title="x",
-        yaxis_title="v(x)",
+        yaxis_title="u(x)",
     )
 
-    fig.write_image(f"figures/num_sol_n{n}.pdf")
+    #fig.write_image(f"figures/num_sol_n{n}.pdf")
     fig.show()
 
 
@@ -33,9 +37,9 @@ def first_few_num_sols():
 
     colors = ["seagreen", "aqua", "gold"]
     for i in range(1, n + 1):
-        dat = dat(i)
+        dat = data("full", s, i)
 
-        fig.add_trace(go.Scatter(x=dat["x"], y=dat["v"], mode="lines", line=dict(width=7, color=colors[i - 1]), name=rf"N = 10\U+207{i}"))
+        fig.add_trace(go.Scatter(x=dat["x"], y=dat["v"], mode="lines", line=dict(width=7, color=colors[i - 1]), name=rf"N = 10^{i}"))
 
     fig.add_trace(go.Scatter(x=dat["x"], y=dat["u"], line=dict(width=7, dash="dot", color="firebrick"), name=f"Analytic solution"))
 
@@ -47,7 +51,7 @@ def first_few_num_sols():
         yaxis_title="v(x)",
 
     )
-    fig.write_image("figures/num_sol_N123.pdf")
+    #fig.write_image("figures/num_sol_N123.pdf")
     fig.show()
 
 
@@ -66,16 +70,16 @@ def absolute_error():
         font_size=40,
         title="Absolute error for different values of N",
         xaxis_title="x",
-        yaxis_title="Absolute error",
+        yaxis_title="log10(absolute error)",
     )
     fig.show()
 
 
 def relative_error():
     fig = go.Figure()
-    for i in range(n, n + 1):
+    for i in range(1, n + 1):
         dat = data("full", s, i)
-        
+
         fig.add_trace(go.Scatter(x=dat["x"][1:-1],
                                  y=dat["rel_err"][1:-1],
                                  mode="lines",
@@ -86,7 +90,7 @@ def relative_error():
         font_size=40,
         title="Relative error for different values of N",
         xaxis_title="x",
-        yaxis_title="Relative error",
+        yaxis_title="log10(relative error)",
     )
     fig.show()
 
@@ -96,7 +100,7 @@ def max_error():
     points_to_exclude = 2
     x = np.arange(n) + 1
     y = np.asarray(data("limited", s, "This agrument is useless")["max_error"])
-    
+
     model = LR()
     model.fit(x[:-points_to_exclude].reshape(-1, 1), y[:-points_to_exclude].reshape(-1, 1))
     y_predict = model.predict(x.reshape(-1, 1))
@@ -134,7 +138,7 @@ def both_max_error():
     x = np.arange(n) + 1
     y_norma = np.asarray(data("limited", "", "np.log10(this is a usless argument)")["max_error"])
     y_optim = np.asarray(data("limited", "_optim_", "np.log10(this is a usless argument)")["max_error"])
-    
+
     model = LR()
     model.fit(x[:-points_to_exclude[1]].reshape(-1, 1), y_norma[:-points_to_exclude[1]].reshape(-1, 1))
     y_predict_norma = model.predict(x.reshape(-1, 1))
@@ -155,7 +159,7 @@ def both_max_error():
                              name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
                              )
                   )
-    
+
     model = LR()
     model.fit(x.reshape(-1, 1), y_optim.reshape(-1, 1))
     y_predict_optim = model.predict(x.reshape(-1, 1))
@@ -181,8 +185,8 @@ def both_max_error():
         font_family="Garamond",
         font_size=40,
         title="Max relative error for algoritms as function of N",
-        xaxis_title="Log10(N)",
-        yaxis_title="Log10(Time)",
+        xaxis_title="log10(N)",
+        yaxis_title="log10(Max relative error)",
         legend=dict(yanchor="bottom", xanchor="left", x=0.01, y=1-0.99),
     )
     fig.show()
@@ -192,7 +196,7 @@ def timing():
     x = np.arange(n) + 1
     y_norma = np.log10(np.asarray(data("limited", "", "np.log10(this is a usless argument)")["time"]))
     y_optim = np.log10(np.asarray(data("limited", "_optim_", "np.log10(this is a usless argument)")["time"]))
-    
+
     model = LR()
     model.fit(x.reshape(-1, 1), y_norma.reshape(-1, 1))
     y_predict_norma = model.predict(x.reshape(-1, 1))
@@ -213,7 +217,7 @@ def timing():
                              name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
                              )
                   )
-    
+
     model = LR()
     model.fit(x.reshape(-1, 1), y_optim.reshape(-1, 1))
     y_predict_optim = model.predict(x.reshape(-1, 1))
