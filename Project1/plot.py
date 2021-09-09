@@ -98,7 +98,7 @@ def relative_error():
 def max_error():
     fig = go.Figure()
     points_to_exclude = 2
-    x = np.arange(n) + 1
+    x = np.asarray(data("limited", s, "This agrument is useless")["n"])
     y = np.asarray(data("limited", s, "This agrument is useless")["max_error"])
 
     model = LR()
@@ -135,7 +135,7 @@ def max_error():
 def both_max_error():
     fig = go.Figure()
     points_to_exclude = (0, 2)
-    x = np.arange(n) + 1
+    x = np.asarray(data("limited", "", "np.log10(this is a usless argument)")["n"])
     y_norma = np.asarray(data("limited", "", "np.log10(this is a usless argument)")["max_error"])
     y_optim = np.asarray(data("limited", "_optim_", "np.log10(this is a usless argument)")["max_error"])
 
@@ -193,17 +193,32 @@ def both_max_error():
 
 def timing():
     fig = go.Figure()
-    x = np.arange(n) + 1
-    y_norma = np.log10(np.asarray(data("limited", "", "np.log10(this is a usless argument)")["time"]))
-    y_optim = np.log10(np.asarray(data("limited", "_optim_", "np.log10(this is a usless argument)")["time"]))
+
+    x = np.arange(1, n + 1, 1)
+    x_raw = np.asarray(data("limited", "", "np.log10(this is a usless argument)")["n"])
+    y_g_raw = np.log10(np.asarray(data("limited", "", "np.log10(this is a usless argument)")["time"]))
+    y_o_raw = np.log10(np.asarray(data("limited", "_optim_", "np.log10(this is a usless argument)")["time"]))
+    y_g_mean = np.zeros(n)
+    y_g_std = np.zeros(n)
+    y_o_mean = np.zeros(n)
+    y_o_std = np.zeros(n)
+
+    for i in range(n):
+        y_g = y_g_raw[np.where(x_raw == i + 1)]
+        y_g_mean[i] = np.mean(y_g)
+        y_g_std[i] = np.std(y_g)
+        y_o = y_o_raw[np.where(x_raw == i + 1)]
+        y_o_mean[i] = np.mean(y_o)
+        y_o_std[i] = np.std(y_o)
 
     model = LR()
-    model.fit(x.reshape(-1, 1), y_norma.reshape(-1, 1))
+    model.fit(x.reshape(-1, 1), y_g_mean.reshape(-1, 1))
     y_predict_norma = model.predict(x.reshape(-1, 1))
 
-    fig.add_trace(go.Scatter(x=x, y=y_norma,
+    fig.add_trace(go.Scatter(x=x, y=y_g_mean,
+                             error_y=dict(type='data', array=y_g_std, visible=True),
                              mode="markers",
-                             marker=dict(size=20,
+                             marker=dict(size=6,
                                          color="maroon"),
                              name="General Thomas algorithm"
                              )
@@ -212,19 +227,20 @@ def timing():
     fig.add_trace(go.Scatter(x=x, y=y_predict_norma.T[0],
                              mode="lines",
                              line=dict(dash="dot",
-                                       width=7,
+                                       width=3,
                                        color="firebrick"),
                              name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
                              )
                   )
 
     model = LR()
-    model.fit(x.reshape(-1, 1), y_optim.reshape(-1, 1))
+    model.fit(x.reshape(-1, 1), y_o_mean.reshape(-1, 1))
     y_predict_optim = model.predict(x.reshape(-1, 1))
 
-    fig.add_trace(go.Scatter(x=x, y=y_optim,
+    fig.add_trace(go.Scatter(x=x, y=y_o_mean,
+                             error_y=dict(type='data', array=y_o_std, visible=True),
                              mode="markers",
-                             marker=dict(size=20,
+                             marker=dict(size=6,
                                          color="darkgreen"),
                              name="Optimized Thomas algorithm"
                              )
@@ -233,16 +249,15 @@ def timing():
     fig.add_trace(go.Scatter(x=x, y=y_predict_optim.T[0],
                              mode="lines",
                              line=dict(dash="dot",
-                                       width=7,
+                                       width=3,
                                        color="mediumseagreen"),
                              name=f"Fitted line. Slope = {model.coef_[0][0]:.5}"
-                             )
-                  )
+                             )                  )
 
     fig.update_layout(
         font_family="Garamond",
-        font_size=40,
-        title="Running time of algoritm as function of N",
+        font_size=35,
+        title="Running time of algorithm as function of N",
         xaxis_title="Log10(N)",
         yaxis_title="Log10(Time)",
         legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99),
