@@ -52,7 +52,7 @@ Utility functions.
 ### [plot.py](https://github.com/Haakooto/FYS4150/blob/main/Project1/plot.py)
 Using library Plotly to make very nice graphs.
 #### Functions():
-- f() and data(): Loads dataframes. Do not attempt to understand how, what, why nor when.
+- f() and data(): Loads dataframes. It works. Do not attempt to understand how, what, why nor when.
 - num_sol(): Plots numerical and analytical solution for a single n
 - first_few_num_sol(): Same as num_sol() for for multiple n in same plot.
 - absolute_error(): Plots absolute error at every point for single n.
