@@ -56,7 +56,7 @@ void Optimized_Thomas(int n, int m, int maxm, int cap, double *duration, double 
     abs_err(N, aerr, u, g);
     max_rel_err[(n - 1) * maxm + m] = rel_err(N, rerr, u, g);
 
-    if (n < cap && m == 1){
+    if (n < cap && m == 0){
         cout << "Writing to file\n";
         write_full(n, x, u, g, aerr, rerr, "_optim_");
     }
