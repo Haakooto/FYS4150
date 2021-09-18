@@ -71,12 +71,11 @@ void Rotation(mat &A, mat &R, int &k,int &l, int &size){
     if (tau > 0){
         t = 1 / (tau + sqrt(1 + pow(tau, 2)));}
     else if (tau < 0){
-        - 1 / (- tau + sqrt(1 + pow(tau, 2)));}
+        t = - 1 / (- tau + sqrt(1 + pow(tau, 2)));}
     else{t = 1;};
     double c = 1 / sqrt(1 + pow(t, 2));
     double s = c * t;
 
-    // cout << tau << " " << t << " " << c << " " << s << endl;
     double a_kk = A(k,k);
     A(k,k) = A(k,k) * pow(c, 2) - 2 * A(k,l) * c * s + A(l,l) * pow(s, 2);
     A(l,l) = A(l,l) * pow(c, 2) + 2 * A(k,l) * c * s + a_kk * pow(s, 2);
@@ -109,10 +108,6 @@ mat Jacobi(mat &A, double tol){
     while (abs(max) > tol){
         Rotation(A, R, k, l, size);
         max = max_offdiag_symmetric(A, k, l);
-        //cout << counter << " ";
-        A.print();
-        cout << endl;
-        counter = counter + 1;
         };
     return R;
     }
@@ -137,19 +132,19 @@ int main() {
 
 
 
-	// analytic_solutions(A_vals, A_vecs, N, A(0, 0), A(0, 1));
+	analytic_solutions(A_vals, A_vecs, N, A(0, 0), A(0, 1));
 
 	mat R = Jacobi(A, tolerance);
 
-	//R.print();
-	//cout << " " << endl;
-	//A.print();
+	R.print();
+	cout << " " << endl;
+	A.print();
 	// A.print();
 	// D.print();
 	// S.print();
 
-	//A_vals.print();
-	//A_vecs.print();
+	A_vals.print();
+	A_vecs.print();
 
 	// max_test();
 
