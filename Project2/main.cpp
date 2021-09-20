@@ -2,11 +2,10 @@
 #include <vector>
 #include <cmath>
 #include <assert.h>
-#include "armadillo"
 #include "utils.hpp"
 
-using namespace std;
 using namespace arma;
+using namespace std;
 
 const double tolerance = 1e-14;
 
@@ -16,20 +15,19 @@ double max_offdiag_symmetric(const mat &A, int &k, int &l){
     //   i is rows and j is columns (maybe)
     for (int i=0; i < size; i++){
         for (int j=i + 1; j < size; j++){
-            if (abs(A(i,j)) > abs(max)){
-                max = A(i,j);
+            if (abs(A(i,j)) > max){
+                max = abs(A(i,j));
                 k = i;
                 l = j;
             }
         }
     }
-    return abs(max);
+    return max;
 }
 
 void Rotation(mat &A, mat &R, int &k, int &l, int &size){
     double tau = (A(l,l) - A(k,k)) / (2 * A(k,l));
     double t;
-    // Hvis Håkon Olav kjenner en enkel sign function kan vi endre her
     if (tau > 0){
         t = 1 / (tau + sqrt(1 + pow(tau, 2)));
     } else {
@@ -74,9 +72,10 @@ mat Jacobi(mat &A, double tol){
 }
 
 void test_max_offdiag(){
+    // Problem 4b
     mat A(4, 4, fill::eye);
     A(0, 3) = A(3,0) = 0.5;
-    A(1, 2) = A(2,1) = - 0.7;
+    A(1, 2) = A(2,1) = -0.7;
     int k;
     int l;
     double max = max_offdiag_symmetric(A, k, l);
@@ -86,6 +85,7 @@ void test_max_offdiag(){
 }
 
 void test_analyticity(){
+    // Problem 5b
     int N = 6;
     double hsq = (double)pow(N + 1, 2);
     double tol = 1e-10;
@@ -123,16 +123,11 @@ int main() {
 	int l = 0;
 	double hsq = (double)pow(n, 2);
 	
-
 	mat A = make_A(N, hsq);
-	vec D;
-	mat S;
 
-	// eig_sym(D, S, A);
-
-	int number_of_analytic_eig_to_check = N;
-	vec a_vals(number_of_analytic_eig_to_check);
-	mat a_vecs(N, number_of_analytic_eig_to_check);
+	int number_of_analytic_eig = 3;
+	vec a_vals(number_of_analytic_eig);
+	mat a_vecs(N, number_of_analytic_eig);
 
 
 	analytic_solutions(a_vals, a_vecs, N, A(0, 0), A(0, 1));
