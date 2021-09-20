@@ -59,7 +59,7 @@ void sort_mat_by_vec(mat &A, vec &b){
     }
 }
 
-void write_to_file(int N, int M, mat &vecs, vec &vals, mat &avec, vec &almb){
+void write_to_file(int N, int M, int iters, mat &vecs, vec &vals, mat &avec, vec &almb){
 	double h = 1 / ((double)N + 1);
 	ofstream out;
 	out.open("results/data_" + to_string(N) + ".txt");
@@ -77,7 +77,7 @@ void write_to_file(int N, int M, mat &vecs, vec &vals, mat &avec, vec &almb){
 	out << fixed << setprecision(8);
 
 	// write eigenvalues
-	out << "0"; // value under x, to be discarded
+	out << iters; // value under x, iters used
 	vec v = almb;
 	for (int i = 0; i < M * 2; i++){
 		out << " " << v(i % M);

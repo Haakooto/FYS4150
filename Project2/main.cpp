@@ -137,7 +137,7 @@ void run_Jacobi(int N, const int maxiter){
 	    mat a_vecs(N, vecs_to_write);
 	    analytic_solutions(a_vals, a_vecs, N, 2 * hsq, -hsq);
 
-        write_to_file(N, vecs_to_write, eig_vecs, eig_vals, a_vecs, a_vals);     
+        write_to_file(N, vecs_to_write, iters, eig_vecs, eig_vals, a_vecs, a_vals);     
 
     } else {
         cout << "Algorithm did not converge. Terminated after " << maxiter << " iterations.\n";
