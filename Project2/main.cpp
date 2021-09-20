@@ -57,18 +57,20 @@ void Rotation(mat &A, mat &R, int &k, int &l, int &size){
     }
 }
 
-mat Jacobi(mat &A, double tol){
+bool Jacobi(mat &A, mat &R, const double tol, const int maxiter, int &iters){
     int size = A.n_rows;
     int k;
     int l;
-    int counter = 1;
     double max = max_offdiag_symmetric(A, k, l);
-    mat R = mat(size, size, fill::eye);
     while (max > tol){
         Rotation(A, R, k, l, size);
         max = max_offdiag_symmetric(A, k, l);
+        iters++;
+        if (iters == maxiter){
+            return false;
+        }
     }
-    return R;
+    return true;
 }
 
 void test_max_offdiag(){
@@ -114,44 +116,40 @@ void tests(){
     cout << "All tests passed" << endl;
 }
 
+void run_Jacobi(int N, const int maxiter){
+	double hsq = (double)pow(N + 1, 2);  // h^-2
+    int iters = 0;
+	
+	mat A = make_A(N, hsq);
+    mat eig_vecs = mat(N, N, fill::eye);
+
+	if (Jacobi(A, eig_vecs, tolerance, maxiter, iters)){
+        cout << "Algorithm converged after " << iters << " iterations.\n";
+        cout << "Writing results to file.\n";
+        
+        vec eig_vals = A.diag();
+        sort_mat_by_vec(eig_vecs, eig_vals);
+
+
+	    int vecs_to_write = 3;
+        // calculate analytic solutions
+	    vec a_vals(vecs_to_write);
+	    mat a_vecs(N, vecs_to_write);
+	    analytic_solutions(a_vals, a_vecs, N, 2 * hsq, -hsq);
+
+        write_to_file(N, vecs_to_write, eig_vecs, eig_vals, a_vecs, a_vals);     
+
+    } else {
+        cout << "Algorithm did not converge. Terminated after " << maxiter << " iterations.\n";
+    }
+}
+
 int main() {
     tests();  // Run all test functions
 
-	int N = 6;
-	int n = N + 1;
-	int k = 0;
-	int l = 0;
-	double hsq = (double)pow(n, 2);
-	
-	mat A = make_A(N, hsq);
-
-	int number_of_analytic_eig = 3;
-	vec a_vals(number_of_analytic_eig);
-	mat a_vecs(N, number_of_analytic_eig);
-
-
-	analytic_solutions(a_vals, a_vecs, N, A(0, 0), A(0, 1));
-
-	mat R = Jacobi(A, tolerance);
-    vec v = A.diag();
-    sort_mat_by_vec(R, v);
-
-    
-	cout << " " << endl;
-	R.print();
-	cout << " " << endl;
-    // a_vecs.print();
-    v.print();
-    // cout << max_diff(R, a_vecs) << endl;
-	
-    // // A.print();
-	// // D.print();
-	// // S.print();
-
-	// a_vals.print();
-	// a_vecs.print();
-
-	// max_test();
+	int N = 100;
+    int maxiter = 10000000;
+    run_Jacobi(N, maxiter);
 
 	return 0;
 }
