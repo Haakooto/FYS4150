@@ -1,5 +1,8 @@
+#include <fstream>
+#include <iomanip>
 #include "utils.hpp"
 
+using namespace arma;
 using namespace std;
 
 mat make_A(int N, double hsq){
@@ -54,4 +57,59 @@ void sort_mat_by_vec(mat &A, vec &b){
             A.col(i) *= -1;
         }
     }
+}
+
+void write_to_file(int N, int M, mat &vecs, vec &vals, mat &avec, vec &almb){
+	double h = 1 / ((double)N + 1);
+	ofstream out;
+	out.open("results/data_" + to_string(N) + ".txt");
+	// Make header of datafile. First col is x
+	// Next M are analytic results, next M are computed results
+	out << "x";
+	string u = " analytic_";
+	for (int i = 0; i < M * 2; i++){
+		out << u + to_string(i % M + 1);
+		if (i == M - 1) {
+			u = " computed_";
+		}
+	}
+	out << endl;
+	out << fixed << setprecision(8);
+
+	// write eigenvalues
+	out << "0"; // value under x, to be discarded
+	vec v = almb;
+	for (int i = 0; i < M * 2; i++){
+		out << " " << v(i % M);
+		if (i == M - 1){
+			v = vals;
+		} 
+	}
+	out << endl;
+	
+	// write first boundary condition
+	for (int i = 0; i < M * 2 + 1; i++){
+		out << 0 << " ";
+	}
+	out << endl;
+
+	for (int j=0; j < N; j++){
+		out << (double)(j + 1) * h;  // xj
+		mat v = avec;
+		for (int i=0; i < M * 2; i++){
+			out << " " << v(j, i % M);
+			if (i == M - 1){
+				v = vecs;
+			}
+		}
+		out << endl;
+	}
+
+	// write other boundary condition
+	out << (double)(N + 1) * h;
+	for (int i = 0; i < M * 2; i++){
+		out << " " << 0;
+	}
+	out << endl;
+	out.close();
 }
