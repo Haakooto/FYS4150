@@ -7,7 +7,7 @@
 using namespace arma;
 using namespace std;
 
-const double tolerance = 1e-14;
+const double tolerance = 1e-4;
 
 double max_offdiag_symmetric(const mat &A, int &k, int &l){
     int size = A.n_rows;
@@ -147,9 +147,11 @@ void run_Jacobi(int N, const int maxiter){
 int main() {
     tests();  // Run all test functions
 
-	int N = 100;
-    int maxiter = 10000000;
-    run_Jacobi(N, maxiter);
+	int N = 101;
+    int maxiter = 100000; // Set to huge value. Should be estimated
+    for (int i = 5; i < N ; i++){
+        run_Jacobi(i, maxiter);
+    }
 
 	return 0;
 }

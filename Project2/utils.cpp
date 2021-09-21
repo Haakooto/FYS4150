@@ -88,11 +88,13 @@ void write_to_file(int N, int M, int iters, mat &vecs, vec &vals, mat &avec, vec
 	out << endl;
 	
 	// write first boundary condition
-	for (int i = 0; i < M * 2 + 1; i++){
-		out << 0 << " ";
+	out << 0;
+	for (int i = 0; i < M * 2; i++){
+		out << " " << 0;
 	}
 	out << endl;
 
+	// write eigenvectors
 	for (int j=0; j < N; j++){
 		out << (double)(j + 1) * h;  // xj
 		mat v = avec;
