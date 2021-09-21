@@ -8,8 +8,6 @@ import sys
 
 
 def iterations(N):
-
-    #define lists
     Iterations = []
     Dim = []
 
@@ -17,7 +15,6 @@ def iterations(N):
         data = pd.read_csv("results/data_" + str(i) + ".txt", header=0, sep=" ")
 
         Iterations.append(data.iloc[0, 0])
-
         Dim.append(i)
 
 
