@@ -7,7 +7,7 @@
 using namespace arma;
 using namespace std;
 
-const double tolerance = 1e-4;
+const double tolerance = 1e-10;
 
 double max_offdiag_symmetric(const mat &A, int &k, int &l){
     int size = A.n_rows;
@@ -90,7 +90,7 @@ void test_analyticity(){
     // Problem 5b
     int N = 6;
     double hsq = (double)pow(N + 1, 2);
-    double tol = 1e-10;
+    double eps = 1e-10;
 
     // using armadillo to solve problem
     mat A = make_A(N, hsq);
@@ -105,13 +105,36 @@ void test_analyticity(){
     // comparing the two
     sort_mat_by_vec(S, D);
     sort_mat_by_vec(avecs, avals);
-    assert (max_diff(S, avecs) < tol);
-    assert (max_diff(D, avals) < tol);
+    assert (max_diff(S, avecs) < eps);
+    assert (max_diff(D, avals) < eps);
+}
+
+void test_algorithm(){
+    int N = 6;
+    double hsq = (double)pow(N + 1, 2);
+    double eps = 1e-10;
+    int iters = 0;
+
+
+    mat A = make_A(N, hsq);
+    mat eig_vecs = mat(N, N, fill::eye);
+    bool converged = Jacobi(A, eig_vecs, tolerance, 100, iters);
+    vec eig_vals = A.diag();
+
+    vec a_vals(N);
+    mat a_vecs(N, N);
+    analytic_solutions(a_vals, a_vecs, N, 2 * hsq, -hsq);
+
+    sort_mat_by_vec(eig_vecs, eig_vals);
+    sort_mat_by_vec(a_vecs, a_vals);
+    assert (max_diff(a_vecs, eig_vecs) < eps);
+    assert (max_diff(a_vals, eig_vals) < eps);
 }
 
 void tests(){
     test_analyticity(); // problem 3 in project discription
     test_max_offdiag();
+    test_algorithm();
 
     cout << "All tests passed" << endl;
 }
@@ -147,7 +170,7 @@ void run_Jacobi(int N, const int maxiter){
 int main() {
     tests();  // Run all test functions
 
-	int N = 101;
+	int N = 101; 
     int maxiter = 100000; // Set to huge value. Should be estimated
     for (int i = 5; i < N ; i++){
         run_Jacobi(i, maxiter);
