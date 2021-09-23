@@ -133,8 +133,8 @@ void test_algorithm(){
 
 void tests(){
     test_analyticity(); // problem 3 in project discription
-    test_max_offdiag();
-    test_algorithm();
+    test_max_offdiag(); // problem 4b
+    test_algorithm();  // problem 5b
 
     cout << "All tests passed" << endl;
 }
@@ -170,7 +170,7 @@ void run_Jacobi(int N, const int maxiter){
 int main() {
     tests();  // Run all test functions
 
-	int N = 101; 
+	int N = 101;
     int maxiter = 100000; // Set to huge value. Should be estimated
     for (int i = 5; i < N ; i++){
         run_Jacobi(i, maxiter);
