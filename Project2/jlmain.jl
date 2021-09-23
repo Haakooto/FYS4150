@@ -1,6 +1,6 @@
 using Formatting
 using Plotly
-include("utils.jl")
+include("jlutils.jl")
 
 #=
     This is a solution of the problem in Julia-lang.
@@ -192,10 +192,10 @@ function main()
     tests()
 
     maxiter = 100000
-    # N = 100
-    # for i = 5:N
-    #     run_Jacobi(i, maxiter)
-    # end
+    N = 100
+    for i = 5:N
+        run_Jacobi(i, maxiter)
+    end
 
     run_Jacobi(10, maxiter, true)
     run_Jacobi(100, maxiter, true)
