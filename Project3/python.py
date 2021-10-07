@@ -3,6 +3,19 @@ import matplotlib.pyplot as plt
 
 ke = 1.38935333e5
 
+"""
+This is a "quick" and dirty imlementation of more or less whole project in python
+(Not last problem (10). really need to restructure quite a bit to do that one)
+
+Before implementing I didnt quite see use of Particle class, and this particles are only stored as r, v and qom in PT.
+Realised this was a bit awkward, because of sum_Eforce(), more precisely Eforce()
+Also don't really need to use f(t) = x + iy. This can make it easier to find more elegant solution to problem above
+Problem with this is storing history of positions. Can initiate Particles with full storing capability,
+but then T and dt must be passed to them.
+Might have some ideas for solving this, but will do when implementing in cpp, not now
+This might also ease problem with time-dependant potential
+"""
+
 
 class Particle:
     def __init__(self, r0, v0, mass, charge):
@@ -36,9 +49,13 @@ class PenningTrap:
         self.wzsq = self.V0d * self.qom
 
     def Eforce(self, dx, dy, dz, q):
+        """
+        This is very akward. see longer comment
+        """
         rmrj = np.asarray([dx, dy, dz])
+        # rmrj = self.r - other.r
         norm = np.linalg.norm(rmrj)
-        return q * rmrj * norm ** -3
+        return q * rmrj * norm ** -3  # * other.q
 
     def sum_Eforce(self, x, y, z):
         Fse = np.zeros((self.N, 3))
@@ -46,6 +63,7 @@ class PenningTrap:
             return Fse.T
         for i in range(self.N):
             for j in range(i):
+                # This is bad
                 f = -ke * self.Eforce(x[i] - x[j], y[i] - y[j], z[i] - z[j], self.q[j])
                 Fse[i] += f * self.qom[i]
                 Fse[j] -= f * self.qom[j]
