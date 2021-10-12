@@ -9,8 +9,8 @@ public:
     double q, m;
     arma::vec r, v;
 
-    Particle(double charge, double mass, arma::vec position, arma::vec velocity);
-
+    Particle(double charge, mass, arma::vec position, velocity);
+    arma::vec force_from_other(Particle other);
 };
 
 #endif
