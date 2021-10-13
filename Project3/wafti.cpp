@@ -42,11 +42,13 @@ class Particle{
 
 class PenningTrap{
   public:
-	int N = 2;
+	int N = 0;
 	double B0, V0, d;
 	double (*tV0)(double);
 	bool ppi, time_dep_V;
 	vector<Particle> particles;
+	arma::cube r;
+	arma::mat v;
 
 	PenningTrap(double Bfield, double Efield, double length, bool particle_particle=false){
 		B0 = Bfield;
@@ -109,8 +111,52 @@ class PenningTrap{
 		} return Eforce;
 	}
 
+	double dt;
+	int nT;
+	arma::vec t;
+	void simulate(double T, double timestep){
+		dt = timestep;
+		nT = (int)(T / dt);
+		t = arma::vec(nT, arma::fill::zeros);
+		r = arma::cube(nT, 3, N);
+		v = arma::mat(3, N);
+		for (int i=0; i < N; i++){
+			r.slice(i).row(0) = particles[i].r.t();
+			v.col(i) = particles[i].v;
+		}
 
+		for (int i=0; i < nT; i++){
+			t(i + 1) = i * dt;
+			RK4(i, t(i));
+		}
+	}
+};
 
+class Solver{
+  public:
+	int nT;
+	double T, dt;
+	arma::cube U;
+	arma::vec t;
+
+	Solver(double Time, double timestep, arma::mat U0, bool Rk4=true){
+		dt = timestep;
+		nT = (int)(Time / dt);
+		t = arma::vec(nT, arma::fill::zeros);
+		U = arma::cube(nT, U0.n_rows, U0.n_cols);
+		U.zeros();
+		U.row(0) = U0;
+	}
+
+	void solve(void(*func)(arma::mat)){
+		for (int i=0; i < nT; i++){
+			t(i + 1) = i * dt;
+			RK4((*func), t(i + 1));
+		}
+	}
+	void RK4(void(*func)(arma::mat), double t){
+
+	}
 
 };
 
@@ -129,10 +175,16 @@ int main() {
 	p.push_back(p2);
 
     PenningTrap P = PenningTrap(b, (*f), d, true);
-	P.particles = p;
-	// cout << P.get_Efield_at_time(0.2) << endl;
-	cout << P.sum_particles_forces() << endl;
-
+	P.insert_particles(p);
+	P.simulate(2, 0.5);
+	// // cout << P.get_Efield_at_time(0.2) << endl;
+	// cout << P.sum_particles_forces() << endl;
+	// arma::mat U0(3, 2, arma::fill::randn);
+	// // arma::cube R(2, 3, 4);
+	// arma::cube U(4, U0.n_rows, U0.n_cols); //, arma::fill:zeros);
+	// U.randn();
+	// U.print();
+	// U.slice(0).row(0).print();
 	// bool a = true;
 	// if (!a) { cout << "true\n";}
 	// else {cout << a << "false\n";}
