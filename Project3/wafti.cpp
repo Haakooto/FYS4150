@@ -98,12 +98,12 @@ class PenningTrap{
 		if (!ppi) {return Eforce;}
 		else {
 			for (int i=0; i < N; i++){
-				Particle p = particles[i];
+				Particle alice = particles[i];
 				for (int j=0; j < i; j++){
-					Particle q = particles[j];
-					arma::vec F = -ke * p.force_from(q);
-					Eforce.row(i) += F.t() * p.q / p.m;
-					Eforce.row(j) -= F.t() * p.q / q.m;
+					Particle bob = particles[j];
+					arma::vec F = -ke * alice.force_from(bob);
+					Eforce.row(i) += F.t() * alice.q / alice.m;
+					Eforce.row(j) -= F.t() * alice.q / bob.m;
 				}
 			}
 		} return Eforce;
@@ -128,7 +128,7 @@ int main() {
 	p.push_back(p1);
 	p.push_back(p2);
 
-	PenningTrap P = PenningTrap(b, (*f), d, true);
+    PenningTrap P = PenningTrap(b, (*f), d, true);
 	P.particles = p;
 	// cout << P.get_Efield_at_time(0.2) << endl;
 	cout << P.sum_particles_forces() << endl;
