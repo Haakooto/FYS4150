@@ -43,7 +43,7 @@ class Particle{
 class PenningTrap{
   public:
 	int N = 0;
-	double B0, V0, d;
+	double B0, V0, dsq;
 	double (*tV0)(double);
 	bool ppi, time_dep_V;
 	vector<Particle> particles;
@@ -53,7 +53,7 @@ class PenningTrap{
 	PenningTrap(double Bfield, double Efield, double length, bool particle_particle=false){
 		B0 = Bfield;
 		V0 = Efield;
-		d = length;
+		dsq = pow(length, 2);
 		time_dep_V = false;
 		ppi = particle_particle;
 	}
@@ -61,7 +61,7 @@ class PenningTrap{
 	PenningTrap(double Bfield, double(*tEfield)(double), double length, bool particle_particle=true){
 		B0 = Bfield;
 		tV0 = tEfield;
-		d = length;
+		dsq = pow(length, 2);
 		time_dep_V = true;
 		ppi = particle_particle;
 	}
@@ -83,7 +83,7 @@ class PenningTrap{
 		for (int i=0; i<n; i++){
 			arma::vec r(3, arma::fill::randn);
 			arma::vec u(1, arma::fill::randu);
-			r *= d * pow(u(0), 3) / arma::norm(r);
+			r *= dsq * pow(u(0), 3) / arma::norm(r);  // must use d, not dsq
 			particles.push_back(Particle(r, arma::zeros(3), m, q));
 			N++;
 		}
@@ -94,8 +94,11 @@ class PenningTrap{
 		else {return V0;}
 	}
 
-	arma::mat sum_particles_forces(){
-		/* Calculates all particle-particle forces */
+	arma::mat sum_particles_forces(arma::mat ri){
+		/*
+		Calculates all particle-particle forces
+		ri has shape 3, N
+		*/
 		arma::mat Eforce(N, 3, arma::fill::zeros);
 		if (!ppi) {return Eforce;}
 		else {
@@ -114,15 +117,22 @@ class PenningTrap{
 	double dt;
 	int nT;
 	arma::vec t;
+	arma::vec w0;
+	arma::vec wzsq;
+
 	void simulate(double T, double timestep){
 		dt = timestep;
 		nT = (int)(T / dt);
 		t = arma::vec(nT, arma::fill::zeros);
-		r = arma::cube(nT, 3, N);
-		v = arma::mat(3, N);
+		r = arma::cube(nT, 3, N);  // nT timesteps x 3dim x N particles
+		v = arma::mat(3, N);  // 3dim x N particles
+
 		for (int i=0; i < N; i++){
-			r.slice(i).row(0) = particles[i].r.t();
-			v.col(i) = particles[i].v;
+			Particle p = particles[i];
+			r.slice(i).row(0) = p.r.t();
+			v.col(i) = p.v;
+			w0(i) = p.q * B0 / p.m;
+			wzsq(i) = 2 * p.q / p.m / dsq;
 		}
 
 		for (int i=0; i < nT; i++){
@@ -130,6 +140,37 @@ class PenningTrap{
 			RK4(i, t(i));
 		}
 	}
+
+	void RK4(int i, double t){
+		double h = dt / 2;
+		arma::cube u, k1, k2, k3, k4;
+		u = arma::cube(3, N, 2);  // 3dim x N paricles x 2 phases (postion and velocity)
+		u.slice(0) = r.row(i);  // postion at time i
+		u.slice(1) = v;  // velocity
+
+		k1 = advance(t, u);
+		k2 = advance(t + h, u + h * k1);
+		k3 = advance(t + h, u + h * k2);
+		k4 = advance(t + 2 * h, u + h * k3);
+		u += h * (k1 + 2 * k2 + 2 * k3 + k4) / 3;
+
+		r.row(i + 1) = u.slice(0);
+		v = u.slice(1);
+	}
+
+	arma::cube advance(double time, arma::cube u){
+		arma::cube du(size(u));
+		arma::mat F = sum_particle_forces(u.slice(0));  // calculate ppi from poistions
+		double V = get_Efield_at_time(time);
+		du.slice(0) = u.slice(1);  // set change in pos to vel
+		du.slice(1).row(0) = w0 * u.slice(1).row(1) + wzsq * u.slice(0).row(0) * V0 / 2 + F.col(0);
+		du.slice(1).row(1) = -w0 * u.slice(1).row(0) + wzsq * u.slice(0).row(1) * V0 / 2 + F.col(1);
+		du.slice(1).row(2) = -wzsq * u.slice(0).row(2) * V0 + F.col(2);
+
+		return du;
+	}
+
+
 };
 
 class Solver{
@@ -165,21 +206,24 @@ double f(double t){
 }
 
 int main() {
-	Particle p1 = Particle(arma::vec(3).fill(1), arma::vec(3).fill(2), 0.1, 3);
-	Particle p2 = Particle(arma::vec(3).fill(3), arma::vec(3).fill(2), 0.1, 3);
-	double b = 1.;
-	double v = 3.;
-	double d = 4.;
-	vector<Particle> p;
-	p.push_back(p1);
-	p.push_back(p2);
+	// Particle p1 = Particle(arma::vec(3).fill(1), arma::vec(3).fill(2), 0.1, 3);
+	// Particle p2 = Particle(arma::vec(3).fill(3), arma::vec(3).fill(2), 0.1, 3);
+	// double b = 1.;
+	// double v = 3.;
+	// double d = 4.;
+	// vector<Particle> p;
+	// p.push_back(p1);
+	// p.push_back(p2);
 
-    PenningTrap P = PenningTrap(b, (*f), d, true);
-	P.insert_particles(p);
-	P.simulate(2, 0.5);
+    // PenningTrap P = PenningTrap(b, (*f), d, true);
+	// P.insert_particles(p);
+	// P.simulate(2, 0.5);
 	// // cout << P.get_Efield_at_time(0.2) << endl;
 	// cout << P.sum_particles_forces() << endl;
-	// arma::mat U0(3, 2, arma::fill::randn);
+	arma::mat U0(3, 2, arma::fill::randn);
+	U0.print();
+	arma::mat U(size(U0));
+	U.print();
 	// // arma::cube R(2, 3, 4);
 	// arma::cube U(4, U0.n_rows, U0.n_cols); //, arma::fill:zeros);
 	// U.randn();
