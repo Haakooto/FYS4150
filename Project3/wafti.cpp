@@ -20,6 +20,10 @@ class Particle{
 		q = charge;
 	}
 
+    // ~Particle(){
+	// 	cout << "a" << endl;
+	// }
+
 	void print(){
 		cout << "Particle at ( ";
 		for (int i=0; i<3; i++){cout << r(i) << " ";}
@@ -28,16 +32,16 @@ class Particle{
 		cout << ") with mass " << m << " and charge " << q << endl;
 	}
 
-	void advance(arma::vec dr, arma::vec dv){
-		r += dr;
-		v += dv;
-	}
-
-	arma::vec force_from(Particle other){
-		arma::vec rirj = r - other.r;
-		double norm = arma::norm(rirj);
-		return other.q * rirj * pow(norm, -3);
-	}
+	// void advance(arma::vec dr, arma::vec dv){
+	// 	r += dr;
+	// 	v += dv;
+	// }
+    //
+	// arma::vec force_from(Particle other){
+	// 	arma::vec rirj = r - other.r;
+	// 	double norm = arma::norm(rirj);
+	// 	return other.q * rirj * pow(norm, -3);
+	// }
 };
 
 class PenningTrap{
@@ -65,6 +69,9 @@ class PenningTrap{
 		time_dep_V = true;
 		ppi = particle_particle;
 	}
+
+    // ~PenningTrap(){
+	// }
 
 	void insert_particles(vector<Particle> P){
 		for (Particle p: P){
@@ -100,15 +107,16 @@ class PenningTrap{
 		ri has shape 3, N
 		*/
 		arma::mat Eforce(N, 3, arma::fill::zeros);
-		if (!ppi) {return Eforce;}
+		if (!ppi) {return Eforce;}   //ignore particle-particle interactions
+
 		else {
-			for (int i=0; i < N; i++){
-				Particle alice = particles[i];
+            for (int i=0; i < N; i++){
 				for (int j=0; j < i; j++){
-					Particle bob = particles[j];
-					arma::vec F = -ke * alice.force_from(bob);
-					Eforce.row(i) += F.t() * alice.q / alice.m;
-					Eforce.row(j) -= F.t() * alice.q / bob.m;
+                    arma::vec diff_ri = ri.col(i)-ri.col(j);
+                    double norm = arma::norm(diff_ri);
+                    arma::vec F = -ke * Q(i) * Q(j) * diff_ri * pow(norm, -3);
+					Eforce.row(i) += F.t() / M(i);
+					Eforce.row(j) -= F.t() / M(j);
 				}
 			}
 		} return Eforce;
@@ -119,6 +127,8 @@ class PenningTrap{
 	arma::vec t;
 	arma::vec w0;
 	arma::vec wzsq;
+    arma::vec Q; //list of all charges
+    arma::vec M; //list of all masses
 
 	void simulate(double T, double timestep){
 		dt = timestep;
@@ -133,6 +143,8 @@ class PenningTrap{
 			v.col(i) = p.v;
 			w0(i) = p.q * B0 / p.m;
 			wzsq(i) = 2 * p.q / p.m / dsq;
+            Q(i) = p.q;
+            M(i) = p.m;
 		}
 
 		for (int i=0; i < nT; i++){
@@ -144,8 +156,8 @@ class PenningTrap{
 	void RK4(int i, double t){
 		double h = dt / 2;
 		arma::cube u, k1, k2, k3, k4;
-		u = arma::cube(3, N, 2);  // 3dim x N paricles x 2 phases (postion and velocity)
-		u.slice(0) = r.row(i);  // postion at time i
+		u = arma::cube(3, N, 2);  // 3dim x N particles x 2 phases (position and velocity)
+		u.slice(0) = r.row(i);  // position at time i
 		u.slice(1) = v;  // velocity
 
 		k1 = advance(t, u);
@@ -160,50 +172,22 @@ class PenningTrap{
 
 	arma::cube advance(double time, arma::cube u){
 		arma::cube du(size(u));
-		arma::mat F = sum_particle_forces(u.slice(0));  // calculate ppi from poistions
+		arma::mat F = sum_particles_forces(u.slice(0));  // calculate ppi from poistions
 		double V = get_Efield_at_time(time);
 		du.slice(0) = u.slice(1);  // set change in pos to vel
-		du.slice(1).row(0) = w0 * u.slice(1).row(1) + wzsq * u.slice(0).row(0) * V0 / 2 + F.col(0);
+		du.slice(1).row(0) = w0 * u.slice(1).row(1) + wzsq * u.slice(0).row(0) * V0 / 2 + F.col(0);  //update velocities for x, y, z
 		du.slice(1).row(1) = -w0 * u.slice(1).row(0) + wzsq * u.slice(0).row(1) * V0 / 2 + F.col(1);
 		du.slice(1).row(2) = -wzsq * u.slice(0).row(2) * V0 + F.col(2);
 
-		return du;
+		return du;  // 3dim x N particles x 2 phases (position and velocity)
 	}
-
-
 };
 
-class Solver{
-  public:
-	int nT;
-	double T, dt;
-	arma::cube U;
-	arma::vec t;
-
-	Solver(double Time, double timestep, arma::mat U0, bool Rk4=true){
-		dt = timestep;
-		nT = (int)(Time / dt);
-		t = arma::vec(nT, arma::fill::zeros);
-		U = arma::cube(nT, U0.n_rows, U0.n_cols);
-		U.zeros();
-		U.row(0) = U0;
-	}
-
-	void solve(void(*func)(arma::mat)){
-		for (int i=0; i < nT; i++){
-			t(i + 1) = i * dt;
-			RK4((*func), t(i + 1));
-		}
-	}
-	void RK4(void(*func)(arma::mat), double t){
-
-	}
-
-};
 
 double f(double t){
 	return sin(t);
 }
+
 
 int main() {
 	// Particle p1 = Particle(arma::vec(3).fill(1), arma::vec(3).fill(2), 0.1, 3);
@@ -236,3 +220,48 @@ int main() {
 
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// class Solver{
+//   public:
+// 	int nT;
+// 	double T, dt;
+// 	arma::cube U;
+// 	arma::vec t;
+//
+// 	Solver(double Time, double timestep, arma::mat U0, bool Rk4=true){
+// 		dt = timestep;
+// 		nT = (int)(Time / dt);
+// 		t = arma::vec(nT, arma::fill::zeros);
+// 		U = arma::cube(nT, U0.n_rows, U0.n_cols);
+// 		U.zeros();
+// 		U.row(0) = U0;
+// 	}
+//
+//
+// 	void solve(void(*func)(arma::mat)){
+// 		for (int i=0; i < nT; i++){
+// 			t(i + 1) = i * dt;
+// 			RK4((*func), t(i + 1));
+// 		}
+// 	}
+// 	void RK4(void(*func)(arma::mat), double t){
+//
+// 	}
+//
+// };
