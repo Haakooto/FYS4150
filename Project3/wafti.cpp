@@ -62,9 +62,6 @@ class PenningTrap{
 		ppi = particle_particle;
 	}
 
-    // ~PenningTrap(){
-	// }
-
 	void insert_particles(vector<Particle> P){
 		for (Particle p: P){
 			particles.push_back(p);
@@ -77,7 +74,6 @@ class PenningTrap{
 		N++;
 	}
 
-	// void insert_identical_resting_particles(int n, double q, double m){
 	void insert_particles(int n, double q, double m){ // inserting n identical particles uniformly in sphere
 		// https://math.stackexchange.com/questions/87230/picking-random-points-in-the-volume-of-sphere-with-uniform-probability
 		for (int i=0; i<n; i++){
@@ -93,6 +89,7 @@ class PenningTrap{
 		if (time_dep_V) {return tV0(t);}
 		else {return V0;}
 	}
+
 	arma::mat sum_particles_forces(arma::mat ri){
 		/*
 		Calculates all particle-particle forces
@@ -115,22 +112,20 @@ class PenningTrap{
 	}
 
 	double dt;
-	int nT, escaped=0;
+	int nT;
 	arma::vec t;  // time-vector
     arma::rowvec Q; //list of all charges	
     arma::rowvec M; //list of all masses
 
 	void simulate(double T, double timestep){
 		dt = timestep;
-		nT = (int)(T / dt);
+		nT = (int)(T / dt) + 1;
 		t = arma::vec(nT, arma::fill::zeros);
 		r = arma::cube(nT, 3, N);  // nT timesteps x 3dim x N particles
 		v = arma::mat(3, N);  // 3dim x N particles
 		
-		// cout << "DEBUG: " << __LINE__ << endl;
 		Q = arma::rowvec(N);
 		M = arma::rowvec(N);
-		// cout << "DEBUG: " << __LINE__ << endl;
 
 		// initiate simulation
 		for (int i=0; i < N; i++){
@@ -140,12 +135,10 @@ class PenningTrap{
             Q(i) = p.q;
             M(i) = p.m;
 		}
-		// cout << "DEBUG: " << __LINE__ << endl;
 		// start simulation
 		for (int i=0; i < nT - 1; i++){
-			t(i + 1) = i * dt;
 			RK4(i, t(i));
-
+			t(i + 1) = (i + 1) * dt;
 		}
 	}
 
@@ -154,17 +147,12 @@ class PenningTrap{
 		arma::cube u, k1, k2, k3, k4;
 		u = arma::cube(3, N, 2);  // 3dim x N particles x 2 phases (position and velocity)
 
+		// wacky bugfix.
 		arma::mat r_(r.row(i));
-		if (N == 1){
-			u.slice(0) = r_.t();  // position at time i
-
-		} else {
-			u.slice(0) = r_;  // position at time i
-		}
-		
+		if (N == 1){ u.slice(0) = r_.t();}  // position at time i
+		else { u.slice(0) = r_;}  // position at time i		
 		u.slice(1) = v;  // velocity
 
-		// cout << "DEBUG: " << __LINE__ << endl;
 		k1 = advance(t, u);
 		k2 = advance(t + h, u + h * k1);
 		k3 = advance(t + h, u + h * k2);
@@ -174,10 +162,10 @@ class PenningTrap{
 		r.row(i + 1) = u.slice(0);
 		v = u.slice(1);
 
+		// check for escapees
 		for (int p=0; p < N; p++){
 			if (arma::norm(r.slice(p).row(i + 1)) > d){
 				Q(p) = 0;
-				escaped++;
 			}
 		}
 
@@ -187,17 +175,14 @@ class PenningTrap{
 		arma::cube du(size(u));  // change in u
 		arma::mat F = sum_particles_forces(u.slice(0));  // calculate ppi from poistions
 		du.slice(0) = u.slice(1);  // set change in pos to vel
-		// cout << "DEBUG: " << __LINE__ << endl;
 
-		//update velocities for x, y, z for all particles
 		Efield(u.slice(0), time);
 		Bfield(u.slice(1));
 
-		// cout << "DEBUG: " << __LINE__ << endl;
+		//update velocities for x, y, z for all particles
 		du.slice(1).row(0) = u.slice(0).row(0) + u.slice(1).row(1) + F.row(0);  
 		du.slice(1).row(1) = u.slice(0).row(1) + u.slice(1).row(0) + F.row(1);
 		du.slice(1).row(2) = u.slice(0).row(2) + F.row(2);
-		// cout << "DEBUG: " << __LINE__ << endl;
 
 		return du;  // 3dim x N particles x 2 phases (position and velocity)
 	}
@@ -239,8 +224,6 @@ void write_cube_to_file(arma::cube C, arma::vec t, string fname){
 		out << endl;
 	}
 	out.close();
-
-
 }
 
 
@@ -253,15 +236,15 @@ int main() {
 	double v = 9.65 * pow(10, 8);
 	double d = pow(10, 4);
 
-    PenningTrap P = PenningTrap(b, v, d, false);
-	// P.insert_particles(1, 1, 1);
-	P.insert_particles(p1);
-	P.insert_particles(p2);
+    PenningTrap P = PenningTrap(b, v, d, true);
+	P.insert_particles(100, 1, 1);
+	// P.insert_particles(p1);
+	// P.insert_particles(p2);
 	// P.insert_particles(p3);
 	// P.insert_particles(p4);
 	// P.r.print();
 	clock_t t1 = clock();
-	P.simulate(10, 0.0005);
+	P.simulate(1, 0.0005);
     clock_t t2 = clock();
     double time = ((double)(t2 - t1) / CLOCKS_PER_SEC);
 	cout << time << endl;
@@ -269,7 +252,6 @@ int main() {
 	// P.r.reshape(0,2,1).save("r.csv", arma::file_type::arma_ascii);
 	write_cube_to_file(P.r, P.t, "test.txt");
 	// arma::cube pos(P.r);
-	cout << P.escaped << endl;
 	cout << P.N - arma::sum(P.Q) << endl;
 	// pos.reshape(P.r.n_rows,P.r.n_slices,P.r.n_cols);
 	// pos.save("r.csv", arma::file_type::arma_ascii);
