@@ -6,11 +6,12 @@
 class Particle
 {
 public:
-    double q, m;
+    int q;
+    double m;
     arma::vec r, v;
 
-    Particle(double charge, double mass, arma::vec position, arma::vec velocity);
-    arma::vec force_from_other(Particle other);
+    Particle(arma::vec position, arma::vec velocity, double mass, int charge);
+    void print();
 };
 
 #endif

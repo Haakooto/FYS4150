@@ -1,14 +1,15 @@
 #include "Particle.hpp"
 
-Particle::Particle(double charge, double mass, arma::vec position, arma::vec velocity){
-    q = charge;
-    m = mass;
-    r = position;
-    v = velocity;
+Particle::Particle(arma::vec position, arma::vec velocity, double mass, int charge){
+		r = position;
+		v = velocity;
+		m = mass;
+		q = charge;
 }
-
-Particle::force_from_other(Particle other){
-    rirj = r - other.r
-    norm = arma::norm(rirj)
-    return other.q * rirj * pow(norm, -3)
+Particle::print(){
+		cout << "Particle at ( ";
+		for (int i=0; i<3; i++){cout << r(i) << " ";}
+		cout << ") with velocity ( ";
+		for (int i=0; i<3; i++){cout << v(i) << " ";}
+		cout << ") with mass " << m << " and charge " << q << endl;
 }
