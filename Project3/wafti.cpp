@@ -114,7 +114,7 @@ class PenningTrap{
 	double dt;
 	int nT;
 	arma::vec t;  // time-vector
-    arma::rowvec Q; //list of all charges	
+    arma::rowvec Q; //list of all charges
     arma::rowvec M; //list of all masses
 
 	void simulate(double T, double timestep){
@@ -123,7 +123,7 @@ class PenningTrap{
 		t = arma::vec(nT, arma::fill::zeros);
 		r = arma::cube(nT, 3, N);  // nT timesteps x 3dim x N particles
 		v = arma::mat(3, N);  // 3dim x N particles
-		
+
 		Q = arma::rowvec(N);
 		M = arma::rowvec(N);
 
@@ -131,7 +131,7 @@ class PenningTrap{
 		for (int i=0; i < N; i++){
 			Particle p = particles[i];
 			r.slice(i).row(0) = p.r.t();  // particle i at time 0
-			v.col(i) = p.v;  
+			v.col(i) = p.v;
             Q(i) = p.q;
             M(i) = p.m;
 		}
@@ -150,7 +150,7 @@ class PenningTrap{
 		// wacky bugfix.
 		arma::mat r_(r.row(i));
 		if (N == 1){ u.slice(0) = r_.t();}  // position at time i
-		else { u.slice(0) = r_;}  // position at time i		
+		else { u.slice(0) = r_;}  // position at time i
 		u.slice(1) = v;  // velocity
 
 		k1 = advance(t, u);
@@ -180,7 +180,7 @@ class PenningTrap{
 		Bfield(u.slice(1));
 
 		//update velocities for x, y, z for all particles
-		du.slice(1).row(0) = u.slice(0).row(0) + u.slice(1).row(1) + F.row(0);  
+		du.slice(1).row(0) = u.slice(0).row(0) + u.slice(1).row(1) + F.row(0);
 		du.slice(1).row(1) = u.slice(0).row(1) + u.slice(1).row(0) + F.row(1);
 		du.slice(1).row(2) = u.slice(0).row(2) + F.row(2);
 
@@ -205,25 +205,36 @@ double f(double t){
 	return sin(t);
 }
 
-void write_cube_to_file(arma::cube C, arma::vec t, string fname){
+void write_cube_to_file(arma::cube C, arma::vec t, string fname, int frame_rate=1){
 	ofstream out;
 	out.open(fname);
-	out << "t";
-	for (int i=0; i < C.n_slices; i++){
-		out << " x" + to_string(i) + " y" + to_string(i) + " z" + to_string(i);
-	}
-	out << endl;
+	out << "time particle x y z\n";
 	out << fixed << setprecision(8);
-	for (int i=0; i < C.n_rows; i++){
-		out << t(i);
-		for (int j=0; j < C.n_slices; j++){
+	for (int i=0; i < C.n_slices; i++){
+		for (int j=0; j < C.n_rows; j+=frame_rate){
+			out << t(j) << " " << i + 1;
 			for (int k=0; k < C.n_cols; k++){
-				out << " " << C.slice(j).col(k)(i);  
+				out << " " << C.slice(i).row(j)(k);
 			}
+			out << endl;
 		}
-		out << endl;
 	}
 	out.close();
+
+	// for (int i=0; i < C.n_slices; i++){
+	// 	out << " x" + to_string(i) + " y" + to_string(i) + " z" + to_string(i);
+	// }
+	// out << endl;
+	// for (int i=0; i < C.n_rows; i++){
+	// 	out << t(i);
+	// 	for (int j=0; j < C.n_slices; j++){
+	// 		for (int k=0; k < C.n_cols; k++){
+	// 			out << " " << C.slice(j).col(k)(i);
+	// 		}
+	// 	}
+	// 	out << endl;
+	// }
+	// out.close();
 }
 
 
@@ -244,13 +255,13 @@ int main() {
 	// P.insert_particles(p4);
 	// P.r.print();
 	clock_t t1 = clock();
-	P.simulate(1, 0.0005);
+	P.simulate(0.01, 0.0005);
     clock_t t2 = clock();
     double time = ((double)(t2 - t1) / CLOCKS_PER_SEC);
 	cout << time << endl;
 	// P.r.print();
 	// P.r.reshape(0,2,1).save("r.csv", arma::file_type::arma_ascii);
-	write_cube_to_file(P.r, P.t, "test.txt");
+	write_cube_to_file(P.r, P.t, "test.txt", 20);
 	// arma::cube pos(P.r);
 	cout << P.N - arma::sum(P.Q) << endl;
 	// pos.reshape(P.r.n_rows,P.r.n_slices,P.r.n_cols);
