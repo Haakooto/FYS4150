@@ -263,25 +263,36 @@ double f(double t){
 	return sin(t);
 }
 
-void write_cube_to_file(arma::cube C, arma::vec t, string fname){
+void write_cube_to_file(arma::cube C, arma::vec t, string fname, int frame_rate=1){
 	ofstream out;
 	out.open(fname);
-	out << "t";
-	for (int i=0; i < C.n_slices; i++){
-		out << " x" + to_string(i) + " y" + to_string(i) + " z" + to_string(i);
-	}
-	out << endl;
+	out << "time particle x y z\n";
 	out << fixed << setprecision(8);
-	for (int i=0; i < C.n_rows; i++){
-		out << t(i);
-		for (int j=0; j < C.n_slices; j++){
+	for (int i=0; i < C.n_slices; i++){
+		for (int j=0; j < C.n_rows; j+=frame_rate){
+			out << t(j) << " " << i + 1;
 			for (int k=0; k < C.n_cols; k++){
-				out << " " << C.slice(j).col(k)(i);
+				out << " " << C.slice(i).row(j)(k);
 			}
+			out << endl;
 		}
-		out << endl;
 	}
 	out.close();
+
+	// for (int i=0; i < C.n_slices; i++){
+	// 	out << " x" + to_string(i) + " y" + to_string(i) + " z" + to_string(i);
+	// }
+	// out << endl;
+	// for (int i=0; i < C.n_rows; i++){
+	// 	out << t(i);
+	// 	for (int j=0; j < C.n_slices; j++){
+	// 		for (int k=0; k < C.n_cols; k++){
+	// 			out << " " << C.slice(j).col(k)(i);
+	// 		}
+	// 	}
+	// 	out << endl;
+	// }
+	// out.close();
 }
 
 
