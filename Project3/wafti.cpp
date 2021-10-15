@@ -4,6 +4,7 @@
 #include <cmath>
 #include <armadillo>
 #include <time.h>
+#include <complex>
 
 using namespace std;
 
@@ -114,8 +115,47 @@ class PenningTrap{
 	double dt;
 	int nT;
 	arma::vec t;  // time-vector
-    arma::rowvec Q; //list of all charges	
+    arma::rowvec Q; //list of all charges
     arma::rowvec M; //list of all masses
+
+
+
+    void analytic(double T, double timestep, double x0, double z0, double y_v0){   //analytic solution for one particle with
+        dt = timestep;
+		nT = (int)(T / dt) + 1;
+		t = arma::vec(nT, arma::fill::zeros);
+		arma::mat r_a = arma::mat(nT, 3);  // nT timesteps x 3dim x 1 particle
+        r_a.row(0) = (x0, 0, z0);   //initial position
+		//v_a = arma::vec(0, y_v0, 0);  // 3dim x 1 particle, with initial velocity
+
+        double w_0 = particles[0].q * B0 / particles[0].m;
+        double w_z = 2*particles[0].q*V0/(particles[0].m * pow(d, 2));
+
+        double w_plus = ((w_0)+pow(pow(w_0, 2) - 2*w_z, 0.5))/2;
+        double w_min = ((w_0)-pow(pow(w_0, 2) - 2*w_z, 0.5))/2;
+
+        double A_plus = (y_v0 + w_min*x0)/(w_min - w_plus);
+        double A_min = -(y_v0 + w_plus*x0)/(w_min - w_plus);
+
+        double time = 0;
+
+        complex<double> complex_i = (0, 1);
+
+        for (int i=0; i < nT - 1, i++){
+
+            complex<double> f = ((complex<double>)A_plus * exp(-complex_i*(complex<double>)w_plus*(complex<double>)time)) + ((complex<double>)A_min * exp(-complex * (complex<double>)w_min * (complex<double>)time));
+
+            double x = real(f);
+            double y = imag(f);
+            double z = 1;
+
+            t(i) = time;
+            //r_a.row(i) = (x, y, z);
+
+            time += dt;
+		}
+
+    }
 
 	void simulate(double T, double timestep){
 		dt = timestep;
@@ -123,7 +163,7 @@ class PenningTrap{
 		t = arma::vec(nT, arma::fill::zeros);
 		r = arma::cube(nT, 3, N);  // nT timesteps x 3dim x N particles
 		v = arma::mat(3, N);  // 3dim x N particles
-		
+
 		Q = arma::rowvec(N);
 		M = arma::rowvec(N);
 
@@ -131,7 +171,7 @@ class PenningTrap{
 		for (int i=0; i < N; i++){
 			Particle p = particles[i];
 			r.slice(i).row(0) = p.r.t();  // particle i at time 0
-			v.col(i) = p.v;  
+			v.col(i) = p.v;
             Q(i) = p.q;
             M(i) = p.m;
 		}
@@ -150,7 +190,7 @@ class PenningTrap{
 		// wacky bugfix.
 		arma::mat r_(r.row(i));
 		if (N == 1){ u.slice(0) = r_.t();}  // position at time i
-		else { u.slice(0) = r_;}  // position at time i		
+		else { u.slice(0) = r_;}  // position at time i
 		u.slice(1) = v;  // velocity
 
 		k1 = advance(t, u);
@@ -180,7 +220,7 @@ class PenningTrap{
 		Bfield(u.slice(1));
 
 		//update velocities for x, y, z for all particles
-		du.slice(1).row(0) = u.slice(0).row(0) + u.slice(1).row(1) + F.row(0);  
+		du.slice(1).row(0) = u.slice(0).row(0) + u.slice(1).row(1) + F.row(0);
 		du.slice(1).row(1) = u.slice(0).row(1) + u.slice(1).row(0) + F.row(1);
 		du.slice(1).row(2) = u.slice(0).row(2) + F.row(2);
 
@@ -218,7 +258,7 @@ void write_cube_to_file(arma::cube C, arma::vec t, string fname){
 		out << t(i);
 		for (int j=0; j < C.n_slices; j++){
 			for (int k=0; k < C.n_cols; k++){
-				out << " " << C.slice(j).col(k)(i);  
+				out << " " << C.slice(j).col(k)(i);
 			}
 		}
 		out << endl;
@@ -228,31 +268,62 @@ void write_cube_to_file(arma::cube C, arma::vec t, string fname){
 
 
 int main() {
-	Particle p1 = Particle(arma::vec({0,0,1}), arma::vec({0,0,0}), 1, 1);
-	Particle p2 = Particle(arma::vec({0,0,-1}), arma::vec({0,0,0}), 1, 1);
+	//Particle p1 = Particle(arma::vec({0,0,1}), arma::vec({0,0,0}), 1, 1);
+	//Particle p2 = Particle(arma::vec({0,0,-1}), arma::vec({0,0,0}), 1, 1);
 	// Particle p3 = Particle(arma::vec({0,0,-200}), arma::vec({0,0,0}), 1, 1);
 	// Particle p4 = Particle(arma::vec({0,0,200}), arma::vec({0,0,0}), 1, 1);
 	double b = 9.65;
 	double v = 9.65 * pow(10, 8);
 	double d = pow(10, 4);
 
-    PenningTrap P = PenningTrap(b, v, d, true);
-	P.insert_particles(100, 1, 1);
+    //PenningTrap P = PenningTrap(b, v, d, true);
+	//P.insert_particles(100, 1, 1);
 	// P.insert_particles(p1);
 	// P.insert_particles(p2);
 	// P.insert_particles(p3);
 	// P.insert_particles(p4);
 	// P.r.print();
-	clock_t t1 = clock();
-	P.simulate(1, 0.0005);
-    clock_t t2 = clock();
-    double time = ((double)(t2 - t1) / CLOCKS_PER_SEC);
-	cout << time << endl;
+	//clock_t t1 = clock();
+	//P.simulate(1, 0.0005);
+    //clock_t t2 = clock();
+    //double time = ((double)(t2 - t1) / CLOCKS_PER_SEC);
+	//cout << time << endl;
 	// P.r.print();
 	// P.r.reshape(0,2,1).save("r.csv", arma::file_type::arma_ascii);
-	write_cube_to_file(P.r, P.t, "test.txt");
+	//write_cube_to_file(P.r, P.t, "test.txt");
 	// arma::cube pos(P.r);
-	cout << P.N - arma::sum(P.Q) << endl;
+	//cout << P.N - arma::sum(P.Q) << endl;
+
+    std::complex<double> mycomplex(10.0, 2.0);
+
+    // prints the real part using the real function
+    cout << "Real part: " << real(mycomplex) << endl;
+    cout << "Imaginary part: " << imag(mycomplex) << endl;
+
+
+
+    const double pi = 3.14;
+    const complex<double> i(0, 1);
+
+    complex<double> test = exp(i * pi);
+
+    complex <double> new_test = (complex<double>) 5 * test;
+
+    cout << " exp(i*pi) = " << new_test << '\n';
+
+    complex<double> complex_i(0, 1);
+
+    complex <double> f = (complex<double>)5 + exp(-complex_i+(complex<double>)2);
+
+    //double x = ;
+    //double y = ;
+
+    cout << f << endl;
+    cout << imag(f) << endl;
+
+
+
+
 	// pos.reshape(P.r.n_rows,P.r.n_slices,P.r.n_cols);
 	// pos.save("r.csv", arma::file_type::arma_ascii);
 	// arma::mat a(4, 4, arma::fill::randn);
