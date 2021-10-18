@@ -32,7 +32,7 @@ public:
     void insert_particles(vector<Particle> P);
     void insert_particles(Particle);
     void insert_particles(int, double, int);
-    void simulate(double, double);
+    void simulate(double, double, string method="RK4");
     void analytic(double, double, double, double, double);
     arma::cube get_history();  // returns r
     arma::mat get_asol();  // returns r_a

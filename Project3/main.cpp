@@ -27,6 +27,7 @@ class TimePotential{
 	}
 };
 
+
 void write_cube_to_file(arma::cube C, arma::vec t, string fname, int frame_rate=1){
 	ofstream out;
 	out.open(fname);
@@ -43,6 +44,7 @@ void write_cube_to_file(arma::cube C, arma::vec t, string fname, int frame_rate=
 	}
 	out.close();
 }
+
 
 void write_analytic_solution_to_file(arma::mat R, arma::vec t, string filename){
     ofstream out;
@@ -76,7 +78,7 @@ int main() {
     double z0 = 10;
     double y_v0 = 10;
     double T_tot = 1;
-    double timestep = 0.0005;
+    double timestep = 0.00005;
 
 	// TimePotential TP = TimePotential(v, 1, 1); // not sure what f and wV should be
 
@@ -96,7 +98,7 @@ int main() {
 	// Trap.insert_particles(p4);
 
 	//clock_t t1 = clock();
-	Trap.simulate(T_tot, timestep);
+	Trap.simulate(T_tot, timestep, "Euler");
 	Trap.analytic(T_tot, timestep, x0, z0, y_v0);
     //clock_t t2 = clock();
     //double time = ((double)(t2 - t1) / CLOCKS_PER_SEC);
