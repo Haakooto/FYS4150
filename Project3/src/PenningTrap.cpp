@@ -83,7 +83,6 @@ void PenningTrap::analytic(double T, double timestep, double x0, double z0, doub
 	complex <double> A_plus = (y_v0 + w_min*x0)/(w_min - w_plus);
 	complex <double> A_min = -(y_v0 + w_plus*x0)/(w_min - w_plus);
 
-	std::cout << w_0 << " " << w_z << " " << w_plus << " " << w_min << " " << A_plus << " " << A_min << std::endl;
 	double time = dt;
 
 	complex <double> complex_i(0, 1);
@@ -93,19 +92,15 @@ void PenningTrap::analytic(double T, double timestep, double x0, double z0, doub
 		complex <double> f = A_plus * exp(- complex_i * w_plus * (complex<double>) time) + A_min * exp(-complex_i * w_min * (complex<double>)time);
 		double x = real(f);
 		double y = imag(f);
-
-		// std::cout << f << std::endl;
-		// std::cout << x << std::endl;
-
 		double z = z0 * cos(pow(real(w_z), 0.5)*time);
-		// t(i) = time;
+
 		r_a.row(i) = arma::vec({x,y,z}).t();
 		time += dt;
 	}
-	// write_analytic_solution_to_file(r_a, t, "analytic_solution.txt");
+
 }
 
-void PenningTrap::simulate(double T, double timestep){
+void PenningTrap::simulate(double T, double timestep, string method){
 	dt = timestep;
 	nT = (int)(T / dt) + 1;
 	t = arma::vec(nT, arma::fill::zeros);
@@ -123,15 +118,47 @@ void PenningTrap::simulate(double T, double timestep){
 		Q(i) = p.q;
 		M(i) = p.m;
 	}
+
+
 	// start simulation
 	for (int i=0; i < nT - 1; i++){
-		RK4(i, t(i));
+        if (method == "RK4"){
+            RK4(i, t(i));
+        }
+        else if (method == "Euler"){
+            Euler(i, t(i));
+        }
+
 		t(i + 1) = (i + 1) * dt;
+
+        for (int p=0; p < N; p++){
+            if (arma::norm(r.slice(p).row(i + 1)) > d){
+                Q(p) = 0;
+            }
+        }
 	}
 }
 
+
+void PenningTrap::Euler(int i, double t){
+    double h = dt;
+    arma::cube u;
+    u = arma::cube(3, N, 2);  // 3dim x N particles x 2 phases (position and velocity)
+
+	arma::mat r_(r.row(i));  // position at time i
+	if (N == 1){ u.slice(0) = r_.t();}  // wacky bugfix.  For 1 particle, need to transpose r.row
+	else { u.slice(0) = r_;}
+	u.slice(1) = v;  // velocity
+
+    u += h * advance(t, u);
+
+    r.row(i + 1) = u.slice(0);
+	v = u.slice(1);
+}
+
+
 void PenningTrap::RK4(int i, double t){
-	double h = dt / 2;
+	double h = dt / 2;   //divide by 2 to get rid of factor of 1/2 in later expression
 	arma::cube u, k1, k2, k3, k4;
 	u = arma::cube(3, N, 2);  // 3dim x N particles x 2 phases (position and velocity)
 
@@ -149,15 +176,8 @@ void PenningTrap::RK4(int i, double t){
 
 	r.row(i + 1) = u.slice(0);
 	v = u.slice(1);
-
-	// check for escapees
-	for (int p=0; p < N; p++){
-		if (arma::norm(r.slice(p).row(i + 1)) > d){
-			Q(p) = 0;
-		}
-	}
-
 }
+
 
 arma::cube PenningTrap::advance(double time, arma::cube u){
 	arma::cube du(size(u));  // change in u
