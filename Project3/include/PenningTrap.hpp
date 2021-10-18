@@ -1,20 +1,35 @@
+#include <armadillo>
+
+using namespace std;
+
+#ifndef __Particle_hpp__
+#define __Particle_hpp__
+
+class Particle
+{
+public:
+    int q;
+    double m;
+    arma::vec r, v;
+
+    Particle(arma::vec position, arma::vec velocity, double mass, int charge);
+    void print();
+};
+
+#endif
+
+
 #ifndef __PenningTrap_hpp__
 #define __PenningTrap_hpp__
 
-#include <armadillo>
-#include <vector>
-#include <complex>
-
 class PenningTrap
-/*
-*/
 {
 public:
     int N=0;  // number of particles in trap
-    PenningTrap(double Bfield, double Efield, double length, bool particle_particle=false );
-    PenningTrap(double Bfield, double(*)(double), double length, bool particle_particle=false );
+    PenningTrap(double, double, double, bool);
+    PenningTrap(double, double(*)(double), double, bool);
     // Overloaded insertion methods
-    void insert_particles(vector<Particle>);
+    void insert_particles(vector<Particle> P);
     void insert_particles(Particle);
     void insert_particles(int, double, int);
     void simulate(double, double);
