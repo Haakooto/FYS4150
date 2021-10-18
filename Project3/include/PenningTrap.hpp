@@ -26,6 +26,7 @@ private:
     vector<Particle> particles;
     bool ppi, time_dep_V;
     arma::cube r;
+    arma::mat r_a; // analytic solutions.
     arma::mat v;
     arma::vec t;
     arma::rowvec Q, M;
