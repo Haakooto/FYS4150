@@ -3,3 +3,5 @@ compile:
 
 run:
 	./main.out
+
+all: compile run
