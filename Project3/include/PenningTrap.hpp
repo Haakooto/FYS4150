@@ -34,7 +34,7 @@ public:
     void insert_particles(int, double, int);
     void simulate(double, double, string method="RK4");
     void analytic(double, double, double, double, double);
-    arma::cube get_history();  // returns r
+    arma::cube get_history();  // returns r and v
     arma::mat get_asol();  // returns r_a
     arma::vec get_time();  // retruns t
     int escaped();  // counts particles left in trap
@@ -43,19 +43,18 @@ private:
     int nT;  // number of time steps
     double dt;  // length of time step
     double B0, V0, d;  // properties of trap
-    double (*tV0)(double);  // time-dep E-field
+    double(*tV0)(double);  // time-dep E-field
     vector<Particle> particles;  // Particle container
     bool ppi, time_dep_V;
-    arma::cube r;  // postion of all particles at all times
+    arma::cube R;  // postion and velocity of all particles at all times
     arma::mat r_a; // analytic solutions.
-    arma::mat v;  // velocity of all particles, only one time step
     arma::vec t;  // time vector
     arma::rowvec Q, M;  // properties of particles
 
     double get_Efield_at_time(double);
     arma::mat sum_particle_forces(arma::mat);
-    void RK4(int, double);
-    void Euler(int, double);
+    void RK4(arma::cube &, double);
+    void Euler(arma::cube &, double);
     arma::cube advance(double, arma::cube);
     void Efield(arma::mat &, double );
     void Bfield(arma::mat &);
