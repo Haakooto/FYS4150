@@ -10,12 +10,14 @@ PenningTrap::PenningTrap(double Bfield, double Efield, double length, bool parti
 	ppi = particle_particle;
 }
 
-PenningTrap::PenningTrap(double Bfield, double(*tEfield)(double), double length, bool particle_particle){
+PenningTrap::PenningTrap(double Bfield, double Efield_0, double length, bool particle_particle, double amplitude, double freq){
 	B0 = Bfield;
-	tV0 = tEfield;
+	V0 = Efield_0;
 	d = length;
 	time_dep_V = true;
 	ppi = particle_particle;
+    f = amplitude;
+    w_V = freq;
 }
 
 void PenningTrap::insert_particles(vector<Particle> P){
@@ -42,7 +44,8 @@ void PenningTrap::insert_particles(int n, double m, int q){ // inserting n ident
 }
 
 double PenningTrap::get_Efield_at_time(double t){
-	if (time_dep_V) {return tV0(t);}
+	if (time_dep_V) {return V0 * (1 + f * cos(w_V * t));}
+
 	else {return V0;}
 }
 
