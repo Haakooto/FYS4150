@@ -59,7 +59,7 @@ void write_analytic_solution_to_file(arma::mat R, arma::vec t, string filename){
 out.close();
 }
 
-double f(double t){
+double V_t(double t){
 	return sin(t);
 }
 
@@ -80,11 +80,15 @@ int main() {
     double T_tot = 1;
     double timestep = 0.00005;
 
-	// TimePotential TP = TimePotential(v, 1, 1); // not sure what f and wV should be
 
-	PenningTrap Trap = PenningTrap(b, v, d, false);
+    double f = 1;
+    double w_v = 0.2;
+
+	//TimePotential TP = TimePotential(v, f, w_v); // not sure what f and wV should be
+
+	//PenningTrap Trap = PenningTrap(b, v, d, false);
     // PenningTrap TimeTrap = PenningTrap(b, (*f), d, true);
-    // PenningTrap TimeTrap = PenningTrap(b, (*TP.call), d, true);
+    PenningTrap TimeTrap = PenningTrap(b, v, d, true, f, w_v);
 
 	Particle p1 = Particle(arma::vec({x0,0,z0}), arma::vec({0,y_v0,0}), m, q);
 	//Particle p2 = Particle(arma::vec({0,0,-1}), arma::vec({0,0,0}), 1, 1);
@@ -92,18 +96,18 @@ int main() {
 	// Particle p4 = Particle(arma::vec({0,0,200}), arma::vec({0,0,0}), 1, 1);
 
 	//Trap.insert_particles(100, m, q);
-	Trap.insert_particles(p1);
+	TimeTrap.insert_particles(p1);
 	// Trap.insert_particles(p2);
 	// Trap.insert_particles(p3);
 	// Trap.insert_particles(p4);
 
 	//clock_t t1 = clock();
-	Trap.simulate(T_tot, timestep, "Euler");
-	Trap.analytic(T_tot, timestep, x0, z0, y_v0);
+	TimeTrap.simulate(T_tot, timestep, "RK4");
+	//Trap.analytic(T_tot, timestep, x0, z0, y_v0);
     //clock_t t2 = clock();
     //double time = ((double)(t2 - t1) / CLOCKS_PER_SEC);
 	//cout << time << endl;
-	write_cube_to_file(Trap.get_history(), Trap.get_time(), "test.txt");
-	write_analytic_solution_to_file(Trap.get_asol(), Trap.get_time(), "analytic_solution.txt");
+	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "test.txt");
+	//write_analytic_solution_to_file(Trap.get_asol(), Trap.get_time(), "analytic_solution.txt");
 	return 0;
 }

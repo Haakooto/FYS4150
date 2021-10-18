@@ -27,12 +27,12 @@ class PenningTrap
 public:
     int N=0;  // number of particles in trap
     PenningTrap(double, double, double, bool);
-    PenningTrap(double, double(*)(double), double, bool);
+    PenningTrap(double, double, double, bool, double, double);
     // Overloaded insertion methods
     void insert_particles(vector<Particle> P);
     void insert_particles(Particle);
     void insert_particles(int, double, int);
-    void simulate(double, double, string method="RK4");
+    void simulate(double, double, string="RK4");
     void analytic(double, double, double, double, double);
     arma::cube get_history();  // returns r
     arma::mat get_asol();  // returns r_a
@@ -42,7 +42,7 @@ public:
 private:
     int nT;  // number of time steps
     double dt;  // length of time step
-    double B0, V0, d;  // properties of trap
+    double B0, V0, d, f, w_V;  // properties of trap
     double (*tV0)(double);  // time-dep E-field
     vector<Particle> particles;  // Particle container
     bool ppi, time_dep_V;
