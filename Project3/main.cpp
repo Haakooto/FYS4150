@@ -12,6 +12,13 @@ using namespace std;
 
 // Define physical constants
 extern const double ke = 1.38935333 * pow(10, 5);  // u (mu m)^3 / (mu s)^2 / e^2
+// Define Ca+ ion properties
+const int q = 1; // e
+const double m = 40.078; // u Ca+
+// Define standard trap properties
+const double b = 96.5;  // u / (mu s) / e
+const double v = 9.65 * pow(10, 8);  // u (mu m)^2 / (mu s)^2 / e
+const double d = pow(10, 4); // mu m
 
 
 class TimePotential{
@@ -62,29 +69,77 @@ double f(double t){
 }
 
 
-int main() {
-	// define particle and trap properties.
-	vector<int> test;
-	int q = 1; // e
-	double m = 40.078; // u Ca+
+void z_movement(){
+	double T = 100;
+	double h = 0.005;
 
-	double b = 96.5;  // u / (mu s) / e
-	double v = 9.65 * pow(10, 8);  // u (mu m)^2 / (mu s)^2 / e
-	double d = pow(10, 4); // mu m
+	Particle p = Particle(arma::vec({0, 0, 10}), arma::vec({0,0,0}), m, q);
+	PenningTrap Trap = PenningTrap(b, v, d, false);
+	Trap.insert_particles(p);
 
+	Trap.simulate(T, h);
+
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/z_movement.txt");
+}
+
+void ppi_comparison(){
+	double T = 10;
+	double h = 0.005;
+
+	Particle p1 = Particle(arma::vec(3, arma::fill::randu), arma::vec(3, arma::fill::randn), m, q);
+	Particle p2 = Particle(arma::vec(3, arma::fill::randu), arma::vec(3, arma::fill::randn), m, q);
+	
+	PenningTrap Trap = PenningTrap(b, v, d, true);
+	PenningTrap Trap_no_ppi = PenningTrap(b, v, d, false);
+
+	Trap.insert_particles(p1);
+	Trap.insert_particles(p2);
+	Trap.simulate(T, h);
+
+	Trap_no_ppi.insert_particles(p1);
+	Trap_no_ppi.insert_particles(p2);
+	Trap_no_ppi.simulate(T, h);
+
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/ppi_comparison.txt");
+	write_cube_to_file(Trap_no_ppi.get_history(), Trap_no_ppi.get_time(), "outputs/ppi_comparison_no_ppi.txt");
+}
+
+
+
+void single_particle(){
 	double x0 = 10;
     double z0 = 10;
     double y_v0 = 10;
     double T_tot = 1;
     double timestep = 0.0005;
 
+	Particle p = Particle(arma::vec({x0,0,z0}), arma::vec({0,y_v0,0}), m, q);
+	PenningTrap Trap = PenningTrap(b, v, d, false);
+	Trap.insert_particles(p);
+
+	Trap.simulate(T_tot, timestep);
+	Trap.analytic(T_tot, timestep, x0, z0, y_v0);
+
+
+}
+
+
+void experiments(){
+	z_movement();  // first point in P9
+	ppi_comparison();  // second point in P9
+}
+
+
+
+int main() {
+	// define particle and trap properties.
+
+
 	// TimePotential TP = TimePotential(v, 1, 1); // not sure what f and wV should be
 
-	PenningTrap Trap = PenningTrap(b, v, d, false);
     // PenningTrap TimeTrap = PenningTrap(b, (*f), d, true);
     // PenningTrap TimeTrap = PenningTrap(b, (*TP.call), d, true);
 
-	Particle p1 = Particle(arma::vec({x0,0,z0}), arma::vec({0,y_v0,0}), m, q);
 	//Particle p2 = Particle(arma::vec({0,0,-1}), arma::vec({0,0,0}), 1, 1);
 	// Particle p3 = Particle(arma::vec({0,0,-200}), arma::vec({0,0,0}), 1, 1);
 	// Particle p4 = Particle(arma::vec({0,0,200}), arma::vec({0,0,0}), 1, 1);
