@@ -20,6 +20,7 @@ public:
     void simulate(double, double);
     void analytic(double, double, double, double, double);
     arma::cube get_history();  // returns r
+    arma::mat get_asol();  // returns r_a
     arma::vec get_time();  // retruns t
     int escaped();  // counts particles left in trap
 
@@ -31,6 +32,7 @@ private:
     vector<Particle> particles;  // Particle container
     bool ppi, time_dep_V;
     arma::cube r;  // postion of all particles at all times
+    arma::mat r_a; // analytic solutions.
     arma::mat v;  // velocity of all particles, only one time step
     arma::vec t;  // time vector
     arma::rowvec Q, M;  // properties of particles
