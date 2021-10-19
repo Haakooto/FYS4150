@@ -36,6 +36,34 @@ def plot_xy_plane():
     # fig = px.scatter(df, x="x", y="y", animation_frame="time", animation_group="particle", range_y=[-20, 20])
     fig.show()
 
+
+
+def ex10_broad_plot_fraction_remaining():
+    fig = go.Figure()
+    file = pd.read_csv("outputs/broad_freq_search.txt", header = 0, sep = " " )
+    #timestep er 0.0025
+    for f in [0.1, 0.4, 0.7]:
+        data = file.loc[lambda x: x["ampl"] == f, :]
+        fig.add_trace(go.Scatter(x = data["wV"],
+        y = data["fracEsq"],
+        mode = "lines",
+        line=dict(width=3),
+        name = f"Amplitude: {f}"))
+
+    fig.update_layout(
+        font_family="Garamond",
+        font_size=30,
+        title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds",
+        xaxis_title="Frequency",
+        yaxis_title="Fraction of particles remaining",
+        legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01)
+        )
+    fig.show()
+
+
+
+
 if __name__ == "__main__":
     # main()
-    plot_xy_plane()
+    #plot_xy_plane()
+    ex10_broad_plot_fraction_remaining()
