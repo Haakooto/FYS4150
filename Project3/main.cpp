@@ -72,7 +72,7 @@ void single_particle(){
 }
 
 
-void single_particle_endurace(){
+void single_particle_endurance(){
 	double T = 100;
 	double h = 0.005;
 
@@ -82,16 +82,16 @@ void single_particle_endurace(){
 
 	Trap.simulate(T, h);
 
-	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP_endurace.txt");
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP_endurance.txt");
 }
 
 void two_particle(){
-	double T = 10;
+	double T = 20;
 	double h = 0.005;
 
-	Particle p1 = Particle(arma::vec(3, arma::fill::randu), arma::vec(3, arma::fill::randn), m, q);
-	Particle p2 = Particle(arma::vec(3, arma::fill::randu), arma::vec(3, arma::fill::randn), m, q);
-	
+	Particle p1 = Particle(arma::vec({-20, 0, 0}), arma::vec(3, arma::fill::zeros), m, q);
+	Particle p2 = Particle(arma::vec({20, 0, 0}), arma::vec(3, arma::fill::zeros), m, q);
+
 	PenningTrap Trap = PenningTrap(b, v, d, true);
 	PenningTrap Trap_no_ppi = PenningTrap(b, v, d, false);
 
@@ -120,18 +120,18 @@ void broad_freq_search(){
 	double sd = 0.05;  // factor difference in d
 	double sv = 4000;  // factor difference in v0
 
-	vector<double> amps = {0.1, 0.4, 0.7}; 
+	vector<double> amps = {0.1, 0.4, 0.7};
 	double w_min = 0.2;
 	double w_max = 2.5;
 	double w_step = 0.02;
 
 	ofstream out;
 	out.open("outputs/broad_freq_sarch.txt");
-	out << "ampl wV fracEsq wz_sq w_min w_plus\n";
+	out << "ampl wV fracRem wz_sq w_min w_plus\n";
 	out << fixed << setprecision(6);
 
 	double w0 = q * b / m;
-	
+
 	// Make a PenningTrap with time-dep Efield. Set to dummy func, returning t
 	PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
 	TimeTrap.insert_particles(N, m, q); // insert N particles
@@ -144,7 +144,7 @@ void broad_freq_search(){
 			TimeTrap.simulate(T, timestep);
 
 			// Calculate some parameters
-			double wz_sq = 2 * q * V(T, v / sv, f, wV) / m * pow(d, 2);
+			double wz_sq = 2 * q * v / (sv * m * pow(d, 2));
 			double w_plus = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
 			double w_min = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
 			double fraq = (double)(N - TimeTrap.escaped()) / N;
@@ -160,7 +160,7 @@ void broad_freq_search(){
 
 
 void run_all_experiments(){
-	single_particle_endurace();  // first point in P9
+	single_particle_endurance();  // first point in P9
 	two_particle();  // second point in P9
 	single_particle();  // same as spe, run for shorter to compare with analytic results
 	broad_freq_search(); // first part in p10
