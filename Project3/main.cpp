@@ -21,20 +21,6 @@ const double v = 9.65 * pow(10, 8);  // u (mu m)^2 / (mu s)^2 / e
 const double d = pow(10, 4); // mu m
 
 
-class TimePotential{
-  public:
-	double V0, f, wV;
-	TimePotential(double strength, double ampl, double freq){
-		V0 = strength;
-		f = ampl;
-		wV = freq;
-	}
-	double operator() (double t){
-		return V0 * (1 + f * cos(wV * t));
-	}
-};
-
-
 void write_cube_to_file(arma::cube C, arma::vec t, string fname, int frame_rate=1){
 	ofstream out;
 	out.open(fname);
@@ -121,13 +107,58 @@ void two_particle(){
 	write_cube_to_file(Trap_no_ppi.get_history(), Trap_no_ppi.get_time(), "outputs/twoP_no_ppi.txt");
 }
 
+double V(double t, double V0, double f, double w){
+	// time-dependent potential, eq 21 in project description
+	return V0 * (1 + f * cos(w * t));
+}
+
+void broad_freq_search(){
+	double T = 500;
+	double timestep = 0.005;
+
+	int N = 100;  // number of particles
+	double sd = 0.05;  // factor difference in d
+	double sv = 4000;  // factor difference in v0
+
+	vector<double> amps = {0.1, 0.4, 0.7}; 
+	double w_min = 0.2;
+	double w_max = 2.5;
+	double w_step = 0.02;
+
+	ofstream out;
+	out.open("outputs/broad_freq_sarch.txt");
+	out << "ampl wV fracEsq wz_sq w_min w_plus\n";
+	out << fixed << setprecision(6);
+
+	double w0 = q * b / m;
+	
+	PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
+	TimeTrap.insert_particles(N, m, q);
+	for (double f: amps){
+		cout << "f = " << f << endl;
+		for (double wV = w_min; wV <= w_max; wV += w_step){
+			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
+			TimeTrap.simulate(T, timestep);
+
+			double wz_sq = 2 * q * V(T, v / sv, f, wV) / m * pow(d, 2);
+			double w_plus = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
+			double w_min = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
+			double fraq = (double)(N - TimeTrap.escaped()) / N;
+
+			out << f << " " << wV << " " << fraq << " " << wz_sq << " " << w_min << " " << w_plus << endl;
+			cout << " wV = " << wV << " ratio remaining: " << fraq << endl;
+		}
+	}
+	out.close();
+}
 
 
 
 void run_all_experiments(){
-	single_particle();  // same as spe, run for shorter to compare with analytic results
 	single_particle_endurace();  // first point in P9
 	two_particle();  // second point in P9
+	single_particle();  // same as spe, run for shorter to compare with analytic results
+	broad_freq_search(); // first part in p10
 }
 
 

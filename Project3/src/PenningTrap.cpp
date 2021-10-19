@@ -10,17 +10,16 @@ PenningTrap::PenningTrap(double Bfield, double Efield, double length, bool parti
 	ppi = particle_particle;
 }
 
-PenningTrap::PenningTrap(double Bfield, double Efield_0, double length, bool particle_particle, double amplitude, double freq){
+PenningTrap::PenningTrap(double Bfield, function<double(double)> Efield, double length, bool particle_particle){
 	B0 = Bfield;
-	V0 = Efield_0;
+	tV0 = Efield;
 	d = length;
 	time_dep_V = true;
 	ppi = particle_particle;
-    f = amplitude;
-    w_V = freq;
 }
 
 void PenningTrap::insert_particles(vector<Particle> P){
+	// insert many particles
 	for (Particle p: P){
 		particles.push_back(p);
 		N++;
@@ -28,6 +27,7 @@ void PenningTrap::insert_particles(vector<Particle> P){
 }
 
 void PenningTrap::insert_particles(Particle p){
+	// Insert single particle
 	particles.push_back(p);
 	N++;
 }
@@ -43,9 +43,14 @@ void PenningTrap::insert_particles(int n, double m, int q){ // inserting n ident
 	}
 }
 
-double PenningTrap::get_Efield_at_time(double t){
-	if (time_dep_V) {return V0 * (1 + f * cos(w_V * t));}
+void PenningTrap::set_tEfield(function<double(double)> f){
+	// change function for time-dep Efield
+	tV0 = f;
+}
 
+double PenningTrap::get_Efield_at_time(double t){
+	// evaluate Efield at time t. May be constant
+	if (time_dep_V) {return tV0(t);} 
 	else {return V0;}
 }
 
@@ -73,7 +78,6 @@ arma::mat PenningTrap::sum_particle_forces(arma::mat ri){
 void PenningTrap::analytic(double T, double timestep, double x0, double z0, double y_v0){   //analytic solution for one particle with a given starting position
 	dt = timestep;
 	nT = (int)(T / dt) + 1;
-	// t = arma::vec(nT, arma::fill::zeros);
 	r_a = arma::mat(nT, 3);  // nT timesteps x 3dim, only 1 particle
 	r_a.row(0) = arma::vec({x0, 0, z0}).t();   //initial position
 
@@ -111,6 +115,7 @@ void PenningTrap::simulate(double T, double timestep, string method){
 
 	Q = arma::rowvec(N);
 	M = arma::rowvec(N);
+
 
 	// initiate simulation
 	for (int i=0; i < N; i++){
