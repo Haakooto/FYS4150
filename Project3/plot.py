@@ -19,8 +19,25 @@ def main():
 
 def plot_z():
     df = pd.read_csv("outputs/oneP_endurance.txt", header=0, sep=" ")
+
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["time"], y=df["z"], mode="lines"))
+
+    N = df.shape[0]
+
+    dt = df["time"][1]
+    yf = np.fft.rfft(df["z"])
+    xf = np.fft.rfftfreq(N, d=dt)
+
+    wz = np.sqrt(2 * 9.65 / 40.078)
+    freq = 2 * np.pi * xf[np.argmax(np.abs(yf))]
+    print(1 - freq / wz)  # relative error in freq
+
+    trace = go.Scatter(x=df["time"], y=df["z"], mode="lines")
+    lo = make_nice_plot(r"$\huge{\text{Time }[\mu s]}$", r"$\huge{\text{z }[\mu m]}$",
+                   "Movement in z-direction for single particle")
+    fig = go.Figure(data=[trace,], layout=lo)
+
     fig.show()
 
 
