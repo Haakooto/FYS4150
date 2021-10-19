@@ -116,7 +116,7 @@ void broad_freq_search(){
 	double T = 500;
 	double timestep = 0.005;
 
-	int N = 150;  // number of particles
+	int N = 100;  // number of particles
 	double sd = 0.05;  // factor difference in d
 	double sv = 4000;  // factor difference in v0
 
@@ -126,7 +126,52 @@ void broad_freq_search(){
 	double w_step = 0.01;
 
 	ofstream out;
-	out.open("outputs/broad_freq_search_150particles.txt");
+	out.open("outputs/broad_freq_search.txt");
+	out << "ampl wV fracRem wz_sq w_min w_plus\n";
+	out << fixed << setprecision(6);
+
+	double w0 = q * b / m;
+
+	// Make a PenningTrap with time-dep Efield. Set to dummy func, returning t
+	PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
+	TimeTrap.insert_particles(N, m, q); // insert N particles
+	for (double f: amps){
+		cout << "f = " << f << endl;
+		for (double wV = w_min; wV <= w_max; wV += w_step){
+			// Set actual Efield func
+			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
+			// simulate function resets the particles, so do not have to reinitialize trap, can just restart simulation with new Efield func
+			TimeTrap.simulate(T, timestep);
+
+			// Calculate some parameters
+			double wz_sq = 2 * q * V(T, v / sv, f, wV) / m * pow(d, 2);
+			double w_plus = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
+			double w_min = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
+			double fraq = (double)(N - TimeTrap.escaped()) / N;
+
+			// write to file
+			out << f << " " << wV << " " << fraq << " " << wz_sq << " " << w_min << " " << w_plus << endl;
+			cout << " wV = " << wV << " ratio remaining: " << fraq << endl;
+		}
+	}
+	out.close();
+}
+
+void broad_freq_search_test(){
+	double T = 500;
+	double timestep = 0.005;
+
+	int N = 100;  // number of particles
+	double sd = 0.05;  // factor difference in d
+	double sv = 4000;  // factor difference in v0
+
+	vector<double> amps = {2};
+	double w_min = 0.2;
+	double w_max = 2.5;
+	double w_step = 0.02;
+
+	ofstream out;
+	out.open("outputs/broad_freq_search_test.txt");
 	out << "ampl wV fracRem wz_sq w_min w_plus\n";
 	out << fixed << setprecision(6);
 
@@ -225,18 +270,46 @@ void narrow_freq_search(){
 }
 
 
+void ex10_particle_track(){
+    double T = 5000;
+    double timestep = 0.005;
+
+    double sd = 0.05;  // factor difference in d
+    double sv = 4000;  // factor difference in v0
+
+    double f = 0.7;
+    double wV = 2.38;
+
+    PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
+    Particle p = Particle(arma::vec({10, 0, 10}), arma::vec({0,-10,0}), m, q);
+	TimeTrap.insert_particles(p);
+
+    TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
+    TimeTrap.simulate(T, timestep);
+
+	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_particle_track.txt");
+}
+
+
+
+
+
+
 
 void run_all_experiments(){
 	single_particle_endurace();  // first point in P9
 	two_particle();  // second point in P9
 	single_particle();  // same as spe, run for shorter to compare with analytic results
 	broad_freq_search(); // first part in p10
+
 }
 
 
 int main() {
 	//run_all_experiments();
-    broad_freq_search();
+    //broad_freq_search();
+    //ex10_particle_track();
+    broad_freq_search_test();
 
 
 	return 0;
