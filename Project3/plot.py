@@ -31,10 +31,14 @@ def plot_z():
 
     wz = np.sqrt(2 * 9.65 / 40.078)
     freq = 2 * np.pi * xf[np.argmax(np.abs(yf))]
+    print(freq)
     print(1 - freq / wz)  # relative error in freq
 
-    trace = go.Scatter(x=df["time"], y=df["z"] / df["z"][0], mode="lines")
-    fig = go.Figure(data=[trace,])
+    anal = 0.5 * (np.exp(1j * wz * df["time"]) + np.exp(-1j * wz * df["time"]))
+    
+    trace = go.Scatter(x=df["time"], y=df["z"] / df["z"][0], mode="lines", line=dict(width=5))
+    trace2 = go.Scatter(x=df["time"], y=np.real(anal), mode="lines", line=dict(dash="dot"))
+    fig = go.Figure(data=[trace, trace2])
 
     fig.show()
 
