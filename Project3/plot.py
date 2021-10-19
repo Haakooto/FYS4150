@@ -69,6 +69,55 @@ def plot_xy_plane():
     fig.show()
 
 
+
+def ex10_broad_plot_fraction_remaining():
+    fig = go.Figure()
+    file = pd.read_csv("outputs/broad_freq_search.txt", header = 0, sep = " " )
+    #timestep er 0.0025
+    for f in [0.1, 0.4, 0.7]:
+        data = file.loc[lambda x: x["ampl"] == f, :]
+        fig.add_trace(go.Scatter(x = data["wV"],
+        y = data["fracEsq"],
+        mode = "lines",
+        line=dict(width=3),
+        name = f"Amplitude: {f}"))
+
+    fig.update_layout(
+        font_family="Garamond",
+        font_size=30,
+        title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds",
+        xaxis_title="Frequency",
+        yaxis_title="Fraction of particles remaining",
+        legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01)
+        )
+    fig.show()
+
+
+def ex10_narrow_plot_no_ppi_fraction_remaining():
+    fig = go.Figure()
+    file = pd.read_csv("outputs/narrow_freq_search_no_ppi.txt", header = 0, sep = " " )
+    #timestep er 0.0025
+    for f in [0.1, 0.4, 0.7]:
+        data = file.loc[lambda x: x["ampl"] == f, :]
+        fig.add_trace(go.Scatter(x = data["wV"],
+        y = data["fracRem"],
+        mode = "lines",
+        line=dict(width=3),
+        name = f"Amplitude: {f}"))
+
+    fig.update_layout(
+        font_family="Garamond",
+        font_size=30,
+        title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds",
+        xaxis_title="Frequency",
+        yaxis_title="Fraction of particles remaining",
+        legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99)
+        )
+    fig.show()
+
+
 if __name__ == "__main__":
     # main()
-    ex9_plot_z()
+    #plot_xy_plane()
+    #ex10_broad_plot_fraction_remaining()
+    ex10_narrow_plot_no_ppi_fraction_remaining()
