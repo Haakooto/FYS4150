@@ -132,19 +132,24 @@ void broad_freq_search(){
 
 	double w0 = q * b / m;
 	
+	// Make a PenningTrap with time-dep Efield. Set to dummy func, returning t
 	PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
-	TimeTrap.insert_particles(N, m, q);
+	TimeTrap.insert_particles(N, m, q); // insert N particles
 	for (double f: amps){
 		cout << "f = " << f << endl;
 		for (double wV = w_min; wV <= w_max; wV += w_step){
+			// Set actual Efield func
 			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
+			// simulate function resets the particles, so do not have to reinitialize trap, can just restart simulation with new Efield func
 			TimeTrap.simulate(T, timestep);
 
+			// Calculate some parameters
 			double wz_sq = 2 * q * V(T, v / sv, f, wV) / m * pow(d, 2);
 			double w_plus = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
 			double w_min = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
 			double fraq = (double)(N - TimeTrap.escaped()) / N;
 
+			// write to file
 			out << f << " " << wV << " " << fraq << " " << wz_sq << " " << w_min << " " << w_plus << endl;
 			cout << " wV = " << wV << " ratio remaining: " << fraq << endl;
 		}
