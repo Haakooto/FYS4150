@@ -44,6 +44,7 @@ public:
     arma::vec get_time();  // retruns t
     vector<Particle> get_particles();
     int escaped();  // counts particles left in trap
+    bool ppi;
 
 private:
     int nT;  // number of time steps
@@ -51,7 +52,7 @@ private:
     double B0, V0, d, f, w_V;  // properties of trap
     function<double(double)> tV0; // time-dep E-field (lambda func)
     vector<Particle> particles;  // Particle container
-    bool ppi, time_dep_V;
+    bool time_dep_V;
     arma::cube R;  // postion and velocity of all particles at all times
     arma::mat r_a; // analytic solutions.
     arma::vec t;  // time vector
