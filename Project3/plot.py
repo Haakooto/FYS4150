@@ -4,10 +4,10 @@ import plotly.graph_objects as go
 import pandas as pd
 
 
-def make_nice_plot(fig, xlabel="", ylabel="", title="", legend=None):
+def make_nice_plot(xlabel="", ylabel="", title="", legend=None):
     layout = go.Layout(
-        font_family="Garamond",
-        font_size=35,
+        font_family="Open Sans",
+        font_size=30,
         xaxis=dict(title=xlabel),
         yaxis=dict(title=ylabel),
         title=title,
@@ -49,8 +49,8 @@ def ex9_plot_z():
     print(1 - freq / wz)  # relative error in freq
 
     trace = go.Scatter(x=df["time"], y=df["z"], mode="lines")
-    lo = make_nice_plot(r"$Time [\mu s]$", r"$z [\mu m]$",
-                   r"$\text{Movement in z-direction for single particle}$")
+    lo = make_nice_plot(r"$\huge{\text{Time }[\mu s]}$", r"$\huge{\text{z }[\mu m]}$",
+                   "Movement in z-direction for single particle")
     fig = go.Figure(data=[trace,], layout=lo)
     fig.show()
 
@@ -119,5 +119,6 @@ def ex10_narrow_plot_no_ppi_fraction_remaining():
 if __name__ == "__main__":
     # main()
     #plot_xy_plane()
-    #ex10_broad_plot_fraction_remaining()
-    ex10_narrow_plot_no_ppi_fraction_remaining()
+    # ex10_broad_plot_fraction_remaining()
+    # ex10_narrow_plot_no_ppi_fraction_remaining()
+    ex9_plot_z()
