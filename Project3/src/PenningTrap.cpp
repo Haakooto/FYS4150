@@ -50,7 +50,7 @@ void PenningTrap::set_tEfield(function<double(double)> f){
 
 double PenningTrap::get_Efield_at_time(double t){
 	// evaluate Efield at time t. May be constant
-	if (time_dep_V) {return tV0(t);} 
+	if (time_dep_V) {return tV0(t);}
 	else {return V0;}
 }
 
@@ -120,11 +120,11 @@ void PenningTrap::simulate(double T, double timestep, string method){
 	// initiate simulation
 	for (int i=0; i < N; i++){
 		Particle p = particles[i];
-		R.slice(0).rows(0, 2).col(i) = p.r;
-		R.slice(0).rows(3, 5).col(i) = p.v;
+		R.slice(0).rows(0, 2).col(i) = p.r; // set positions
+		R.slice(0).rows(3, 5).col(i) = p.v;  // set velocities
 
-		Q(i) = p.q;
-		M(i) = p.m;
+		Q(i) = p.q;  // set charges
+		M(i) = p.m; // set masses
 	}
 
 	// start simulation
@@ -132,7 +132,11 @@ void PenningTrap::simulate(double T, double timestep, string method){
 	for (int i=0; i < nT - 1; i++){
 		u.slice(0) = R.slice(i).rows(0, 2);
 		u.slice(1) = R.slice(i).rows(3, 5);
-		RK4(u, t(i));
+		if (method == "Euler"){
+			Euler(u, t(i));
+		} else{
+			RK4(u, t(i));
+		}
 
 		R.slice(i + 1).rows(0, 2) = u.slice(0);
 		R.slice(i + 1).rows(3, 5) = u.slice(1);
@@ -203,6 +207,11 @@ arma::mat PenningTrap::get_asol(){
 arma::vec PenningTrap::get_time(){
 	return t;
 }
+
+vector<Particle> get_particles(){
+	return particles;
+}
+
 int PenningTrap::escaped(){
 	int out = 0;
 	for (int i=0; i < N; i++){

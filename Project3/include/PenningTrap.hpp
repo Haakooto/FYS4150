@@ -29,16 +29,20 @@ public:
     int N=0;  // number of particles in trap
     PenningTrap(double, double, double, bool);
     PenningTrap(double, function<double(double)>, double, bool);
+
     // Overloaded insertion methods
     void insert_particles(vector<Particle> P);
     void insert_particles(Particle);
     void insert_particles(int, double, int);
+
     void set_tEfield(function<double(double)>);
     void simulate(double, double, string="RK4");
     void analytic(double, double, double, double, double);
+
     arma::cube get_history();  // returns r and v
     arma::mat get_asol();  // returns r_a
     arma::vec get_time();  // retruns t
+    vector<Particle> get_particles();
     int escaped();  // counts particles left in trap
 
 private:
