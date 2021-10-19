@@ -33,10 +33,8 @@ def plot_z():
     freq = 2 * np.pi * xf[np.argmax(np.abs(yf))]
     print(1 - freq / wz)  # relative error in freq
 
-    trace = go.Scatter(x=df["time"], y=df["z"], mode="lines")
-    lo = make_nice_plot(r"$\huge{\text{Time }[\mu s]}$", r"$\huge{\text{z }[\mu m]}$",
-                   "Movement in z-direction for single particle")
-    fig = go.Figure(data=[trace,], layout=lo)
+    trace = go.Scatter(x=df["time"], y=df["z"] / df["z"][0], mode="lines")
+    fig = go.Figure(data=[trace,])
 
     fig.show()
 
@@ -79,21 +77,21 @@ def ex10_broad_plot_fraction_remaining():
     #timestep er 0.0025
     for f in [0.1, 0.4, 0.7]:
 
-    data = file.loc[lambda x: x["ampl"] == f, :]
-    fig.add_trace(go.Scatter(x = data["wV"],
-        y = data["fracRem"],
-        mode = "lines",
-        line=dict(width=3),
-        name = f"Amplitude: {f}"))
+        data = file.loc[lambda x: x["ampl"] == f, :]
+        fig.add_trace(go.Scatter(x = data["wV"],
+            y = data["fracRem"],
+            mode = "lines",
+            line=dict(width=3),
+            name = f"Amplitude: {f}"))
 
-    fig.update_layout(
-        font_family="Garamond",
-        font_size=30,
-        title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds testing",
-        xaxis_title="Frequency",
-        yaxis_title="Fraction of particles remaining",
-        legend=dict(yanchor="bottom", xanchor="left", x=0.01, y=0.01)
-        )
+        fig.update_layout(
+            font_family="Garamond",
+            font_size=30,
+            title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds testing",
+            xaxis_title="Frequency",
+            yaxis_title="Fraction of particles remaining",
+            legend=dict(yanchor="bottom", xanchor="left", x=0.01, y=0.01)
+            )
     fig.show()
 
 
@@ -122,8 +120,9 @@ def ex10_narrow_plot_no_ppi_fraction_remaining():
 
 if __name__ == "__main__":
     # main()
+    plot_z()
     #plot_xy_plane()
     #ex10_broad_plot_fraction_remaining()
     #ex_10_plot_xy_plane()
-    ex10_broad_plot_fraction_remaining()
+    # ex10_broad_plot_fraction_remaining()
     #ex10_narrow_plot_no_ppi_fraction_remaining()
