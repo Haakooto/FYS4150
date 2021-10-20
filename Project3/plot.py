@@ -2,6 +2,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
+import glob
 
 
 def main():
@@ -31,8 +32,8 @@ def plot_z():
 
     wz = np.sqrt(2 * 9.65 / 40.078)
     freq = 2 * np.pi * xf[np.argmax(np.abs(yf))]
-    print(freq)
-    print(1 - freq / wz)  # relative error in freq
+    print(f"Most prevalent frequency: {freq}")
+    print(f"Relative error compared to wz: {1 - freq / wz}")
 
     anal = 0.5 * (np.exp(1j * wz * df["time"]) + np.exp(-1j * wz * df["time"]))
     
@@ -47,13 +48,28 @@ def plot_xy_plane():
     fig = go.Figure()
     for b in ["", "_no"]:
         df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
-        for i in range(1, 2):
+        for i in range(1, 3):
             dP = df.loc[lambda x: x["particle"] == i, :]
             fig.add_trace(go.Scatter(x=dP["x"], y=dP["y"], mode="lines", name=f"particle {i} {b} ppi"))
 
-    fig.update_layout(xaxis_range=[-30, 30], yaxis_range=[-30,30])
+    # fig.update_layout(xaxis_range=[-30, 30], yaxis_range=[-30,30])
     # fig = px.scatter(df, x="x", y="y", animation_frame="time", animation_group="particle", range_y=[-20, 20])
     fig.show()
+
+
+def plot_rel_errors(method="RK4"):
+    fig = go.Figure()
+
+    files = glob.glob(f"outputs/rel_errors_{method}*")
+    traces = []
+    for file in files:
+        data = pd.read_csv(file, header=0, sep=" ")
+        data["err"][0] = 0  # not interested in abs err here
+        dt = np.log10()
+
+        trace = go.Scatter(x=data["t"], y=data["err"], mode="lines", name=)
+        traces.append(trace)
+
 
 
 
@@ -124,8 +140,9 @@ def ex10_narrow_plot_no_ppi_fraction_remaining():
 
 if __name__ == "__main__":
     # main()
-    plot_z()
-    #plot_xy_plane()
+    # plot_z()
+    # plot_xy_plane()
+    plot_rel_errors()
     #ex10_broad_plot_fraction_remaining()
     #ex_10_plot_xy_plane()
     # ex10_broad_plot_fraction_remaining()

@@ -22,6 +22,23 @@ const double d = pow(10, 4); // mu m
 
 
 void write_cube_to_file(arma::cube C, arma::vec t, string fname, int frame_rate=1){
+	/*
+	Write position and velocity history of all particles in trap to file.
+
+	Arguments:
+		C: arma::cube 
+			object with positions and velocities
+		t: arma::vec 
+			object with times
+		fname: string
+			filename. Must include path and extension
+		frame_rate: int
+			Write only every frame_rate to file. Defualts to write all 
+	Returns:
+		None
+	Outputs:
+		file with filename
+	*/
 	ofstream out;
 	out.open(fname);
 	out << "time particle x y z vx vy vz\n";
@@ -39,15 +56,44 @@ void write_cube_to_file(arma::cube C, arma::vec t, string fname, int frame_rate=
 }
 
 void write_errors_to_file(arma::vec err, arma::vec t, string filename){
+	/*
+	Write relative error in every time-step to file
+
+	Arguments:
+		err: arma::vec
+			Vector with all relative errors. 
+			First value is max absolute error. error is 0 here anyways
+		t: armma::vec
+			times
+		filename: string
+			filename. Must include path and extension
+	Returns:
+		None
+	Outputs:
+		file with filename
+	*/
     ofstream out;
 	cout << filename << endl;
     out.open(filename);
     out << "t err" << endl;
     out << setprecision(8);
-    for (int i=0; i < err.n_cols; i++){
+    for (int i=0; i < err.n_rows; i++){
         out << t(i) << " " << err(i) << endl;
     }
 	out.close();
+}
+
+void single_particle_endurace(){
+	double T = 100;
+	double h = 0.005;
+
+	Particle p = Particle(arma::vec({0, 0, 10}), arma::vec({0, 0, 0}), m, q);
+	PenningTrap Trap = PenningTrap(b, v, d, false);
+	Trap.insert_particles(p);
+
+	Trap.simulate(T, h);
+
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP_endurance.txt");
 }
 
 void single_particle_errors(string method="RK4"){
@@ -66,19 +112,6 @@ void single_particle_errors(string method="RK4"){
 		cout << errs(0) << endl;
 		write_errors_to_file(errs, Trap.get_time(), "outputs/rel_errors_" + method + "_neglog10dt_" + to_string(i) + ".txt");
 	}
-}
-
-void single_particle_endurace(){
-	double T = 100;
-	double h = 0.005;
-
-	Particle p = Particle(arma::vec({0, 0, 10}), arma::vec({0, 0, 0}), m, q);
-	PenningTrap Trap = PenningTrap(b, v, d, false);
-	Trap.insert_particles(p);
-
-	Trap.simulate(T, h);
-
-	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP_endurance.txt");
 }
 
 void two_particle(){
@@ -297,7 +330,7 @@ void run_all_experiments(){
 }
 
 int main() {
-	single_particle_errors("Euler");  // same as spe, run for shorter to compare with analytic results
+	single_particle_errors();  // same as spe, run for shorter to compare with analytic results
 	// two_particle();  // second point in P9
 	// single_particle_endurace();  // first point in P9
 	//run_all_experiments();
