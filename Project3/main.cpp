@@ -57,16 +57,16 @@ void single_particle(){
 	double x0 = 10;
     double z0 = 10;
     double y_v0 = 10;
-    double T_tot = 1;
-    double timestep = 0.00005;
+    double T_tot = 5;
+    double timestep = 0.005;
 
-	Particle p = Particle(arma::vec({x0,0,z0}), arma::vec({0,y_v0,0}), m, q);
+	Particle p = Particle(arma::vec({x0, 0, z0}), arma::vec({0, y_v0, 0}), m, q);
 	PenningTrap Trap = PenningTrap(b, v, d, false);
 	Trap.insert_particles(p);
 
 	Trap.simulate(T_tot, timestep);
 	Trap.analytic(T_tot, timestep, x0, z0, y_v0);
-
+	<
 	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP.txt");
 
 }
@@ -76,7 +76,7 @@ void single_particle_endurace(){
 	double T = 100;
 	double h = 0.005;
 
-	Particle p = Particle(arma::vec({0, 0, 10}), arma::vec({0,0,0}), m, q);
+	Particle p = Particle(arma::vec({0, 0, 10}), arma::vec({0, 0, 0}), m, q);
 	PenningTrap Trap = PenningTrap(b, v, d, false);
 	Trap.insert_particles(p);
 
@@ -121,16 +121,22 @@ void broad_freq_search(){
 	double sv = 4000;  // factor difference in v0
 
 	vector<double> amps = {0.1, 0.4, 0.7};
-	double w_min = 0.25;
-	double w_max = 0.55;//2.5;
-	double w_step = 0.01;
+	double w_min = 0.2;
+	double w_max = 2.51;
+	double w_step = 0.02;
+
+	// Calculate some parameters
+	double w0 = q * b / m;
+	double wz_sq = 2 * q * v / sv / m * pow(d, -2);
+	double w_plus = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
+	double w_min = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
 
 	ofstream out;
 	out.open("outputs/broad_freq_search.txt");
-	out << "ampl wV fracRem wz_sq w_min w_plus\n";
+	out << " wz_sq w_min w_plus\n";
+	out << wz_sq << " " << w_min << " " << w_plus << endl;
+	out << "ampl wV fracRem\n";
 	out << fixed << setprecision(6);
-
-	double w0 = q * b / m;
 
 	// Make a PenningTrap with time-dep Efield. Set to dummy func, returning t
 	PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
@@ -142,15 +148,12 @@ void broad_freq_search(){
 			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
 			// simulate function resets the particles, so do not have to reinitialize trap, can just restart simulation with new Efield func
 			TimeTrap.simulate(T, timestep);
-
-			// Calculate some parameters
-			double wz_sq = 2 * q * V(T, v / sv, f, wV) / m * pow(d, 2);
-			double w_plus = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
-			double w_min = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
+			
 			double fraq = (double)(N - TimeTrap.escaped()) / N;
 
+
 			// write to file
-			out << f << " " << wV << " " << fraq << " " << wz_sq << " " << w_min << " " << w_plus << endl;
+			out << f << " " << wV << " " << fraq << endl;
 			cout << " wV = " << wV << " ratio remaining: " << fraq << endl;
 		}
 	}
