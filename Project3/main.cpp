@@ -119,7 +119,7 @@ void single_particle_errors(string method="RK4"){
 	double x0 = 10;
     double z0 = 10;
     double y_v0 = 10;
-    double T_tot = 5;
+    double T_tot = 05;
 	int N = 5;
 
 	Particle p = Particle(arma::vec({x0, 0, z0}), arma::vec({0, y_v0, 0}), m, q);
