@@ -26,14 +26,14 @@ void write_cube_to_file(arma::cube C, arma::vec t, string fname, int frame_rate=
 	Write position and velocity history of all particles in trap to file.
 
 	Arguments:
-		C: arma::cube 
+		C: arma::cube
 			object with positions and velocities
-		t: arma::vec 
+		t: arma::vec
 			object with times
 		fname: string
 			filename. Must include path and extension
 		frame_rate: int
-			Write only every frame_rate to file. Defualts to write all 
+			Write only every frame_rate to file. Defualts to write all
 	Returns:
 		None
 	Outputs:
@@ -61,7 +61,7 @@ void write_errors_to_file(arma::vec err, arma::vec t, string filename){
 
 	Arguments:
 		err: arma::vec
-			Vector with all relative errors. 
+			Vector with all relative errors.
 			First value is max absolute error. error is 0 here anyways
 		t: armma::vec
 			times
@@ -80,7 +80,26 @@ void write_errors_to_file(arma::vec err, arma::vec t, string filename){
     for (int i=0; i < err.n_rows; i++){
         out << t(i) << " " << err(i) << endl;
     }
-	out.close();
+out.close();
+}
+
+
+void single_particle(){
+	double x0 = 10;
+    double z0 = 10;
+    double y_v0 = 10;
+    double T_tot = 5;
+    double timestep = 0.005;
+
+	Particle p = Particle(arma::vec({x0, 0, z0}), arma::vec({0, y_v0, 0}), m, q);
+	PenningTrap Trap = PenningTrap(b, v, d, false);
+	Trap.insert_particles(p);
+
+	Trap.simulate(T_tot, timestep);
+	Trap.analytic(T_tot, timestep, x0, z0, y_v0);
+
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP.txt");
+
 }
 
 void single_particle_endurace(){
@@ -177,7 +196,7 @@ void broad_freq_search(){
 			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
 			// simulate function resets the particles, so do not have to reinitialize trap, can just restart simulation with new Efield func
 			TimeTrap.simulate(T, timestep);
-			
+
 			double fraq = (double)(N - TimeTrap.escaped()) / N;
 
 
@@ -301,13 +320,13 @@ void narrow_freq_search(){
 }
 
 void ex10_particle_track(){
-    double T = 5000;
+    double T = 500;
     double timestep = 0.005;
 
     double sd = 0.05;  // factor difference in d
     double sv = 4000;  // factor difference in v0
 
-    double f = 0.7;
+    double f = 3;
     double wV = 2.38;
 
     PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
@@ -317,7 +336,14 @@ void ex10_particle_track(){
     TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
     TimeTrap.simulate(T, timestep);
 
-	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_particle_track.txt");
+	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_TimeTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
+
+    PenningTrap RegularTrap = PenningTrap(b, v/sv, d * sd, false);
+    RegularTrap.insert_particles(p);
+
+    RegularTrap.simulate(T, timestep);
+
+    write_cube_to_file(RegularTrap.get_history(), RegularTrap.get_time(), "outputs/ex10_RegularTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
 }
 
 void run_all_experiments(){
@@ -336,7 +362,7 @@ int main() {
 	// single_particle_endurace();  // first point in P9
 	//run_all_experiments();
     //broad_freq_search();
-    //ex10_particle_track();
+    ex10_particle_track();
     // broad_freq_search_test();
 
 

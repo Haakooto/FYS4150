@@ -4,7 +4,6 @@ import plotly.graph_objects as go
 import pandas as pd
 import glob
 
-
 def main():
     df = pd.read_csv("outputs/oneP_endurace.txt", header=0, sep=" ")
     print(df)
@@ -32,8 +31,8 @@ def plot_z():
 
     wz = np.sqrt(2 * 9.65 / 40.078)
     freq = 2 * np.pi * xf[np.argmax(np.abs(yf))]
-    print(f"Most prevalent frequency: {freq}")
-    print(f"Relative error compared to wz: {1 - freq / wz}")
+    print(freq)
+    print(1 - freq / wz)  # relative error in freq
 
     anal = 0.5 * (np.exp(1j * wz * df["time"]) + np.exp(-1j * wz * df["time"]))
 
@@ -48,11 +47,11 @@ def plot_xy_plane():
     fig = go.Figure()
     for b in ["", "_no"]:
         df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
-        for i in range(1, 3):
+        for i in range(1, 2):
             dP = df.loc[lambda x: x["particle"] == i, :]
             fig.add_trace(go.Scatter(x=dP["x"], y=dP["y"], mode="lines", name=f"particle {i} {b} ppi"))
 
-    # fig.update_layout(xaxis_range=[-30, 30], yaxis_range=[-30,30])
+    fig.update_layout(xaxis_range=[-30, 30], yaxis_range=[-30,30])
     # fig = px.scatter(df, x="x", y="y", animation_frame="time", animation_group="particle", range_y=[-20, 20])
     fig.show()
 
@@ -75,6 +74,21 @@ def plot_rel_errors(method="RK4"):
                       font_size=35,
                       font_family="Garamond",
                       )
+
+def ex_10_plot_track_z():
+    fig = go.Figure()
+    data = pd.read_csv("outputs/ex10_TimeTrap_particle_track_f0.4_w0.44.txt", header = 0, sep = " ")
+
+    fig.add_trace(go.Scatter(x=data["time"], y=data["z"], mode="lines"))
+
+    fig.update_layout(
+    xaxis_range=[0, 500],
+    yaxis_range=[-100,100],
+    font_family="Garamond",
+    font_size=30,
+    xaxis_title="Time",
+    yaxis_title="z",
+    title="Position along z-axis with f=0.4, frequency=0.44")
     fig.show()
 
 def error_conv_rate(method="RK4"):
@@ -88,27 +102,75 @@ def error_conv_rate(method="RK4"):
     print(f"Error convergence rate for {method} is {conv}")  # print
 
 
-def ex_10_plot_xy_plane():
-    fig = go.Figure()
-    data = pd.read_csv("outputs/ex10_particle_track.txt", header = 0, sep = " ")
 
-    fig.add_trace(go.Scatter(x=data["x"], y=data["y"], mode="lines"))
+def ex_10_plot_both_tracks_z():
+    f=3
+    w=2.38
+    fig = go.Figure()
+    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+
+    fig.add_trace(go.Scatter(
+        x=dfTime["time"],
+        y=dfTime["z"],
+        mode="lines",
+        name = "Time-dependent potential"))
+
+    fig.add_trace(go.Scatter(
+        x=dfRegular["time"],
+        y=dfRegular["z"],
+        mode="lines",
+        name = "Constant potential"))
+
 
     fig.update_layout(
-        xaxis_range=[-500, 500],
-        yaxis_range=[-500,500],
-        font_family="Garamond",
-        font_size=30,
-        title="",
-        xaxis_title="x",
-        yaxis_title="y",)
+    xaxis_range=[0, 500],
+    yaxis_range=[-100,100],
+    font_family="Garamond",
+    font_size=30,
+    title=f"Position along z-axis with f={f}, frequency={w}",
+    xaxis_title="Time",
+    yaxis_title="z",
+    legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+    fig.show()
+
+
+def ex_10_track_xy():
+    fig = go.Figure()
+    f = 3
+    w = 2.38
+    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+
+    fig.add_trace(go.Scatter(
+        x=dfTime["x"],
+        y=dfTime["y"],
+        mode="lines",
+        name = "Time-dependent potential"))
+
+    fig.add_trace(go.Scatter(
+        x=dfRegular["x"],
+        y=dfRegular["y"],
+        mode="lines",
+        name = "Constant potential"))
+
+
+    fig.update_layout(
+    xaxis_range=[-300, 250],
+    yaxis_range=[-100,500],
+    font_family="Garamond",
+    font_size=30,
+    title=f"Position in the xy-plane with f={f}, frequency={w}",
+    xaxis_title="x",
+    yaxis_title="y",
+    legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
     fig.show()
 
 
 
 def ex10_broad_plot_fraction_remaining():
     fig = go.Figure()
-    file = pd.read_csv("outputs/broad_freq_search_test.txt", header = 0, sep = " " )
+    file = pd.read_csv("outputs/broad_freq_search.txt", header = 0, sep = " " )
     #timestep er 0.0025
     for f in [0.1, 0.4, 0.7]:
 
@@ -122,10 +184,10 @@ def ex10_broad_plot_fraction_remaining():
         fig.update_layout(
             font_family="Garamond",
             font_size=30,
-            title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds testing",
+            title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds",
             xaxis_title="Frequency",
             yaxis_title="Fraction of particles remaining",
-            legend=dict(yanchor="bottom", xanchor="left", x=0.01, y=0.01)
+            legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01)
             )
     fig.show()
 
@@ -161,7 +223,10 @@ if __name__ == "__main__":
     # plot_rel_errors("Euler")
     error_conv_rate()
     error_conv_rate("Euler")
+    #plot_z()
+    #plot_xy_plane()
     #ex10_broad_plot_fraction_remaining()
-    #ex_10_plot_xy_plane()
+    #ex_10_plot_both_tracks_z()
+    # ex_10_track_xy()
     # ex10_broad_plot_fraction_remaining()
     #ex10_narrow_plot_no_ppi_fraction_remaining()
