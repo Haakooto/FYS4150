@@ -35,10 +35,13 @@ void PenningTrap::insert_particles(Particle p){
 void PenningTrap::insert_particles(int n, double m, int q){ // inserting n identical particles uniformly in sphere
 	// https://math.stackexchange.com/questions/87230/picking-random-points-in-the-volume-of-sphere-with-uniform-probability
 	for (int i=0; i<n; i++){
-		arma::vec r(3, arma::fill::randn);
-		arma::vec u(1, arma::fill::randu);
-		r *= d * pow(u(0), 3) / arma::norm(r);
-		particles.push_back(Particle(r, arma::zeros(3), m, q));
+		//arma::vec r(3, arma::fill::randn);
+		//arma::vec u(1, arma::fill::randu);
+		//r *= d * pow(u(0), 3) / arma::norm(r);
+        arma::vec r = arma::vec(3).randn() * 0.1 * d;  // random initial position
+        arma::vec v = arma::vec(3).randn() * 0.1 * d;  // random initial velocity
+
+		particles.push_back(Particle(r, v, m, q));
 		N++;
 	}
 }

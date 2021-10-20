@@ -101,13 +101,8 @@ void single_particle_errors(string method="RK4"){
 	double x0 = 10;
     double z0 = 10;
     double y_v0 = 10;
-<<<<<<< HEAD
-    double T_tot = 05;
-	int N = 5;
-=======
     double T_tot = 5;
 	int N = 6;
->>>>>>> 20f3f08ee5d93aa15784d719f5fb0edb1a5e59e4
 
 	Particle p = Particle(arma::vec({x0, 0, z0}), arma::vec({0, y_v0, 0}), m, q);
 	PenningTrap Trap = PenningTrap(b, v, d, false);
@@ -195,6 +190,7 @@ void broad_freq_search(){
 	out.close();
 }
 
+
 void broad_freq_search_test(){
 	double T = 500;
 	double timestep = 0.005;
@@ -203,10 +199,10 @@ void broad_freq_search_test(){
 	double sd = 0.05;  // factor difference in d
 	double sv = 4000;  // factor difference in v0
 
-	vector<double> amps = {2};
+	vector<double> amps = {0.4, 0.7};
 	double w_min = 0.2;
-	double w_max = 2.5;
-	double w_step = 0.02;
+	double w_max = 0.5; //2.5;
+	double w_step = 0.05;
 
 	ofstream out;
 	out.open("outputs/broad_freq_search_test.txt");
@@ -239,6 +235,7 @@ void broad_freq_search_test(){
 	}
 	out.close();
 }
+
 
 void narrow_freq_search(){
     double T = 500;
@@ -343,14 +340,16 @@ void run_all_experiments(){
 }
 
 int main() {
-	single_particle_errors();  // 5th and 6th point in P9, using Euler
-	single_particle_errors("Euler");  // 5th and 6th point in P9, using Euler
+	//single_particle_errors();  // 5th and 6th point in P9, using Euler
+	//single_particle_errors("Euler");  // 5th and 6th point in P9, using Euler
+
 	// two_particle();  // second point in P9
 	// single_particle_endurace();  // first point in P9
 	//run_all_experiments();
-    //broad_freq_search();
-    ex10_particle_track();
+    broad_freq_search();
+    //ex10_particle_track();
     // broad_freq_search_test();
+
 
 
 	return 0;
