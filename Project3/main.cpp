@@ -66,7 +66,7 @@ void single_particle(){
 
 	Trap.simulate(T_tot, timestep);
 	Trap.analytic(T_tot, timestep, x0, z0, y_v0);
-	<
+	
 	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP.txt");
 
 }
