@@ -35,7 +35,7 @@ def plot_z():
     print(1 - freq / wz)  # relative error in freq
 
     anal = 0.5 * (np.exp(1j * wz * df["time"]) + np.exp(-1j * wz * df["time"]))
-    
+
     trace = go.Scatter(x=df["time"], y=df["z"] / df["z"][0], mode="lines", line=dict(width=5))
     trace2 = go.Scatter(x=df["time"], y=np.real(anal), mode="lines", line=dict(dash="dot"))
     fig = go.Figure(data=[trace, trace2])
@@ -57,27 +57,92 @@ def plot_xy_plane():
 
 
 
-def ex_10_plot_xy_plane():
+def ex_10_plot_track_z():
     fig = go.Figure()
-    data = pd.read_csv("outputs/ex10_particle_track.txt", header = 0, sep = " ")
+    data = pd.read_csv("outputs/ex10_TimeTrap_particle_track_f0.4_w0.44.txt", header = 0, sep = " ")
 
-    fig.add_trace(go.Scatter(x=data["x"], y=data["y"], mode="lines"))
+    fig.add_trace(go.Scatter(x=data["time"], y=data["z"], mode="lines"))
 
     fig.update_layout(
-    xaxis_range=[-500, 500],
-    yaxis_range=[-500,500],
+    xaxis_range=[0, 500],
+    yaxis_range=[-100,100],
     font_family="Garamond",
     font_size=30,
-    title="",
+    xaxis_title="Time",
+    yaxis_title="z",
+    title="Position along z-axis with f=0.4, frequency=0.44")
+    fig.show()
+
+
+
+def ex_10_plot_both_tracks_z():
+    f=3
+    w=2.38
+    fig = go.Figure()
+    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+
+    fig.add_trace(go.Scatter(
+        x=dfTime["time"],
+        y=dfTime["z"],
+        mode="lines",
+        name = "Time-dependent potential"))
+
+    fig.add_trace(go.Scatter(
+        x=dfRegular["time"],
+        y=dfRegular["z"],
+        mode="lines",
+        name = "Constant potential"))
+
+
+    fig.update_layout(
+    xaxis_range=[0, 500],
+    yaxis_range=[-50,50],
+    font_family="Garamond",
+    font_size=30,
+    title=f"Position along z-axis with f={f}, frequency={w}",
+    xaxis_title="Time",
+    yaxis_title="z",
+    legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+    fig.show()
+
+
+def ex_10_track_xy():
+    fig = go.Figure()
+    f = 3
+    w = 2.38
+    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+
+    fig.add_trace(go.Scatter(
+        x=dfTime["x"],
+        y=dfTime["y"],
+        mode="lines",
+        name = "Time-dependent potential"))
+
+    fig.add_trace(go.Scatter(
+        x=dfRegular["x"],
+        y=dfRegular["y"],
+        mode="lines",
+        name = "Constant potential"))
+
+
+    fig.update_layout(
+    xaxis_range=[-300, 250],
+    yaxis_range=[-100,500],
+    font_family="Garamond",
+    font_size=30,
+    title=f"Position in the xy-plane with f={f}, frequency={w}",
     xaxis_title="x",
-    yaxis_title="y",)
+    yaxis_title="y",
+    legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
     fig.show()
 
 
 
 def ex10_broad_plot_fraction_remaining():
     fig = go.Figure()
-    file = pd.read_csv("outputs/broad_freq_search_test.txt", header = 0, sep = " " )
+    file = pd.read_csv("outputs/broad_freq_search.txt", header = 0, sep = " " )
     #timestep er 0.0025
     for f in [0.1, 0.4, 0.7]:
 
@@ -91,10 +156,10 @@ def ex10_broad_plot_fraction_remaining():
         fig.update_layout(
             font_family="Garamond",
             font_size=30,
-            title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds testing",
+            title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds",
             xaxis_title="Frequency",
             yaxis_title="Fraction of particles remaining",
-            legend=dict(yanchor="bottom", xanchor="left", x=0.01, y=0.01)
+            legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01)
             )
     fig.show()
 
@@ -124,9 +189,10 @@ def ex10_narrow_plot_no_ppi_fraction_remaining():
 
 if __name__ == "__main__":
     # main()
-    plot_z()
+    #plot_z()
     #plot_xy_plane()
     #ex10_broad_plot_fraction_remaining()
-    #ex_10_plot_xy_plane()
+    ex_10_plot_both_tracks_z()
+    #ex_10_track_xy()
     # ex10_broad_plot_fraction_remaining()
     #ex10_narrow_plot_no_ppi_fraction_remaining()

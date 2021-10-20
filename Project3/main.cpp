@@ -66,7 +66,7 @@ void single_particle(){
 
 	Trap.simulate(T_tot, timestep);
 	Trap.analytic(T_tot, timestep, x0, z0, y_v0);
-	
+
 	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP.txt");
 
 }
@@ -148,7 +148,7 @@ void broad_freq_search(){
 			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
 			// simulate function resets the particles, so do not have to reinitialize trap, can just restart simulation with new Efield func
 			TimeTrap.simulate(T, timestep);
-			
+
 			double fraq = (double)(N - TimeTrap.escaped()) / N;
 
 
@@ -274,13 +274,13 @@ void narrow_freq_search(){
 
 
 void ex10_particle_track(){
-    double T = 5000;
+    double T = 500;
     double timestep = 0.005;
 
     double sd = 0.05;  // factor difference in d
     double sv = 4000;  // factor difference in v0
 
-    double f = 0.7;
+    double f = 3;
     double wV = 2.38;
 
     PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
@@ -290,7 +290,14 @@ void ex10_particle_track(){
     TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
     TimeTrap.simulate(T, timestep);
 
-	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_particle_track.txt");
+	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_TimeTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
+
+    PenningTrap RegularTrap = PenningTrap(b, v/sv, d * sd, false);
+    RegularTrap.insert_particles(p);
+
+    RegularTrap.simulate(T, timestep);
+
+    write_cube_to_file(RegularTrap.get_history(), RegularTrap.get_time(), "outputs/ex10_RegularTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
 }
 
 
@@ -309,10 +316,10 @@ void run_all_experiments(){
 
 
 int main() {
-	single_particle_endurace();  // first point in P9
+	//single_particle_endurace();  // first point in P9
 	//run_all_experiments();
     //broad_freq_search();
-    //ex10_particle_track();
+    ex10_particle_track();
     // broad_freq_search_test();
 
 
