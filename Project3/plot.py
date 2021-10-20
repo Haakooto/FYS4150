@@ -92,6 +92,7 @@ def ex_10_plot_track_z():
     fig.show()
 
 def error_conv_rate(method="RK4"):
+    # You will never see more readable code
     files = sorted(glob.glob(f"outputs/rel_errors_{method}*"))  # load files
     datas = [pd.read_csv(file, header=0, sep=" ") for file in files]  # read files
     errs = np.asarray([data["err"][0] for data in datas])  # extract max abs_err
