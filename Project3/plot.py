@@ -36,7 +36,7 @@ def plot_z():
     print(f"Relative error compared to wz: {1 - freq / wz}")
 
     anal = 0.5 * (np.exp(1j * wz * df["time"]) + np.exp(-1j * wz * df["time"]))
-    
+
     trace = go.Scatter(x=df["time"], y=df["z"] / df["z"][0], mode="lines", line=dict(width=5))
     trace2 = go.Scatter(x=df["time"], y=np.real(anal), mode="lines", line=dict(dash="dot"))
     fig = go.Figure(data=[trace, trace2])
@@ -58,19 +58,19 @@ def plot_xy_plane():
 
 
 def plot_rel_errors(method="RK4"):
-    fig = go.Figure()
-
-    files = glob.glob(f"outputs/rel_errors_{method}*")
+    files = sorted(glob.glob(f"outputs/rel_errors_{method}*"))
     traces = []
     for file in files:
         data = pd.read_csv(file, header=0, sep=" ")
         data["err"][0] = 0  # not interested in abs err here
-        dt = np.log10()
+        s = file.rfind("_")
+        st = file.find(".")
+        dt = file[s + 1: st]
 
-        trace = go.Scatter(x=data["t"], y=data["err"], mode="lines", name=)
+        trace = go.Scatter(x=data["t"], y=np.log10(data["err"]), mode="lines", name=f"log10(h) = - {dt}")
         traces.append(trace)
-
-
+    fig = go.Figure(data=traces)
+    fig.show()
 
 
 def ex_10_plot_xy_plane():
@@ -80,13 +80,13 @@ def ex_10_plot_xy_plane():
     fig.add_trace(go.Scatter(x=data["x"], y=data["y"], mode="lines"))
 
     fig.update_layout(
-    xaxis_range=[-500, 500],
-    yaxis_range=[-500,500],
-    font_family="Garamond",
-    font_size=30,
-    title="",
-    xaxis_title="x",
-    yaxis_title="y",)
+        xaxis_range=[-500, 500],
+        yaxis_range=[-500,500],
+        font_family="Garamond",
+        font_size=30,
+        title="",
+        xaxis_title="x",
+        yaxis_title="y",)
     fig.show()
 
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     # main()
     # plot_z()
     # plot_xy_plane()
-    plot_rel_errors()
+    plot_rel_errors("Euler")
     #ex10_broad_plot_fraction_remaining()
     #ex_10_plot_xy_plane()
     # ex10_broad_plot_fraction_remaining()
