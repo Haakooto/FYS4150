@@ -42,14 +42,14 @@ public:
     arma::cube get_history();  // returns r and v
     arma::mat get_asol();  // returns r_a
     arma::vec get_time();  // retruns t
-    vector<Particle> get_particles();
     int escaped();  // counts particles left in trap
     bool ppi;
 
 private:
     int nT;  // number of time steps
     double dt;  // length of time step
-    double B0, V0, d, f, w_V;  // properties of trap
+    double B0, V0, d;  // properties of trap
+    double r_cutoff, cut=0.05;  // cutoff for coulomb force
     function<double(double)> tV0; // time-dep E-field (lambda func)
     vector<Particle> particles;  // Particle container
     bool time_dep_V;

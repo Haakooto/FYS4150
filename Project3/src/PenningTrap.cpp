@@ -67,9 +67,11 @@ arma::mat PenningTrap::sum_particle_forces(arma::mat ri){
 			for (int j=0; j < i; j++){
 				arma::vec diff_ri = ri.col(i)-ri.col(j);
 				double norm = arma::norm(diff_ri);
-				arma::vec F = ke * Q(i) * Q(j) * diff_ri * pow(norm, -3);
-				Eforce.row(i) += F.t() / M(i);
-				Eforce.row(j) -= F.t() / M(j);
+				if (norm < r_cutoff){  // speed-up
+					arma::vec F = ke * Q(i) * Q(j) * diff_ri * pow(norm, -3);
+					Eforce.row(i) += F.t() / M(i);
+					Eforce.row(j) -= F.t() / M(j);
+				}
 			}
 		}
 	} return Eforce.t();  // 3 x N
@@ -126,6 +128,7 @@ void PenningTrap::simulate(double T, double timestep, string method){
 		Q(i) = p.q;  // set charges
 		M(i) = p.m; // set masses
 	}
+	r_cutoff = pow(ke * Q(0) * d / (get_Efield_at_time(0) * cut), 0.5);
 
 	// start simulation
 	arma::cube u(3, N, 2); // (3dim : N particles : 2 phases)
@@ -206,10 +209,6 @@ arma::mat PenningTrap::get_asol(){
 
 arma::vec PenningTrap::get_time(){
 	return t;
-}
-
-vector<Particle> get_particles(){
-	return particles;
 }
 
 int PenningTrap::escaped(){
