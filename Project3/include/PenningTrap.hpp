@@ -37,7 +37,7 @@ public:
 
     void set_tEfield(function<double(double)>);
     void simulate(double, double, string="RK4");
-    void analytic(double, double, double, double, double);
+    arma::vec analytic_analysis(double, double, string);
 
     arma::cube get_history();  // returns r and v
     arma::mat get_asol();  // returns r_a
@@ -49,7 +49,7 @@ private:
     int nT;  // number of time steps
     double dt;  // length of time step
     double B0, V0, d;  // properties of trap
-    double r_cutoff, cut=0.05;  // cutoff for coulomb force
+    double r_cutoff, cut=0.3;  // cutoff for coulomb force
     function<double(double)> tV0; // time-dep E-field (lambda func)
     vector<Particle> particles;  // Particle container
     bool time_dep_V;
@@ -65,6 +65,7 @@ private:
     arma::cube advance(double, arma::cube);
     void Efield(arma::mat &, double );
     void Bfield(arma::mat &);
+    void analytic_sols(double, double, double);
 
 };
 
