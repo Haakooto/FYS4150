@@ -82,7 +82,7 @@ void single_particle_endurace(){
 
 	Trap.simulate(T, h);
 
-	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP_endurace.txt");
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP_endurance.txt");
 }
 
 void two_particle(){
@@ -306,10 +306,11 @@ void run_all_experiments(){
 
 
 int main() {
+	single_particle_endurace();  // first point in P9
 	//run_all_experiments();
     //broad_freq_search();
     //ex10_particle_track();
-    broad_freq_search_test();
+    // broad_freq_search_test();
 
 
 	return 0;
