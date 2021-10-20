@@ -54,60 +54,6 @@ double PenningTrap::get_Efield_at_time(double t){
 	else {return V0;}
 }
 
-arma::mat PenningTrap::sum_particle_forces(arma::mat ri){
-	/*
-	Calculates all particle-particle forces
-	ri has shape 3, N
-	*/
-	arma::mat Eforce(N, 3, arma::fill::zeros);
-	if (!ppi) {return Eforce.t();}   //ignore particle-particle interactions
-
-	else {
-		for (int i=0; i < N; i++){
-			for (int j=0; j < i; j++){
-				arma::vec diff_ri = ri.col(i)-ri.col(j);
-				double norm = arma::norm(diff_ri);
-				if (norm < r_cutoff){  // speed-up
-					arma::vec F = ke * Q(i) * Q(j) * diff_ri * pow(norm, -3);
-					Eforce.row(i) += F.t() / M(i);
-					Eforce.row(j) -= F.t() / M(j);
-				}
-			}
-		}
-	} return Eforce.t();  // 3 x N
-}
-
-void PenningTrap::analytic(double T, double timestep, double x0, double z0, double y_v0){   //analytic solution for one particle with a given starting position
-	dt = timestep;
-	nT = (int)(T / dt) + 1;
-	r_a = arma::mat(nT, 3);  // nT timesteps x 3dim, only 1 particle
-	r_a.row(0) = arma::vec({x0, 0, z0}).t();   //initial position
-
-	double w_0 = particles[0].q * B0 / particles[0].m;
-	double w_z = 2 * particles[0].q * V0 / (particles[0].m * pow(d, 2));
-
-	complex <double> w_p ((w_0 + pow( pow(w_0, 2) - 2 * w_z, 0.5 )) / 2, 0);
-	complex <double> w_m ((w_0 - pow( pow(w_0, 2) - 2 * w_z, 0.5 )) / 2, 0);
-
-	complex <double> A_plus = (y_v0 + w_m * x0) / (w_m - w_p);
-	complex <double> A_min = -(y_v0 + w_p * x0) / (w_m - w_p);
-
-	double time = dt;
-
-	complex <double> complex_i(0, 1);
-
-	for (int i=1; i < nT; i++){
-
-		complex <double> f = A_plus * exp(-complex_i * w_p * (complex<double>)time) + A_min * exp(-complex_i * w_m * (complex<double>)time);
-		double x = real(f);
-		double y = imag(f);
-		double z = z0 * cos(pow(w_z, 0.5) * time);
-
-		r_a.row(i) = arma::vec({x, y, z}).t();
-		time += dt;
-	}
-}
-
 void PenningTrap::simulate(double T, double timestep, string method){
 	dt = timestep;
 	nT = (int)(T / dt) + 1;
@@ -116,6 +62,7 @@ void PenningTrap::simulate(double T, double timestep, string method){
 
 	Q = arma::rowvec(N);
 	M = arma::rowvec(N);
+	r_cutoff = cut * d;
 
 
 	// initiate simulation
@@ -127,13 +74,13 @@ void PenningTrap::simulate(double T, double timestep, string method){
 		Q(i) = p.q;  // set charges
 		M(i) = p.m; // set masses
 	}
-	r_cutoff = pow(ke * Q(0) * d / (get_Efield_at_time(0) * cut), 0.5);
 
 	// start simulation
 	arma::cube u(3, N, 2); // (3dim : N particles : 2 phases)
 	for (int i=0; i < nT - 1; i++){
 		u.slice(0) = R.slice(i).rows(0, 2);
 		u.slice(1) = R.slice(i).rows(3, 5);
+
 		if (method == "Euler"){
 			Euler(u, t(i));
 		} else{
@@ -152,11 +99,9 @@ void PenningTrap::simulate(double T, double timestep, string method){
 	}
 }
 
-
 void PenningTrap::Euler(arma::cube &u, double t){
     u += dt * advance(t, u);
 }
-
 
 void PenningTrap::RK4(arma::cube &u, double t){
 	double h = dt / 2;   //divide by 2 to get rid of factor of 1/2 in later expression
@@ -196,6 +141,77 @@ void PenningTrap::Efield(arma::mat &pos, double t){
 void PenningTrap::Bfield(arma::mat &vel){
 	vel.row(0) %= Q * B0 / M;
 	vel.row(1) %= -Q * B0 / M;
+}
+
+arma::mat PenningTrap::sum_particle_forces(arma::mat ri){
+	/*
+	Calculates all particle-particle forces
+	ri has shape 3, N
+	*/
+	arma::mat Eforce(N, 3, arma::fill::zeros);
+	if (!ppi) {return Eforce.t();}   //ignore particle-particle interactions
+
+	else {
+		for (int i=0; i < N; i++){
+			for (int j=0; j < i; j++){
+				arma::vec diff_ri = ri.col(i)-ri.col(j);
+				double norm = arma::norm(diff_ri);
+				if (norm < r_cutoff){  // speed-up
+					arma::vec F = ke * Q(i) * Q(j) * diff_ri * pow(norm, -3);
+					Eforce.row(i) += F.t() / M(i);
+					Eforce.row(j) -= F.t() / M(j);
+				}
+			}
+		}
+	} return Eforce.t();  // 3 x N
+}
+
+arma::vec PenningTrap::analytic_analysis(double T, double timestep, string method){
+	simulate(T, timestep, method);
+	analytic_sols(particles[0].r[0], particles[0].r[2], particles[0].v[1]);
+
+	arma::cube np = R.rows(0, 2);  // get positions
+	arma::mat r = np.col(0);  // get first (only) particle
+	arma::vec rel_errs = arma::vec(nT);
+	arma::vec abs_errs = arma::vec(nT);
+
+	for (int i=1; i < nT; i++){
+		double abs_err = arma::norm(r_a.col(i) - r.col(i));
+		double rel_err = abs_err / arma::norm(r_a.col(i));
+		rel_errs(i) = rel_err;
+		abs_errs(i) = abs_err;
+	}
+	rel_errs(0) = arma::max(abs_errs);  // error in first step is 0 anyways, store max abs err there
+	return rel_errs;
+}
+
+void PenningTrap::analytic_sols(double x0, double z0, double y_v0){   //analytic solution for one particle with a given starting position
+	r_a = arma::mat(3, nT);  // 3dim x nT timesteps, only 1 particle
+	r_a.col(0) = arma::vec({x0, 0, z0});   //initial position
+
+	double w_0 = particles[0].q * B0 / particles[0].m;
+	double w_z = 2 * particles[0].q * V0 / (particles[0].m * pow(d, 2));
+
+	complex <double> w_p ((w_0 + pow( pow(w_0, 2) - 2 * w_z, 0.5 )) / 2, 0);
+	complex <double> w_m ((w_0 - pow( pow(w_0, 2) - 2 * w_z, 0.5 )) / 2, 0);
+
+	complex <double> A_plus = (y_v0 + w_m * x0) / (w_m - w_p);
+	complex <double> A_min = -(y_v0 + w_p * x0) / (w_m - w_p);
+
+	double time = dt;
+
+	complex <double> complex_i(0, 1);
+
+	for (int i=1; i < nT; i++){
+
+		complex <double> f = A_plus * exp(-complex_i * w_p * (complex<double>)time) + A_min * exp(-complex_i * w_m * (complex<double>)time);
+		double x = real(f);
+		double y = imag(f);
+		double z = z0 * cos(pow(w_z, 0.5) * time);
+
+		r_a.col(i) = arma::vec({x, y, z});
+		time += dt;
+	}
 }
 
 arma::cube PenningTrap::get_history(){

@@ -97,7 +97,7 @@ def ex_10_plot_both_tracks_z():
 
     fig.update_layout(
     xaxis_range=[0, 500],
-    yaxis_range=[-50,50],
+    yaxis_range=[-100,100],
     font_family="Garamond",
     font_size=30,
     title=f"Position along z-axis with f={f}, frequency={w}",
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     #plot_z()
     #plot_xy_plane()
     #ex10_broad_plot_fraction_remaining()
-    ex_10_plot_both_tracks_z()
-    #ex_10_track_xy()
+    #ex_10_plot_both_tracks_z()
+    ex_10_track_xy()
     # ex10_broad_plot_fraction_remaining()
     #ex10_narrow_plot_no_ppi_fraction_remaining()
