@@ -202,7 +202,7 @@ void broad_freq_search_test(){
 	vector<double> amps = {0.4, 0.7};
 	double w_min = 0.2;
 	double w_max = 0.5; //2.5;
-	double w_step = 0.05;
+	double w_step = 0.02;
 
 	ofstream out;
 	out.open("outputs/broad_freq_search_test.txt");
@@ -239,13 +239,13 @@ void broad_freq_search_test(){
 
 void narrow_freq_search(){
     double T = 500;
-	double timestep = 0.005;
+	double timestep = 0.002;
 
 	int N = 100;  // number of particles
 	double sd = 0.05;  // factor difference in d
 	double sv = 4000;  // factor difference in v0
 
-	vector<double> amps = {0.1, 0.4, 0.7};
+	vector<double> amps = {0.4};
 	double w_min = 0.35;
 	double w_max = 0.55;
 	double w_step = 0.005;
@@ -278,30 +278,31 @@ void narrow_freq_search(){
 		}
 	}
 	out.close();
+//
+//
+//     //Repeat with particle-particle interactions
+//     TimeTrap.ppi = true;
+// 	out.open("outputs/narrow_freq_search_with_ppi.txt");
+// 	out << "ampl wV fracRem\n";
+// 	out << fixed << setprecision(6);
+//
+//     for (double f: amps){
+// 		cout << "f = " << f << endl;
+// 		for (double wV = w_min; wV <= w_max; wV += w_step){
+// 			// Set actual Efield func
+// 			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
+// 		    TimeTrap.simulate(T, timestep);
+// 			double fraq = (double)(N - TimeTrap.escaped()) / N;
+//
+// 			// write to file
+// 			out << f << " " << wV << " " << fraq << endl;
+// 			cout << "With interactions  " << " wV = " << wV << " ratio remaining: " << fraq << endl;
+// 		}
+// 	}
+// 	out.close();
+//
+// }
 
-
-    //Repeat with particle-particle interactions
-    TimeTrap.ppi = true;
-	out.open("outputs/narrow_freq_search_with_ppi.txt");
-	out << "ampl wV fracRem\n";
-	out << fixed << setprecision(6);
-
-    for (double f: amps){
-		cout << "f = " << f << endl;
-		for (double wV = w_min; wV <= w_max; wV += w_step){
-			// Set actual Efield func
-			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
-		    TimeTrap.simulate(T, timestep);
-			double fraq = (double)(N - TimeTrap.escaped()) / N;
-
-			// write to file
-			out << f << " " << wV << " " << fraq << endl;
-			cout << "With interactions  " << " wV = " << wV << " ratio remaining: " << fraq << endl;
-		}
-	}
-	out.close();
-
-}
 
 void ex10_particle_track(){
     double T = 500;
