@@ -62,7 +62,6 @@ def plot_rel_errors(method="RK4"):
     traces = []
     for file in files:
         data = pd.read_csv(file, header=0, sep=" ")
-        data["err"][0] = 0  # not interested in abs err here
         s = file.rfind("_")
         st = file.find(".")
         dt = file[s + 1: st]
@@ -77,6 +76,16 @@ def plot_rel_errors(method="RK4"):
                       font_family="Garamond",
                       )
     fig.show()
+
+def error_conv_rate(method="RK4"):
+    files = sorted(glob.glob(f"outputs/rel_errors_{method}*"))  # load files
+    datas = [pd.read_csv(file, header=0, sep=" ") for file in files]  # read files
+    errs = np.asarray([data["err"][0] for data in datas])  # extract max abs_err
+    dts = np.asarray([data["t"][1] for data in datas])  # extract dt
+    derrs = np.log(errs[1:] / errs[:-1])  # find log of ratios
+    ddts = np.log(dts[1:] / dts[:-1])  # find log of ratios
+    conv = sum(derrs / ddts) / (len(files) - 1)  # do sum
+    print(f"Error convergence rate for {method} is {conv}")  # print
 
 
 def ex_10_plot_xy_plane():
@@ -148,8 +157,10 @@ if __name__ == "__main__":
     # main()
     # plot_z()
     # plot_xy_plane()
-    plot_rel_errors()
-    plot_rel_errors("Euler")
+    # plot_rel_errors()
+    # plot_rel_errors("Euler")
+    error_conv_rate()
+    error_conv_rate("Euler")
     #ex10_broad_plot_fraction_remaining()
     #ex_10_plot_xy_plane()
     # ex10_broad_plot_fraction_remaining()
