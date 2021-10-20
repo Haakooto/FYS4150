@@ -38,39 +38,35 @@ void write_cube_to_file(arma::cube C, arma::vec t, string fname, int frame_rate=
 	out.close();
 }
 
-
-void write_analytic_solution_to_file(arma::mat R, arma::vec t, string filename){
+void write_errors_to_file(arma::vec err, arma::vec t, string filename){
     ofstream out;
+	cout << filename << endl;
     out.open(filename);
-    out << "t x y z" << endl;
-    out << fixed << setprecision(8);
-    for (int i=0; i < R.n_rows; i++){
-        out << t(i);
-        out << " " << R(i, 0) << " " << R(i, 1) << " " << R(i, 2);
-        out << endl;
+    out << "t err" << endl;
+    out << setprecision(8);
+    for (int i=0; i < err.n_cols; i++){
+        out << t(i) << " " << err(i) << endl;
     }
-out.close();
+	out.close();
 }
 
-
-void single_particle(){
+void single_particle_errors(string method="RK4"){
 	double x0 = 10;
     double z0 = 10;
     double y_v0 = 10;
     double T_tot = 5;
-    double timestep = 0.005;
+	int N = 5;
 
 	Particle p = Particle(arma::vec({x0, 0, z0}), arma::vec({0, y_v0, 0}), m, q);
 	PenningTrap Trap = PenningTrap(b, v, d, false);
 	Trap.insert_particles(p);
 
-	Trap.simulate(T_tot, timestep);
-	Trap.analytic(T_tot, timestep, x0, z0, y_v0);
-	
-	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP.txt");
-
+	for (int i = 1; i < N + 1; i++){
+		arma::vec errs = Trap.analytic_analysis(T_tot, pow(10, -i), method);
+		cout << errs(0) << endl;
+		write_errors_to_file(errs, Trap.get_time(), "outputs/rel_errors_" + method + "_neglog10dt_" + to_string(i) + ".txt");
+	}
 }
-
 
 void single_particle_endurace(){
 	double T = 100;
@@ -86,11 +82,11 @@ void single_particle_endurace(){
 }
 
 void two_particle(){
-	double T = 10;
+	double T = 100;
 	double h = 0.005;
 
-	Particle p1 = Particle(arma::vec(3, arma::fill::randu), arma::vec(3, arma::fill::randn), m, q);
-	Particle p2 = Particle(arma::vec(3, arma::fill::randu), arma::vec(3, arma::fill::randn), m, q);
+	Particle p1 = Particle(arma::vec({20, 0, 0}), arma::vec({0, 0, 0}), m, q);
+	Particle p2 = Particle(arma::vec({-20, 0, 0}), arma::vec({0, 0, 0}), m, q);
 
 	PenningTrap Trap = PenningTrap(b, v, d, true);
 	PenningTrap Trap_no_ppi = PenningTrap(b, v, d, false);
@@ -205,7 +201,6 @@ void broad_freq_search_test(){
 	out.close();
 }
 
-
 void narrow_freq_search(){
     double T = 500;
 	double timestep = 0.005;
@@ -272,7 +267,6 @@ void narrow_freq_search(){
 
 }
 
-
 void ex10_particle_track(){
     double T = 5000;
     double timestep = 0.005;
@@ -293,23 +287,19 @@ void ex10_particle_track(){
 	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_particle_track.txt");
 }
 
-
-
-
-
-
-
 void run_all_experiments(){
 	single_particle_endurace();  // first point in P9
-	two_particle();  // second point in P9
-	single_particle();  // same as spe, run for shorter to compare with analytic results
+	single_particle_errors();  // 5th and 6th point in P9
+	single_particle_errors("Euler");  // 5th and 6th point in P9, using Euler
+	two_particle();  // 2nd, 3rd, 4th point in P9
 	broad_freq_search(); // first part in p10
 
 }
 
-
 int main() {
-	single_particle_endurace();  // first point in P9
+	single_particle_errors("Euler");  // same as spe, run for shorter to compare with analytic results
+	// two_particle();  // second point in P9
+	// single_particle_endurace();  // first point in P9
 	//run_all_experiments();
     //broad_freq_search();
     //ex10_particle_track();
