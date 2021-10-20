@@ -101,13 +101,13 @@ void single_particle_errors(string method="RK4"){
     double z0 = 10;
     double y_v0 = 10;
     double T_tot = 5;
-	int N = 5;
+	int N = 6;
 
 	Particle p = Particle(arma::vec({x0, 0, z0}), arma::vec({0, y_v0, 0}), m, q);
 	PenningTrap Trap = PenningTrap(b, v, d, false);
 	Trap.insert_particles(p);
 
-	for (int i = 1; i < N + 1; i++){
+	for (int i = 0; i < N; i++){
 		arma::vec errs = Trap.analytic_analysis(T_tot, pow(10, -i), method);
 		cout << errs(0) << endl;
 		write_errors_to_file(errs, Trap.get_time(), "outputs/rel_errors_" + method + "_neglog10dt_" + to_string(i) + ".txt");
@@ -330,7 +330,8 @@ void run_all_experiments(){
 }
 
 int main() {
-	single_particle_errors();  // same as spe, run for shorter to compare with analytic results
+	single_particle_errors();  // 5th and 6th point in P9, using Euler
+	single_particle_errors("Euler");  // 5th and 6th point in P9, using Euler
 	// two_particle();  // second point in P9
 	// single_particle_endurace();  // first point in P9
 	//run_all_experiments();
