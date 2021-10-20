@@ -84,13 +84,13 @@ void PenningTrap::analytic(double T, double timestep, double x0, double z0, doub
 	r_a.row(0) = arma::vec({x0, 0, z0}).t();   //initial position
 
 	double w_0 = particles[0].q * B0 / particles[0].m;
-	double w_z = 2*particles[0].q * V0/(particles[0].m * pow(d, 2));
+	double w_z = 2 * particles[0].q * V0 / (particles[0].m * pow(d, 2));
 
-	complex <double> w_plus ((w_0+pow(pow(w_0, 2) - 2 * w_z, 0.5))/2, 0);
-	complex <double> w_min (((w_0)-pow(pow(w_0, 2) - 2 * w_z, 0.5))/2, 0);
+	complex <double> w_p ((w_0 + pow( pow(w_0, 2) - 2 * w_z, 0.5 )) / 2, 0);
+	complex <double> w_m ((w_0 - pow( pow(w_0, 2) - 2 * w_z, 0.5 )) / 2, 0);
 
-	complex <double> A_plus = (y_v0 + w_min*x0)/(w_min - w_plus);
-	complex <double> A_min = -(y_v0 + w_plus*x0)/(w_min - w_plus);
+	complex <double> A_plus = (y_v0 + w_m * x0) / (w_m - w_p);
+	complex <double> A_min = -(y_v0 + w_p * x0) / (w_m - w_p);
 
 	double time = dt;
 
@@ -98,15 +98,14 @@ void PenningTrap::analytic(double T, double timestep, double x0, double z0, doub
 
 	for (int i=1; i < nT; i++){
 
-		complex <double> f = A_plus * exp(- complex_i * w_plus * (complex<double>) time) + A_min * exp(-complex_i * w_min * (complex<double>)time);
+		complex <double> f = A_plus * exp(-complex_i * w_p * (complex<double>)time) + A_min * exp(-complex_i * w_m * (complex<double>)time);
 		double x = real(f);
 		double y = imag(f);
-		double z = z0 * cos(pow(real(w_z), 0.5)*time);
+		double z = z0 * cos(pow(w_z, 0.5) * time);
 
-		r_a.row(i) = arma::vec({x,y,z}).t();
+		r_a.row(i) = arma::vec({x, y, z}).t();
 		time += dt;
 	}
-
 }
 
 void PenningTrap::simulate(double T, double timestep, string method){
@@ -166,7 +165,7 @@ void PenningTrap::RK4(arma::cube &u, double t){
 	k1 = advance(t, u);
 	k2 = advance(t + h, u + h * k1);
 	k3 = advance(t + h, u + h * k2);
-	k4 = advance(t + 2 * h, u + h * k3);
+	k4 = advance(t + 2 * h, u + 2 * h * k3);
 	u += h * (k1 + 2 * k2 + 2 * k3 + k4) / 3;
 }
 
