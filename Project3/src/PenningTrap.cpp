@@ -163,7 +163,7 @@ void PenningTrap::RK4(arma::cube &u, double t){
 	k1 = advance(t, u);
 	k2 = advance(t + h, u + h * k1);
 	k3 = advance(t + h, u + h * k2);
-	k4 = advance(t + 2 * h, u + h * k3);
+	k4 = advance(t + 2 * h, u + 2 * h * k3);
 	u += h * (k1 + 2 * k2 + 2 * k3 + k4) / 3;
 }
 
@@ -206,10 +206,6 @@ arma::mat PenningTrap::get_asol(){
 
 arma::vec PenningTrap::get_time(){
 	return t;
-}
-
-vector<Particle> get_particles(){
-	return particles;
 }
 
 int PenningTrap::escaped(){

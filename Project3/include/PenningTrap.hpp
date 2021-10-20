@@ -42,7 +42,6 @@ public:
     arma::cube get_history();  // returns r and v
     arma::mat get_asol();  // returns r_a
     arma::vec get_time();  // retruns t
-    vector<Particle> get_particles();
     int escaped();  // counts particles left in trap
     bool ppi;
 
