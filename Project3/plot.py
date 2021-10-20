@@ -67,9 +67,15 @@ def plot_rel_errors(method="RK4"):
         st = file.find(".")
         dt = file[s + 1: st]
 
-        trace = go.Scatter(x=data["t"], y=np.log10(data["err"]), mode="lines", name=f"log10(h) = - {dt}")
+        trace = go.Scatter(x=data["t"], y=np.log10(data["err"]), mode="lines", line=dict(width=5), name=f"log10(h) = - {dt}")
         traces.append(trace)
     fig = go.Figure(data=traces)
+    fig.update_layout(title=f"Relative error as function of time using {method} for different timesteps",
+                      xaxis_title="Time [\mu s]",
+                      yaxis_title="log10(relative error)",
+                      font_size=35,
+                      font_family="Garamond",
+                      )
     fig.show()
 
 
@@ -142,6 +148,7 @@ if __name__ == "__main__":
     # main()
     # plot_z()
     # plot_xy_plane()
+    plot_rel_errors()
     plot_rel_errors("Euler")
     #ex10_broad_plot_fraction_remaining()
     #ex_10_plot_xy_plane()
