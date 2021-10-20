@@ -128,13 +128,13 @@ void broad_freq_search(){
 	// Calculate some parameters
 	double w0 = q * b / m;
 	double wz_sq = 2 * q * v / sv / m * pow(d, -2);
-	double w_plus = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
-	double w_min = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
+	double w_p = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
+	double w_m = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
 
 	ofstream out;
 	out.open("outputs/broad_freq_search.txt");
 	out << " wz_sq w_min w_plus\n";
-	out << wz_sq << " " << w_min << " " << w_plus << endl;
+	out << wz_sq << " " << w_m << " " << w_p << endl;
 	out << "ampl wV fracRem\n";
 	out << fixed << setprecision(6);
 
