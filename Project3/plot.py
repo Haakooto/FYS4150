@@ -2,7 +2,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-
+import glob
 
 def main():
     df = pd.read_csv("outputs/oneP_endurace.txt", header=0, sep=" ")
@@ -56,6 +56,24 @@ def plot_xy_plane():
     fig.show()
 
 
+def plot_rel_errors(method="RK4"):
+    files = sorted(glob.glob(f"outputs/rel_errors_{method}*"))
+    traces = []
+    for file in files:
+        data = pd.read_csv(file, header=0, sep=" ")
+        s = file.rfind("_")
+        st = file.find(".")
+        dt = file[s + 1: st]
+
+        trace = go.Scatter(x=data["t"], y=np.log10(data["err"]), mode="lines", line=dict(width=5), name=f"log10(h) = - {dt}")
+        traces.append(trace)
+    fig = go.Figure(data=traces)
+    fig.update_layout(title=f"Relative error as function of time using {method} for different timesteps",
+                      xaxis_title="Time [\mu s]",
+                      yaxis_title="log10(relative error)",
+                      font_size=35,
+                      font_family="Garamond",
+                      )
 
 def ex_10_plot_track_z():
     fig = go.Figure()
@@ -72,6 +90,17 @@ def ex_10_plot_track_z():
     yaxis_title="z",
     title="Position along z-axis with f=0.4, frequency=0.44")
     fig.show()
+
+def error_conv_rate(method="RK4"):
+    # You will never see more readable code
+    files = sorted(glob.glob(f"outputs/rel_errors_{method}*"))  # load files
+    datas = [pd.read_csv(file, header=0, sep=" ") for file in files]  # read files
+    errs = np.asarray([data["err"][0] for data in datas])  # extract max abs_err
+    dts = np.asarray([data["t"][1] for data in datas])  # extract dt
+    derrs = np.log(errs[1:] / errs[:-1])  # find log of ratios
+    ddts = np.log(dts[1:] / dts[:-1])  # find log of ratios
+    conv = sum(derrs / ddts) / (len(files) - 1)  # do sum
+    print(f"Error convergence rate for {method} is {conv}")  # print
 
 
 
@@ -189,10 +218,16 @@ def ex10_narrow_plot_no_ppi_fraction_remaining():
 
 if __name__ == "__main__":
     # main()
+    # plot_z()
+    # plot_xy_plane()
+    # plot_rel_errors()
+    # plot_rel_errors("Euler")
+    error_conv_rate()
+    error_conv_rate("Euler")
     #plot_z()
     #plot_xy_plane()
     #ex10_broad_plot_fraction_remaining()
     #ex_10_plot_both_tracks_z()
-    ex_10_track_xy()
+    # ex_10_track_xy()
     # ex10_broad_plot_fraction_remaining()
     #ex10_narrow_plot_no_ppi_fraction_remaining()
