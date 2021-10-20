@@ -84,22 +84,22 @@ out.close();
 }
 
 
-void single_particle(){
+void single_particle_errors(string method="RK4"){
 	double x0 = 10;
     double z0 = 10;
     double y_v0 = 10;
     double T_tot = 5;
-    double timestep = 0.005;
+	int N = 5;
 
 	Particle p = Particle(arma::vec({x0, 0, z0}), arma::vec({0, y_v0, 0}), m, q);
 	PenningTrap Trap = PenningTrap(b, v, d, false);
 	Trap.insert_particles(p);
 
-	Trap.simulate(T_tot, timestep);
-	Trap.analytic(T_tot, timestep, x0, z0, y_v0);
-
-	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP.txt");
-
+	for (int i = 1; i < N + 1; i++){
+		arma::vec errs = Trap.analytic_analysis(T_tot, pow(10, -i), method);
+		cout << errs(0) << endl;
+		write_errors_to_file(errs, Trap.get_time(), "outputs/rel_errors_" + method + "_neglog10dt_" + to_string(i) + ".txt");
+	}
 }
 
 void single_particle_endurace(){
