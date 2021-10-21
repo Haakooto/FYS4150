@@ -301,7 +301,7 @@ void narrow_freq_search(){
 // 	}
 // 	out.close();
 //
-// }
+}
 
 
 void ex10_particle_track(){
@@ -311,11 +311,11 @@ void ex10_particle_track(){
     double sd = 0.05;  // factor difference in d
     double sv = 4000;  // factor difference in v0
 
-    double f = 3;
-    double wV = 2.38;
+    double f = 0.4;
+    double wV = 0.44;
 
     PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
-    Particle p = Particle(arma::vec({10, 0, 10}), arma::vec({0,-10,0}), m, q);
+    Particle p = Particle(arma::vec({50, 0, 50}), arma::vec({0,250,0}), m, q);
 	TimeTrap.insert_particles(p);
 
     TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
@@ -331,6 +331,7 @@ void ex10_particle_track(){
     write_cube_to_file(RegularTrap.get_history(), RegularTrap.get_time(), "outputs/ex10_RegularTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
 }
 
+
 void run_all_experiments(){
 	single_particle_endurace();  // first point in P9
 	single_particle_errors();  // 5th and 6th point in P9
@@ -340,6 +341,7 @@ void run_all_experiments(){
 
 }
 
+
 int main() {
 	//single_particle_errors();  // 5th and 6th point in P9, using Euler
 	//single_particle_errors("Euler");  // 5th and 6th point in P9, using Euler
@@ -347,8 +349,8 @@ int main() {
 	// two_particle();  // second point in P9
 	// single_particle_endurace();  // first point in P9
 	//run_all_experiments();
-    broad_freq_search();
-    //ex10_particle_track();
+    //broad_freq_search();
+    ex10_particle_track();
     // broad_freq_search_test();
 
 

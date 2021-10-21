@@ -82,8 +82,8 @@ def ex_10_plot_track_z():
     fig.add_trace(go.Scatter(x=data["time"], y=data["z"], mode="lines"))
 
     fig.update_layout(
-    xaxis_range=[0, 500],
-    yaxis_range=[-100,100],
+    xaxis_range=[0, 200],
+    yaxis_range=[-500,500],
     font_family="Garamond",
     font_size=30,
     xaxis_title="Time",
@@ -105,8 +105,8 @@ def error_conv_rate(method="RK4"):
 
 
 def ex_10_plot_both_tracks_z():
-    f=3
-    w=2.38
+    f=0.4
+    w=0.44
     fig = go.Figure()
     dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
     dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
@@ -125,8 +125,8 @@ def ex_10_plot_both_tracks_z():
 
 
     fig.update_layout(
-    xaxis_range=[0, 500],
-    yaxis_range=[-100,100],
+    xaxis_range=[0, 150],
+    yaxis_range=[-600,600],
     font_family="Garamond",
     font_size=30,
     title=f"Position along z-axis with f={f}, frequency={w}",
@@ -138,10 +138,14 @@ def ex_10_plot_both_tracks_z():
 
 def ex_10_track_xy():
     fig = go.Figure()
-    f = 3
-    w = 2.38
+    f = 0.4
+    w = 0.44
+
     dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
     dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+
+    dfTime = dfTime.loc[lambda df: df["time"] < 130, :]
+    dfRegular = dfRegular.loc[lambda df: df["time"] < 130, :]
 
     fig.add_trace(go.Scatter(
         x=dfTime["x"],
@@ -157,8 +161,8 @@ def ex_10_track_xy():
 
 
     fig.update_layout(
-    xaxis_range=[-300, 250],
-    yaxis_range=[-100,500],
+    xaxis_range=[-200,300],
+    yaxis_range=[-300,200],
     font_family="Garamond",
     font_size=30,
     title=f"Position in the xy-plane with f={f}, frequency={w}",
@@ -171,7 +175,7 @@ def ex_10_track_xy():
 
 def ex10_broad_plot_fraction_remaining():
     fig = go.Figure()
-    file = pd.read_csv("outputs/broad_freq_search.txt", header = 0, sep = " " )
+    file = pd.read_csv("outputs/broad_freq_search_test.txt", header = 0, sep = " " )
     #timestep er 0.0025
     for f in [0.1, 0.4, 0.7]:
 
@@ -222,12 +226,12 @@ if __name__ == "__main__":
     # plot_xy_plane()
     # plot_rel_errors()
     # plot_rel_errors("Euler")
-    error_conv_rate()
-    error_conv_rate("Euler")
+    #error_conv_rate()
+    #error_conv_rate("Euler")
     #plot_z()
     #plot_xy_plane()
     #ex10_broad_plot_fraction_remaining()
-    #ex_10_plot_both_tracks_z()
-    # ex_10_track_xy()
-    # ex10_broad_plot_fraction_remaining()
+    ex_10_plot_both_tracks_z()
+    ex_10_track_xy()
+    #ex10_broad_plot_fraction_remaining()
     #ex10_narrow_plot_no_ppi_fraction_remaining()
