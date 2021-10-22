@@ -96,6 +96,10 @@ void PenningTrap::simulate(double T, double timestep, string method){
 
         for (int p=0; p < N; p++){
             if (arma::norm(R.slice(i + 1).rows(0, 2).col(p)) > d){
+                if (Q(p) != 0){
+                    cout << "Escaped at time: " << t(i) << endl;
+                    cout << "Position: " << R.slice(i + 1).rows(0, 2).col(p) << endl;
+                }
                 Q(p) = 0;
             }
         }
