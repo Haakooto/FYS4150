@@ -7,7 +7,7 @@ from PIL import Image
 
 
 img = Image.open("giffel.jpg")
-giffel = lambda x, y, s=1: dict(source=img, x=int(x), y=int(y), sizex=s, sizey=s, xref="x", yref="y", xanchor="center", yanchor="middle", layer="above", opacity=1)
+giffel = lambda x, y, s=1: dict(source=img, x=float(x), y=float(y), sizex=s, sizey=s, xref="x", yref="y", xanchor="center", yanchor="middle", layer="above", opacity=1)
 
 def plot_z():  # Ex9p1
     df = pd.read_csv("outputs/oneP_endurance.txt", header=0, sep=" ")
@@ -56,16 +56,16 @@ def plot_xy_plane():
     fig.show()
 
 def plot_phase_diagrams():
-    max_time = 10
+    max_time = 60
     for x in "xyz":
         fig = go.Figure()
         for b in ["", "_no"]:
             df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
-            df = df.loc[lambda x: x["time"] < max_time, :]
-            for i in range(1, 3):
-                dP = df.loc[lambda x: x["particle"] == i, :]
+            df = df.loc[lambda df: df["time"] < max_time, :]
+            for i in range(1, 2):
+                dP = df.loc[lambda df: df["particle"] == i, :]
                 fig.add_trace(go.Scatter(x=dP[x], y=dP["v" + x], mode="lines", line=dict(width=4), name=f"particle {i} {b} ppi"))
-                start = dP.loc[lambda x: x["time"] == 0, :]
+                start = dP.loc[lambda df: df["time"] == 0, :]
                 fig.add_layout_image(giffel(start[x], start["v" + x], 0.5 if x == "z" else 0.7))
         fig.update_layout(title=f"Phase space plot for {x}, with and without interaction",
                     xaxis_title=f"{x} [\mu m]",
@@ -75,6 +75,52 @@ def plot_phase_diagrams():
                     )
         fig.show()
 
+def plot3d():
+    max_time = 30 # lag meg for 30 og 100
+    fig = go.Figure()
+    colors = px.colors.qualitative.Plotly
+    c = 0
+    for b in ["", "_no"]:
+        df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
+        df = df.loc[lambda x: x["time"] < max_time, :]
+        for i in range(1, 3):
+            dP = df.loc[lambda x: x["particle"] == i, :]
+            fig.add_trace(go.Scatter3d(x=dP["x"], y=dP["y"], z=dP["z"], mode="lines", line=dict(width=4, color=colors[c]), name=f"p {i} {b} ppi"))
+            start = dP.loc[lambda x: x["time"] == 0, :]
+            fig.add_trace(go.Scatter3d(x=start["x"], y=start["y"], z=start["z"], mode="markers", marker=dict(size=5, color=colors[c]), showlegend=False))
+            c += 1
+    fig.update_layout(
+                xaxis_range=[-40, 40],
+                yaxis_range=[-40, 40],
+                # title=f"Phase space plot for {x}, with and without interaction",
+                # xaxis_title=f"{x} [\mu m]",
+                # yaxis_title=f"v{x} [\mu m / \mu s]",
+                # font_family="Open sans",
+                # font_size=45,
+                )
+    fig.show()
+
+def make_cool_wallpaper():
+    max_time = 1000
+    fig = go.Figure()
+    colors = px.colors.qualitative.Plotly
+    c = 0
+    for b in ["", "_no"]:
+        df = pd.read_csv(f"outputs/twoP{b}_ppi_tall.txt", header=0, sep=" ")
+        df = df.loc[lambda x: x["time"] < max_time, :]
+        for i in range(1, 3):
+            dP = df.loc[lambda x: x["particle"] == i, :]
+            fig.add_trace(go.Scatter3d(x=dP["x"], y=dP["y"], z=dP["z"], mode="lines", line=dict(width=4, color=colors[5 * (i % 2)]), name=f"p {i} {b} ppi"))
+            start = dP.loc[lambda x: x["time"] == 0, :]
+            fig.add_trace(go.Scatter3d(x=start["x"], y=start["y"], z=start["z"], mode="markers", marker=dict(size=5, color=colors[c]), showlegend=False))
+            c += 1
+    fig.update_layout(
+                xaxis_range=[-40, 40],
+                yaxis_range=[-40, 40],
+                paper_bgcolor="rgba(1,1,1,1)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                )
+    fig.show()
 
 
 def plot_rel_errors(method="RK4"):  # Ex9p5
@@ -109,34 +155,12 @@ def error_conv_rate(method="RK4"):  # Ex9p6
     print(f"Error convergence rate for {method} is {conv}")  # print
 
 
-
-    N = df.shape[0]
-
-    dt = df["time"][1]
-    yf = np.fft.rfft(df["z"])
-    xf = np.fft.rfftfreq(N, d=dt)
-
-    data = pd.read_csv("outputs/ex10_TimeTrap_particle_track_f0.4_w0.44.txt", header = 0, sep = " ")
-
-    fig.add_trace(go.Scatter(x=data["time"], y=data["z"], mode="lines"))
-
-    fig.update_layout(
-    xaxis_range=[0, 200],
-    yaxis_range=[-500,500],
-    font_family="Open sans",
-    font_size=45,
-    xaxis_title=r"$\Huge \text{Time} [\mu s] $",
-    yaxis_title=r"$\Huge \text{z} [\mu m] $",
-    title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{f} = 0.4, \omega_V = 0.44}$")
-    fig.show()
-
-
 def ex_10_plot_both_tracks_z():
-    f=0.7
-    w=0.2
+    f=0.4
+    w=0.49
     fig = go.Figure()
-    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
-    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header = 0, sep = " ")
+    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header = 0, sep = " ")
 
     fig.add_trace(go.Scatter(
         x=dfTime["time"],
@@ -154,16 +178,34 @@ def ex_10_plot_both_tracks_z():
 
 
     fig.update_layout(
-    xaxis_range=[0, 400],
-    yaxis_range=[-600,600],
-    font_family="Open sans",
-    font_size=45,
-    title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{ f = 0.7}, \omega_V \textit{= 0.2}}$",
-    xaxis_title=r"$\Huge \text{Time  } [\mu s] $",
-    yaxis_title=r"$\Huge \text{z  } [\mu m] $",
-    legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+        # xaxis_range=[0, 150],
+        yaxis_range=[-600,600],
+        font_family="Open sans",
+        font_size=45,
+        title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.44}}$",
+        xaxis_title=r"$\Huge \text{Time  } [\mu s] $",
+        yaxis_title=r"$\Huge \text{z  } [\mu m] $",
+        legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
     fig.show()
 
+def plot_freqs_z():
+    f = 0.4
+    w = 0.49
+    fig = go.Figure()
+    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header=0, sep=" ")
+    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header=0, sep=" ")
+    s = 1
+    for df, name in zip((dfTime, dfRegular),("Time dependent potential", "Constant potential")):
+        N = df.shape[0]
+
+        dt = df["time"][1]
+        yf = np.abs(np.fft.rfft(df["z"]))
+        xf = 2 * np.pi * np.fft.rfftfreq(N, d=dt)
+        stop = np.argmin(abs(xf - s))
+
+        fig.add_trace(go.Scatter(x=xf[:stop], y=np.abs(yf)[:stop], mode="lines", name=name))
+    fig.update_layout(legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+    fig.show()
 
 def ex_10_track_xy():
     fig = go.Figure()
