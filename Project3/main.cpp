@@ -254,7 +254,7 @@ void narrow_freq_search(){  // Ex10p2
 }
 
 
-void ex10_particle_track(){  // delete me?
+void ex10_particle_track(){
     double T = 500;
     double timestep = 0.005;
 
@@ -299,7 +299,7 @@ int main() {
 	// broad_freq_search(); // Ex10p1
     // narrow_freq_search();  // Ex10p2
 	ex10_particle_track();
-	
+
 	// run_all_experiments();
 	return 0;
 }
