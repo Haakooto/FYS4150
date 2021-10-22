@@ -4,20 +4,8 @@ import plotly.graph_objects as go
 import pandas as pd
 import glob
 
-def main():
-    df = pd.read_csv("outputs/oneP_endurace.txt", header=0, sep=" ")
-    print(df)
-    time0 = df.loc[lambda df: df["time"] == 0, :]
-    # fig = go.Figure(
-    #     data=[go.Scatter(time0, x="x", y="y")]
-    # )
 
-    fig = px.scatter_3d(df, x="x", y="y", z="z", animation_frame="time", animation_group="particle",
-                        range_x=[-1e4, 1e4], range_y=[-1e4, 1e4], range_z=[-1e4, 1e4]
-                        )
-    fig.show()
-
-def plot_z():
+def plot_z():  # Ex9p1
     df = pd.read_csv("outputs/oneP_endurance.txt", header=0, sep=" ")
 
     fig = go.Figure()
@@ -56,11 +44,12 @@ def plot_xy_plane():
     fig.show()
 
 
-def plot_rel_errors(method="RK4"):
+def plot_rel_errors(method="RK4"):  # Ex9p5
     files = sorted(glob.glob(f"outputs/rel_errors_{method}*"))
     traces = []
     for file in files:
         data = pd.read_csv(file, header=0, sep=" ")
+        data["err"][0] = 0
         s = file.rfind("_")
         st = file.find(".")
         dt = file[s + 1: st]
@@ -74,6 +63,18 @@ def plot_rel_errors(method="RK4"):
                       font_size=35,
                       font_family="Garamond",
                       )
+    fig.show()
+
+def error_conv_rate(method="RK4"):  # Ex9p6
+    files = sorted(glob.glob(f"outputs/rel_errors_{method}*"))  # load files
+    datas = [pd.read_csv(file, header=0, sep=" ") for file in files]  # read files
+    errs = np.asarray([data["err"][0] for data in datas])  # extract max abs_err
+    dts = np.asarray([data["t"][1] for data in datas])  # extract dt
+    derrs = np.log(errs[1:] / errs[:-1])  # find log of ratios
+    ddts = np.log(dts[1:] / dts[:-1])  # find log of ratios
+    conv = sum(derrs / ddts) / (len(files) - 1)  # do sum
+    print(f"Error convergence rate for {method} is {conv}")  # print
+
 
 def ex_10_plot_track_z():
     fig = go.Figure()
@@ -90,18 +91,6 @@ def ex_10_plot_track_z():
     yaxis_title="z",
     title="Position along z-axis with f=0.4, frequency=0.44")
     fig.show()
-
-def error_conv_rate(method="RK4"):
-    # You will never see more readable code
-    files = sorted(glob.glob(f"outputs/rel_errors_{method}*"))  # load files
-    datas = [pd.read_csv(file, header=0, sep=" ") for file in files]  # read files
-    errs = np.asarray([data["err"][0] for data in datas])  # extract max abs_err
-    dts = np.asarray([data["t"][1] for data in datas])  # extract dt
-    derrs = np.log(errs[1:] / errs[:-1])  # find log of ratios
-    ddts = np.log(dts[1:] / dts[:-1])  # find log of ratios
-    conv = sum(derrs / ddts) / (len(files) - 1)  # do sum
-    print(f"Error convergence rate for {method} is {conv}")  # print
-
 
 
 def ex_10_plot_both_tracks_z():
@@ -217,16 +206,13 @@ def ex10_narrow_plot_no_ppi_fraction_remaining():
 
 
 if __name__ == "__main__":
-    # main()
     # plot_z()
     # plot_xy_plane()
     # plot_rel_errors()
     # plot_rel_errors("Euler")
-    error_conv_rate()
-    error_conv_rate("Euler")
-    #plot_z()
-    #plot_xy_plane()
-    #ex10_broad_plot_fraction_remaining()
+    # error_conv_rate()
+    # error_conv_rate("Euler")
+    # ex10_broad_plot_fraction_remaining()
     #ex_10_plot_both_tracks_z()
     # ex_10_track_xy()
     # ex10_broad_plot_fraction_remaining()
