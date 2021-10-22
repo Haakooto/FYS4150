@@ -48,10 +48,10 @@ def plot_xy_plane():
             fig.add_layout_image(giffel(start["x"], start["y"]))
 
     fig.update_layout(title="Position of 2 particles in xy-plane, with and without interaction",
-                      xaxis_title=r"$\Huge \text{x} [\mu m]$",
-                      yaxis_title=r"$\Huge \text{y} [\mu m]$",
+                      xaxis_title=r"$\huge \text{x} [\mu m]$",
+                      yaxis_title=r"$\huge \text{y} [\mu m]$",
                       font_family="Open sans",
-                      font_size=45,
+                      font_size=30,
                       )
     fig.show()
 
