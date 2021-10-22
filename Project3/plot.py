@@ -3,7 +3,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import glob
+from PIL import Image
 
+
+img = Image.open("giffel.jpg")
+giffel = lambda x, y: dict(source=img, x=int(x), y=int(y), sizex=1, sizey=1, xref="x", yref="y", xanchor="center", yanchor="middle", layer="above", opacity=1)
 
 def plot_z():  # Ex9p1
     df = pd.read_csv("outputs/oneP_endurance.txt", header=0, sep=" ")
@@ -32,16 +36,28 @@ def plot_z():  # Ex9p1
 
 
 def plot_xy_plane():
+    max_time = 20
     fig = go.Figure()
     for b in ["", "_no"]:
         df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
-        for i in range(1, 2):
+        df = df.loc[lambda x: x["time"] < max_time, :]
+        for i in range(1, 3):
             dP = df.loc[lambda x: x["particle"] == i, :]
-            fig.add_trace(go.Scatter(x=dP["x"], y=dP["y"], mode="lines", name=f"particle {i} {b} ppi"))
+            fig.add_trace(go.Scatter(x=dP["x"], y=dP["y"], mode="lines", line=dict(width=4), name=f"particle {i} {b} ppi"))
+            start = dP.loc[lambda x: x["time"] == 0, :]
+            fig.add_layout_image(giffel(start["x"], start["y"]))
 
-    fig.update_layout(xaxis_range=[-30, 30], yaxis_range=[-30,30])
-    # fig = px.scatter(df, x="x", y="y", animation_frame="time", animation_group="particle", range_y=[-20, 20])
+    fig.update_layout(title="Position of 2 particles in xy-plane, with and without interaction",
+                      xaxis_title=r"$\Huge \text{x} [\mu m]$",
+                      yaxis_title=r"$\Huge \text{y} [\mu m]$",
+                      font_family="Open sans",
+                      font_size=45,
+                      )
     fig.show()
+
+def plot_phase_diagrams():
+    max_time = 20
+    fig = go.Figure()
 
 
 def plot_rel_errors(method="RK4"):  # Ex9p5
@@ -216,12 +232,12 @@ def ex10_narrow_plot_no_ppi_fraction_remaining():
 
 if __name__ == "__main__":
     # plot_z()
-    # plot_xy_plane()
     # plot_rel_errors()
     # plot_rel_errors("Euler")
     #error_conv_rate()
     #error_conv_rate("Euler")
-    ex10_broad_plot_fraction_remaining()
-    ex_10_plot_both_tracks_z()
-    ex_10_track_xy()
+    plot_xy_plane()
+    # ex10_broad_plot_fraction_remaining()
+    # ex_10_plot_both_tracks_z()
+    # ex_10_track_xy()
     #ex10_narrow_plot_no_ppi_fraction_remaining()

@@ -138,12 +138,15 @@ void two_particle_old(){  // delete me?
 }
 
 void two_particle(){  // Ex9p2/3/4
-	double T = 10;
+	double T = 100;
 	double h = 0.01;
 
 	PenningTrap Trap = PenningTrap(b, v, d, true);
+	Particle p1 = Particle(arma::vec({20, 0, 10}), arma::vec(3, arma::fill::randn), m, q);
+	Particle p2 = Particle(arma::vec({-20, 0, -10}), arma::vec(3, arma::fill::randn), m, q);
 
-	Trap.insert_particles(2, m, q);
+	Trap.insert_particles(p1);
+	Trap.insert_particles(p2);
 	Trap.simulate(T, h);
 	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/twoP_ppi.txt");
 
@@ -295,10 +298,10 @@ int main() {
 	// single_particle_endurace();  // Ex9p1
 	// single_particle_errors();  // Ex9p5/6
 	// single_particle_errors("Euler");  // Ex9p5/6 Euler
-	// two_particle();  // Ex9p2/3/4
+	two_particle();  // Ex9p2/3/4
 	// broad_freq_search(); // Ex10p1
     // narrow_freq_search();  // Ex10p2
-	ex10_particle_track();
+	// ex10_particle_track();
 
 	// run_all_experiments();
 	return 0;
