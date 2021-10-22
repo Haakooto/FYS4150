@@ -56,7 +56,9 @@ def plot_xy_plane():
     fig.show()
 
 def plot_phase_diagrams():
-    max_time = 60
+    max_time = 70
+    colors = px.colors.qualitative.Plotly
+    c = 0
     for x in "xyz":
         fig = go.Figure()
         for b in ["", "_no"]:
@@ -64,9 +66,12 @@ def plot_phase_diagrams():
             df = df.loc[lambda df: df["time"] < max_time, :]
             for i in range(1, 2):
                 dP = df.loc[lambda df: df["particle"] == i, :]
-                fig.add_trace(go.Scatter(x=dP[x], y=dP["v" + x], mode="lines", line=dict(width=4), name=f"particle {i} {b} ppi"))
-                start = dP.loc[lambda df: df["time"] == 0, :]
+                fig.add_trace(go.Scatter(x=dP[x], y=dP["v" + x], mode="lines", line=dict(width=4, color=colors[c % 2]), name=f"particle {i} {b} ppi"))
+                start = dP.head(1)
+                end = dP.tail(1)
                 fig.add_layout_image(giffel(start[x], start["v" + x], 0.5 if x == "z" else 0.7))
+                fig.add_trace(go.Scatter(x=end[x], y=end["v" + x], mode="markers", marker=dict(size=20, color=colors[c % 2]), name="End point"))
+                c += 1
         fig.update_layout(title=f"Phase space plot for {x}, with and without interaction",
                     xaxis_title=f"{x} [\mu m]",
                     yaxis_title=f"v{x} [\mu m / \mu s]",
@@ -76,7 +81,7 @@ def plot_phase_diagrams():
         fig.show()
 
 def plot3d():
-    max_time = 30 # lag meg for 30 og 100
+    max_time = 1000 # lag meg for 30 og 100
     fig = go.Figure()
     colors = px.colors.qualitative.Plotly
     c = 0
@@ -190,7 +195,7 @@ def ex_10_plot_both_tracks_z():
 
 def plot_freqs_z():
     f = 0.4
-    w = 0.49
+    w = 0.39
     fig = go.Figure()
     dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header=0, sep=" ")
     dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header=0, sep=" ")
@@ -309,8 +314,9 @@ if __name__ == "__main__":
     # plot_xy_plane()
     plot_phase_diagrams()
     # plot3d()
+    # make_cool_wallpaper()
     # ex10_broad_plot_fraction_remaining()
     # plot_freqs_z()
     # ex_10_plot_both_tracks_z()
     # ex_10_track_xy()
-    ex10_narrow_plot_ppi_fraction_remaining()
+    # ex10_narrow_plot_ppi_fraction_remaining()
