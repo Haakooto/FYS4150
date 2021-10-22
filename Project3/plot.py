@@ -132,8 +132,8 @@ def error_conv_rate(method="RK4"):  # Ex9p6
 
 
 def ex_10_plot_both_tracks_z():
-    f=0.4
-    w=0.44
+    f=0.7
+    w=0.2
     fig = go.Figure()
     dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
     dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
@@ -154,44 +154,27 @@ def ex_10_plot_both_tracks_z():
 
 
     fig.update_layout(
-    xaxis_range=[0, 150],
+    xaxis_range=[0, 400],
     yaxis_range=[-600,600],
     font_family="Open sans",
     font_size=45,
-    title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.44}}$",
+    title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{ f = 0.7}, \omega_V \textit{= 0.2}}$",
     xaxis_title=r"$\Huge \text{Time  } [\mu s] $",
     yaxis_title=r"$\Huge \text{z  } [\mu m] $",
     legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
     fig.show()
 
-def plot_freqs_z():
-    f = 0.4
-    w = 0.44
-    fig = go.Figure()
-    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header=0, sep=" ")
-    dfRegular = pd.read_csv(f"outputs/ex10_TimeRegular_particle_track_f{f}_w{w}.txt", header=0, sep=" ")
-
-    for df in (dfTime, dfRegular):
-        N = df.shape[0]
-
-        dt = df["time"][1]
-        yf = np.fft.rfft(df["z"])
-        xf = np.fft.rfftfreq(N, d=dt)
-
-        fig.add_trace(go.Scatter(x=xf, y=np.abs(yf), mode="lines"))
-
-    fig.show()
 
 def ex_10_track_xy():
     fig = go.Figure()
-    f = 0.4
-    w = 0.44
+    f = 0.7
+    w = 0.2
 
     dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
     dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
 
-    dfTime = dfTime.loc[lambda df: df["time"] < 130, :]
-    dfRegular = dfRegular.loc[lambda df: df["time"] < 130, :]
+    dfTime = dfTime.loc[lambda df: df["time"] < 400, :]
+    dfRegular = dfRegular.loc[lambda df: df["time"] < 400, :]
 
     fig.add_trace(go.Scatter(
         x=dfTime["x"],
@@ -213,7 +196,7 @@ def ex_10_track_xy():
     yaxis_range=[-300,200],
     font_family="Open sans",
     font_size=45,
-    title = r"$\Huge{\text{Position  in the xy-plane  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.44}}$",
+    title = r"$\Huge{\text{Position  in the xy-plane  with  } \textit{ f = 0.7}, \omega_V \textit{= 0.2}}$",
     xaxis_title=r"$\Huge \text{x  } [\mu m] $",
     yaxis_title=r"$ \Huge \text{y  } [\mu m] $",
     legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
@@ -224,9 +207,8 @@ def ex_10_track_xy():
 
 def ex10_broad_plot_fraction_remaining():
     fig = go.Figure()
-    file = pd.read_csv("outputs/broad_freq_search_new.txt", header = 2, sep = " " )
-    print(file)
-    #timestep er 0.0025
+    file = pd.read_csv("outputs/broad_freq_search.txt", header = 2, sep = " " )
+
     for f in [0.1, 0.4, 0.7]:
 
         data = file.loc[lambda x: x["ampl"] == f, :]
@@ -234,7 +216,7 @@ def ex10_broad_plot_fraction_remaining():
             y = data["fracRem"],
             mode = "lines",
             line=dict(width=4),
-            name = f"Amplitude: {f}"))
+            name = f"<i>f = {f}"))
 
         fig.update_layout(
             font_family="Open sans",
@@ -267,10 +249,10 @@ def ex10_narrow_plot_ppi_fraction_remaining():
     fig.update_layout(
         font_family="Open sans",
         font_size=45,
-        title=r"$\Huge{\text{Fraction  of  particles  remaining  in  the  Penning  trap  after  0.5  }  \mu s}$",
+        title=r"$\Huge{\text{Fraction  of  particles  remaining  in  the  trap  after  0.5} \mu s \text{  for } \textit{ f =} 0.4}$",
         xaxis_title=r"$\Huge\omega_V$",
         yaxis_title="Fraction",
-        legend=dict(yanchor="top", xanchor="left", x=0.5, y=0.99)
+        legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01)
         )
     fig.show()
 
@@ -283,8 +265,8 @@ if __name__ == "__main__":
     #error_conv_rate("Euler")
     # plot_xy_plane()
     # plot_phase_diagrams()
-    # ex10_broad_plot_fraction_remaining()
+    #ex10_broad_plot_fraction_remaining()
     #plot_freqs_z()
-    # ex_10_plot_both_tracks_z()
-    # ex_10_track_xy()
-    ex10_narrow_plot_ppi_fraction_remaining()
+    ex_10_plot_both_tracks_z()
+    ex_10_track_xy()
+    #ex10_narrow_plot_ppi_fraction_remaining()
