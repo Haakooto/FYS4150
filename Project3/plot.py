@@ -7,7 +7,7 @@ from PIL import Image
 
 
 img = Image.open("giffel.jpg")
-giffel = lambda x, y: dict(source=img, x=int(x), y=int(y), sizex=1, sizey=1, xref="x", yref="y", xanchor="center", yanchor="middle", layer="above", opacity=1)
+giffel = lambda x, y, s=1: dict(source=img, x=int(x), y=int(y), sizex=s, sizey=s, xref="x", yref="y", xanchor="center", yanchor="middle", layer="above", opacity=1)
 
 def plot_z():  # Ex9p1
     df = pd.read_csv("outputs/oneP_endurance.txt", header=0, sep=" ")
@@ -48,16 +48,38 @@ def plot_xy_plane():
             fig.add_layout_image(giffel(start["x"], start["y"]))
 
     fig.update_layout(title="Position of 2 particles in xy-plane, with and without interaction",
+<<<<<<< HEAD
                       xaxis_title=r"$\huge \text{x} [\mu m]$",
                       yaxis_title=r"$\huge \text{y} [\mu m]$",
+=======
+                      xaxis_title="$x [\mu m]",
+                      yaxis_title="$y [\mu m]",
+>>>>>>> e05a778bec83d21af424cecf569c12a4e1c88cdb
                       font_family="Open sans",
                       font_size=30,
                       )
     fig.show()
 
 def plot_phase_diagrams():
-    max_time = 20
-    fig = go.Figure()
+    max_time = 10
+    for x in "xyz":
+        fig = go.Figure()
+        for b in ["", "_no"]:
+            df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
+            df = df.loc[lambda x: x["time"] < max_time, :]
+            for i in range(1, 3):
+                dP = df.loc[lambda x: x["particle"] == i, :]
+                fig.add_trace(go.Scatter(x=dP[x], y=dP["v" + x], mode="lines", line=dict(width=4), name=f"particle {i} {b} ppi"))
+                start = dP.loc[lambda x: x["time"] == 0, :]
+                fig.add_layout_image(giffel(start[x], start["v" + x], 0.5 if x == "z" else 0.7))
+        fig.update_layout(title=f"Phase space plot for {x}, with and without interaction",
+                    xaxis_title=f"{x} [\mu m]",
+                    yaxis_title=f"v{x} [\mu m / \mu s]",
+                    font_family="Open sans",
+                    font_size=45,
+                    )
+        fig.show()
+
 
 
 def plot_rel_errors(method="RK4"):  # Ex9p5
@@ -93,8 +115,12 @@ def error_conv_rate(method="RK4"):  # Ex9p6
 
 
 
-def ex_10_plot_track_z():
-    fig = go.Figure()
+    N = df.shape[0]
+
+    dt = df["time"][1]
+    yf = np.fft.rfft(df["z"])
+    xf = np.fft.rfftfreq(N, d=dt)
+
     data = pd.read_csv("outputs/ex10_TimeTrap_particle_track_f0.4_w0.44.txt", header = 0, sep = " ")
 
     fig.add_trace(go.Scatter(x=data["time"], y=data["z"], mode="lines"))
@@ -143,6 +169,23 @@ def ex_10_plot_both_tracks_z():
     legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
     fig.show()
 
+def plot_freqs_z():
+    f = 0.4
+    w = 0.44
+    fig = go.Figure()
+    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header=0, sep=" ")
+    dfRegular = pd.read_csv(f"outputs/ex10_TimeRegular_particle_track_f{f}_w{w}.txt", header=0, sep=" ")
+
+    for df in (dfTime, dfRegular):
+        N = df.shape[0] 
+
+        dt = df["time"][1]
+        yf = np.fft.rfft(df["z"])
+        xf = np.fft.rfftfreq(N, d=dt)
+
+        fig.add_trace(go.Scatter(x=xf, y=np.abs(yf), mode="lines"))
+
+    fig.show()
 
 def ex_10_track_xy():
     fig = go.Figure()
@@ -183,9 +226,11 @@ def ex_10_track_xy():
 
 
 
+
 def ex10_broad_plot_fraction_remaining():
     fig = go.Figure()
-    file = pd.read_csv("outputs/broad_freq_search.txt", header = 0, sep = " " )
+    file = pd.read_csv("outputs/broad_freq_search_new.txt", header = 2, sep = " " )
+    print(file)
     #timestep er 0.0025
     for f in [0.1, 0.4, 0.7]:
 
@@ -236,8 +281,10 @@ if __name__ == "__main__":
     # plot_rel_errors("Euler")
     #error_conv_rate()
     #error_conv_rate("Euler")
-    plot_xy_plane()
+    # plot_xy_plane()
+    # plot_phase_diagrams()
     # ex10_broad_plot_fraction_remaining()
+    plot_freqs_z()
     # ex_10_plot_both_tracks_z()
     # ex_10_track_xy()
     #ex10_narrow_plot_no_ppi_fraction_remaining()
