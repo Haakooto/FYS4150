@@ -27,8 +27,8 @@ class PenningTrap
 {
 public:
     int N=0;  // number of particles in trap
-    PenningTrap(double, double, double, bool);
-    PenningTrap(double, function<double(double)>, double, bool);
+    PenningTrap(double, double, double, bool=true);
+    PenningTrap(double, function<double(double)>, double, bool=false);
 
     // Overloaded insertion methods
     void insert_particles(vector<Particle> P);
@@ -49,7 +49,7 @@ private:
     int nT;  // number of time steps
     double dt;  // length of time step
     double B0, V0, d;  // properties of trap
-    double r_cutoff, cut=0.3;  // cutoff for coulomb force
+    double r_cutoff, cut=0.3;  // cutoff for coulomb force, set to 0.3d
     function<double(double)> tV0; // time-dep E-field (lambda func)
     vector<Particle> particles;  // Particle container
     bool time_dep_V;

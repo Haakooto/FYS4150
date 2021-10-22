@@ -32,12 +32,9 @@ void PenningTrap::insert_particles(Particle p){
 	N++;
 }
 
-void PenningTrap::insert_particles(int n, double m, int q){ // inserting n identical particles uniformly in sphere
-	// https://math.stackexchange.com/questions/87230/picking-random-points-in-the-volume-of-sphere-with-uniform-probability
+void PenningTrap::insert_particles(int n, double m, int q){
+	// Insert n identical particles with random position and velocity
 	for (int i=0; i<n; i++){
-		//arma::vec r(3, arma::fill::randn);
-		//arma::vec u(1, arma::fill::randu);
-		//r *= d * pow(u(0), 3) / arma::norm(r);
         arma::vec r = arma::vec(3).randn() * 0.1 * d;  // random initial position
         arma::vec v = arma::vec(3).randn() * 0.1 * d;  // random initial velocity
 
@@ -61,14 +58,14 @@ void PenningTrap::simulate(double T, double timestep, string method){
 	dt = timestep;
 	nT = (int)(T / dt) + 1;
 	t = arma::vec(nT, arma::fill::zeros);
-	R = arma::cube(6, N, nT);  // (3dim x 2 phases : N particles : nT timesteps)
+	R = arma::cube(6, N, nT);  // (3dim x 2 phases) : N particles : nT timesteps
 
-	Q = arma::rowvec(N);
-	M = arma::rowvec(N);
+	Q = arma::rowvec(N);  // charges
+	M = arma::rowvec(N);  // masses
 	r_cutoff = cut * d;
 
 
-	// initiate simulation
+	// initiate simulation, 
 	for (int i=0; i < N; i++){
 		Particle p = particles[i];
 		R.slice(0).rows(0, 2).col(i) = p.r; // set positions
@@ -79,10 +76,10 @@ void PenningTrap::simulate(double T, double timestep, string method){
 	}
 
 	// start simulation
-	arma::cube u(3, N, 2); // (3dim : N particles : 2 phases)
+	arma::cube u(3, N, 2);  // 3dim : N particles : 2 phases
 	for (int i=0; i < nT - 1; i++){
-		u.slice(0) = R.slice(i).rows(0, 2);
-		u.slice(1) = R.slice(i).rows(3, 5);
+		u.slice(0) = R.slice(i).rows(0, 2);  // positions at time i
+		u.slice(1) = R.slice(i).rows(3, 5);  // velocities at time i
 
 		if (method == "Euler"){
 			Euler(u, t(i));
@@ -90,17 +87,22 @@ void PenningTrap::simulate(double T, double timestep, string method){
 			RK4(u, t(i));
 		}
 
-		R.slice(i + 1).rows(0, 2) = u.slice(0);
-		R.slice(i + 1).rows(3, 5) = u.slice(1);
-		t(i + 1) = (i + 1) * dt;
+		R.slice(i + 1).rows(0, 2) = u.slice(0);  // write new positions
+		R.slice(i + 1).rows(3, 5) = u.slice(1);  // write new velocities
+		t(i + 1) = (i + 1) * dt; 
 
+		// Check if any particle is outside trap
         for (int p=0; p < N; p++){
             if (arma::norm(R.slice(i + 1).rows(0, 2).col(p)) > d){
+<<<<<<< HEAD
                 if (Q(p) != 0){
                     cout << "Escaped at time: " << t(i) << endl;
                     cout << "Position: " << R.slice(i + 1).rows(0, 2).col(p) << endl;
                 }
                 Q(p) = 0;
+=======
+                Q(p) = 0;  // effectively set E and B-field to 0 outside trap
+>>>>>>> e05a778bec83d21af424cecf569c12a4e1c88cdb
             }
         }
 	}
@@ -130,10 +132,10 @@ arma::cube PenningTrap::advance(double time, arma::cube u){
 	Efield(u.slice(0), time);
 	Bfield(u.slice(1));
 
-	//update velocities for x, y, z for all particles
-	du.slice(1).row(0) = u.slice(0).row(0) - u.slice(1).row(1) + F.row(0);
-	du.slice(1).row(1) = u.slice(0).row(1) - u.slice(1).row(0) + F.row(1);
-	du.slice(1).row(2) = u.slice(0).row(2) + F.row(2);
+	// change in velocities for x, y, z for all particles
+	du.slice(1).row(0) = F.row(0) + u.slice(0).row(0) - u.slice(1).row(1);
+	du.slice(1).row(1) = F.row(1) + u.slice(0).row(1) - u.slice(1).row(0);
+	du.slice(1).row(2) = F.row(2) + u.slice(0).row(2);
 
 	return du;  // 3dim x N particles x 2 phases (position and velocity)
 }
@@ -153,32 +155,32 @@ void PenningTrap::Bfield(arma::mat &vel){
 arma::mat PenningTrap::sum_particle_forces(arma::mat ri){
 	/*
 	Calculates all particle-particle forces
-	ri has shape 3, N
 	*/
-	arma::mat Eforce(N, 3, arma::fill::zeros);
-	if (!ppi) {return Eforce.t();}   //ignore particle-particle interactions
+	arma::mat Eforce(N, 3, arma::fill::zeros);  // N particles : 3dim
+	if (!ppi) {return Eforce.t();}   // ignore particle-particle interactions
 
 	else {
 		for (int i=0; i < N; i++){
-			for (int j=0; j < i; j++){
+			for (int j=0; j < i; j++){  
 				arma::vec diff_ri = ri.col(i)-ri.col(j);
 				double norm = arma::norm(diff_ri);
 				if (norm < r_cutoff){  // speed-up
 					arma::vec F = ke * Q(i) * Q(j) * diff_ri * pow(norm, -3);
-					Eforce.row(i) += F.t() / M(i);
+					Eforce.row(i) += F.t() / M(i);  // Fij = -Fji
 					Eforce.row(j) -= F.t() / M(j);
 				}
 			}
 		}
-	} return Eforce.t();  // 3 x N
+	} return Eforce.t();
 }
 
 arma::vec PenningTrap::analytic_analysis(double T, double timestep, string method){
-	simulate(T, timestep, method);
-	analytic_sols(particles[0].r[0], particles[0].r[2], particles[0].v[1]);
+	ppi = false;  // make sure analytic sols are valid
+	simulate(T, timestep, method);  // Do numertic simulation
+	analytic_sols(particles[0].r[0], particles[0].r[2], particles[0].v[1]);  // Do analytic ones
 
-	arma::cube np = R.rows(0, 2);  // get positions
-	arma::mat r = np.col(0);  // get first (only) particle
+	arma::cube np = R.rows(0, 2);  // positions
+	arma::mat r = np.col(0);  // first particle
 	arma::vec rel_errs = arma::vec(nT);
 	arma::vec abs_errs = arma::vec(nT);
 
@@ -193,7 +195,7 @@ arma::vec PenningTrap::analytic_analysis(double T, double timestep, string metho
 }
 
 void PenningTrap::analytic_sols(double x0, double z0, double y_v0){   //analytic solution for one particle with a given starting position
-	r_a = arma::mat(3, nT);  // 3dim x nT timesteps, only 1 particle
+	r_a = arma::mat(3, nT);  // 3dim : nT timesteps, only 1 particle
 	r_a.col(0) = arma::vec({x0, 0, z0});   //initial position
 
 	double w_0 = particles[0].q * B0 / particles[0].m;
@@ -234,6 +236,7 @@ arma::vec PenningTrap::get_time(){
 }
 
 int PenningTrap::escaped(){
+	// Particle charge change if it left trap
 	int out = 0;
 	for (int i=0; i < N; i++){
 		if (particles[i].q != Q(i)){

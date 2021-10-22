@@ -84,7 +84,7 @@ out.close();
 }
 
 
-void single_particle_endurace(){
+void single_particle_endurace(){  // Ex9p1
 	double T = 100;
 	double h = 0.005;
 
@@ -97,7 +97,7 @@ void single_particle_endurace(){
 	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/oneP_endurance.txt");
 }
 
-void single_particle_errors(string method="RK4"){
+void single_particle_errors(string method="RK4"){  // Ex9p5/6
 	double x0 = 10;
     double z0 = 10;
     double y_v0 = 10;
@@ -115,7 +115,7 @@ void single_particle_errors(string method="RK4"){
 	}
 }
 
-void two_particle(){
+void two_particle_old(){  // delete me?
 	double T = 100;
 	double h = 0.005;
 
@@ -137,14 +137,32 @@ void two_particle(){
 	write_cube_to_file(Trap_no_ppi.get_history(), Trap_no_ppi.get_time(), "outputs/twoP_no_ppi.txt");
 }
 
+void two_particle(){  // Ex9p2/3/4
+	double T = 100;
+	double h = 0.01;
+
+	PenningTrap Trap = PenningTrap(b, v, d, true);
+	Particle p1 = Particle(arma::vec({20, 0, 10}), arma::vec(3, arma::fill::randn), m, q);
+	Particle p2 = Particle(arma::vec({-20, 0, -10}), arma::vec(3, arma::fill::randn), m, q);
+
+	Trap.insert_particles(p1);
+	Trap.insert_particles(p2);
+	Trap.simulate(T, h);
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/twoP_ppi.txt");
+
+	Trap.ppi = false;
+	Trap.simulate(T, h);
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/twoP_no_ppi.txt");
+}
+
 double V(double t, double V0, double f, double w){
 	// time-dependent potential, eq 21 in project description
 	return V0 * (1 + f * cos(w * t));
 }
 
-void broad_freq_search(){
+void broad_freq_search(){  // Ex10p1
 	double T = 500;
-	double timestep = 0.005;
+	double timestep = 0.01;
 
 	int N = 100;  // number of particles
 	double sd = 0.05;  // factor difference in d
@@ -157,12 +175,12 @@ void broad_freq_search(){
 
 	// Calculate some parameters
 	double w0 = q * b / m;
-	double wz_sq = 2 * q * v / sv / m * pow(d, -2);
+	double wz_sq = 2 * q * (v / sv) / m * pow(d * sd, -2);
 	double w_p = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
 	double w_m = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
 
 	ofstream out;
-	out.open("outputs/broad_freq_search.txt");
+	out.open("outputs/broad_freq_search_new.txt");
 	out << " wz_sq w_min w_plus\n";
 	out << wz_sq << " " << w_m << " " << w_p << endl;
 	out << "ampl wV fracRem\n";
@@ -181,7 +199,6 @@ void broad_freq_search(){
 
 			double fraq = (double)(N - TimeTrap.escaped()) / N;
 
-
 			// write to file
 			out << f << " " << wV << " " << fraq << endl;
 			cout << " wV = " << wV << " ratio remaining: " << fraq << endl;
@@ -191,116 +208,52 @@ void broad_freq_search(){
 }
 
 
-void broad_freq_search_test(){
-	double T = 500;
-	double timestep = 0.005;
-
-	int N = 100;  // number of particles
-	double sd = 0.05;  // factor difference in d
-	double sv = 4000;  // factor difference in v0
-
-	vector<double> amps = {0.4, 0.7};
-	double w_min = 0.2;
-	double w_max = 0.5; //2.5;
-	double w_step = 0.02;
-
-	ofstream out;
-	out.open("outputs/broad_freq_search_test.txt");
-	out << "ampl wV fracRem wz_sq w_min w_plus\n";
-	out << fixed << setprecision(6);
-
-	double w0 = q * b / m;
-
-	// Make a PenningTrap with time-dep Efield. Set to dummy func, returning t
-	PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
-	TimeTrap.insert_particles(N, m, q); // insert N particles
-	for (double f: amps){
-		cout << "f = " << f << endl;
-		for (double wV = w_min; wV <= w_max; wV += w_step){
-			// Set actual Efield func
-			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
-			// simulate function resets the particles, so do not have to reinitialize trap, can just restart simulation with new Efield func
-			TimeTrap.simulate(T, timestep);
-
-			// Calculate some parameters
-			double wz_sq = 2 * q * V(T, v / sv, f, wV) / m * pow(d, 2);
-			double w_plus = (w0 + pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
-			double w_min = (w0 - pow(pow(w0, 2) - 2 * wz_sq, 0.5)) / 2;
-			double fraq = (double)(N - TimeTrap.escaped()) / N;
-
-			// write to file
-			out << f << " " << wV << " " << fraq << " " << wz_sq << " " << w_min << " " << w_plus << endl;
-			cout << " wV = " << wV << " ratio remaining: " << fraq << endl;
-		}
-	}
-	out.close();
-}
-
-
-void narrow_freq_search(){
+void narrow_freq_search(){  // Ex10p2
     double T = 500;
-	double timestep = 0.002;
+	double timestep = 0.01;
 
 	int N = 100;  // number of particles
 	double sd = 0.05;  // factor difference in d
 	double sv = 4000;  // factor difference in v0
 
-	vector<double> amps = {0.4};
+	vector<double> amps = {0.1};
 	double w_min = 0.35;
 	double w_max = 0.55;
 	double w_step = 0.005;
     double w0 = q * b / m;
 
-	ofstream out;
-	out.open("outputs/narrow_freq_search_no_ppi.txt");
-	out << "ampl wV fracRem\n";
-	out << fixed << setprecision(6);
+	vector<string> ppis = {"no", "with"};
 
 	// Make a PenningTrap with time-dep Efield. Set to dummy func, returning t
 	PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
 	TimeTrap.insert_particles(N, m, q); // insert N particles
 
-	for (double f: amps){
-		cout << "f = " << f << endl;
-		for (double wV = w_min; wV <= w_max; wV += w_step){
-			// Set actual Efield func
-			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
+	ofstream out;
+	for (string m: ppis){
+		out.open("outputs/narrow_freq_search_" + m + "_ppi.txt");
+		out << "ampl wV fracRem\n";
+		out << fixed << setprecision(6);
 
-			// simulate function resets the particles, so do not have to reinitialize trap, can just restart simulation with new Efield func
-			TimeTrap.simulate(T, timestep);
+		for (double f: amps){
+			cout << "f = " << f << endl;
+			for (double wV = w_min; wV <= w_max; wV += w_step){
+				// Set actual Efield func
+				TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
 
-			// Calculate some parameters
-			double fraq = (double)(N - TimeTrap.escaped()) / N;
+				// simulate function resets the particles, so do not have to reinitialize trap, can just restart simulation with new Efield func
+				TimeTrap.simulate(T, timestep);
 
-			// write to file
-			out << f << " " << wV << " " << fraq << endl;
-			cout << "No interactions" <<  "wV = " << wV << " ratio remaining: " << fraq << endl;
+				// Calculate some parameters
+				double fraq = (double)(N - TimeTrap.escaped()) / N;
+
+				// write to file
+				out << f << " " << wV << " " << fraq << endl;
+				cout << m << " interactions: " <<  "wV = " << wV << " ratio remaining: " << fraq << endl;
+			}
 		}
+		out.close();
+		TimeTrap.ppi = true;
 	}
-	out.close();
-//
-//
-//     //Repeat with particle-particle interactions
-//     TimeTrap.ppi = true;
-// 	out.open("outputs/narrow_freq_search_with_ppi.txt");
-// 	out << "ampl wV fracRem\n";
-// 	out << fixed << setprecision(6);
-//
-//     for (double f: amps){
-// 		cout << "f = " << f << endl;
-// 		for (double wV = w_min; wV <= w_max; wV += w_step){
-// 			// Set actual Efield func
-// 			TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
-// 		    TimeTrap.simulate(T, timestep);
-// 			double fraq = (double)(N - TimeTrap.escaped()) / N;
-//
-// 			// write to file
-// 			out << f << " " << wV << " " << fraq << endl;
-// 			cout << "With interactions  " << " wV = " << wV << " ratio remaining: " << fraq << endl;
-// 		}
-// 	}
-// 	out.close();
-//
 }
 
 
@@ -314,11 +267,10 @@ void ex10_particle_track(){
     double f = 0.4;
     double wV = 0.44;
 
-    PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
-    Particle p = Particle(arma::vec({50, 0, 50}), arma::vec({0,250,0}), m, q);
+    PenningTrap TimeTrap = PenningTrap(b, [&](double t){return V(t, v / sv, f, wV);}, d * sd, false);
+    Particle p = Particle(arma::vec({50, 0, 50}), arma::vec({0, 250, 0}), m, q);
 	TimeTrap.insert_particles(p);
 
-    TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
     TimeTrap.simulate(T, timestep);
 
 	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_TimeTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
@@ -333,27 +285,24 @@ void ex10_particle_track(){
 
 
 void run_all_experiments(){
-	single_particle_endurace();  // first point in P9
-	single_particle_errors();  // 5th and 6th point in P9
-	single_particle_errors("Euler");  // 5th and 6th point in P9, using Euler
-	two_particle();  // 2nd, 3rd, 4th point in P9
-	broad_freq_search(); // first part in p10
-
+	single_particle_endurace();  // Ex9p1
+	single_particle_errors();  // Ex9p5/6
+	single_particle_errors("Euler");  // Ex9p5/6 Euler
+	two_particle();  // Ex9p2/3/4
+	broad_freq_search(); // Ex10p1
+    narrow_freq_search();  // Ex10p2
 }
 
 
 int main() {
-	//single_particle_errors();  // 5th and 6th point in P9, using Euler
-	//single_particle_errors("Euler");  // 5th and 6th point in P9, using Euler
+	// single_particle_endurace();  // Ex9p1
+	// single_particle_errors();  // Ex9p5/6
+	// single_particle_errors("Euler");  // Ex9p5/6 Euler
+	two_particle();  // Ex9p2/3/4
+	// broad_freq_search(); // Ex10p1
+    // narrow_freq_search();  // Ex10p2
+	// ex10_particle_track();
 
-	// two_particle();  // second point in P9
-	// single_particle_endurace();  // first point in P9
-	//run_all_experiments();
-    //broad_freq_search();
-    ex10_particle_track();
-    // broad_freq_search_test();
-
-
-
+	// run_all_experiments();
 	return 0;
 }

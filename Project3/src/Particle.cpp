@@ -1,6 +1,5 @@
 #include "PenningTrap.hpp"
 
-
 Particle::Particle(arma::vec position, arma::vec velocity, double mass, int charge){
 		r = position;
 		v = velocity;
