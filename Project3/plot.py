@@ -7,7 +7,7 @@ from PIL import Image
 
 
 img = Image.open("giffel.jpg")
-giffel = lambda x, y, s=1: dict(source=img, x=int(x), y=int(y), sizex=s, sizey=s, xref="x", yref="y", xanchor="center", yanchor="middle", layer="above", opacity=1)
+giffel = lambda x, y, s=1: dict(source=img, x=float(x), y=float(y), sizex=s, sizey=s, xref="x", yref="y", xanchor="center", yanchor="middle", layer="above", opacity=1)
 
 def plot_z():  # Ex9p1
     df = pd.read_csv("outputs/oneP_endurance.txt", header=0, sep=" ")
@@ -56,16 +56,16 @@ def plot_xy_plane():
     fig.show()
 
 def plot_phase_diagrams():
-    max_time = 10
+    max_time = 60
     for x in "xyz":
         fig = go.Figure()
         for b in ["", "_no"]:
             df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
-            df = df.loc[lambda x: x["time"] < max_time, :]
-            for i in range(1, 3):
-                dP = df.loc[lambda x: x["particle"] == i, :]
+            df = df.loc[lambda df: df["time"] < max_time, :]
+            for i in range(1, 2):
+                dP = df.loc[lambda df: df["particle"] == i, :]
                 fig.add_trace(go.Scatter(x=dP[x], y=dP["v" + x], mode="lines", line=dict(width=4), name=f"particle {i} {b} ppi"))
-                start = dP.loc[lambda x: x["time"] == 0, :]
+                start = dP.loc[lambda df: df["time"] == 0, :]
                 fig.add_layout_image(giffel(start[x], start["v" + x], 0.5 if x == "z" else 0.7))
         fig.update_layout(title=f"Phase space plot for {x}, with and without interaction",
                     xaxis_title=f"{x} [\mu m]",
@@ -75,6 +75,52 @@ def plot_phase_diagrams():
                     )
         fig.show()
 
+def plot3d():
+    max_time = 30 # lag meg for 30 og 100
+    fig = go.Figure()
+    colors = px.colors.qualitative.Plotly
+    c = 0
+    for b in ["", "_no"]:
+        df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
+        df = df.loc[lambda x: x["time"] < max_time, :]
+        for i in range(1, 3):
+            dP = df.loc[lambda x: x["particle"] == i, :]
+            fig.add_trace(go.Scatter3d(x=dP["x"], y=dP["y"], z=dP["z"], mode="lines", line=dict(width=4, color=colors[c]), name=f"p {i} {b} ppi"))
+            start = dP.loc[lambda x: x["time"] == 0, :]
+            fig.add_trace(go.Scatter3d(x=start["x"], y=start["y"], z=start["z"], mode="markers", marker=dict(size=5, color=colors[c]), showlegend=False))
+            c += 1
+    fig.update_layout(
+                xaxis_range=[-40, 40],
+                yaxis_range=[-40, 40],
+                # title=f"Phase space plot for {x}, with and without interaction",
+                # xaxis_title=f"{x} [\mu m]",
+                # yaxis_title=f"v{x} [\mu m / \mu s]",
+                # font_family="Open sans",
+                # font_size=45,
+                )
+    fig.show()
+
+def make_cool_wallpaper():
+    max_time = 1000
+    fig = go.Figure()
+    colors = px.colors.qualitative.Plotly
+    c = 0
+    for b in ["", "_no"]:
+        df = pd.read_csv(f"outputs/twoP{b}_ppi_tall.txt", header=0, sep=" ")
+        df = df.loc[lambda x: x["time"] < max_time, :]
+        for i in range(1, 3):
+            dP = df.loc[lambda x: x["particle"] == i, :]
+            fig.add_trace(go.Scatter3d(x=dP["x"], y=dP["y"], z=dP["z"], mode="lines", line=dict(width=4, color=colors[5 * (i % 2)]), name=f"p {i} {b} ppi"))
+            start = dP.loc[lambda x: x["time"] == 0, :]
+            fig.add_trace(go.Scatter3d(x=start["x"], y=start["y"], z=start["z"], mode="markers", marker=dict(size=5, color=colors[c]), showlegend=False))
+            c += 1
+    fig.update_layout(
+                xaxis_range=[-40, 40],
+                yaxis_range=[-40, 40],
+                paper_bgcolor="rgba(1,1,1,1)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                )
+    fig.show()
 
 
 def plot_rel_errors(method="RK4"):  # Ex9p5
@@ -132,14 +178,14 @@ def ex_10_plot_both_tracks_z():
 
 
     fig.update_layout(
-    # xaxis_range=[0, 150],
-    yaxis_range=[-600,600],
-    font_family="Open sans",
-    font_size=45,
-    title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.44}}$",
-    xaxis_title=r"$\Huge \text{Time  } [\mu s] $",
-    yaxis_title=r"$\Huge \text{z  } [\mu m] $",
-    legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+        # xaxis_range=[0, 150],
+        yaxis_range=[-600,600],
+        font_family="Open sans",
+        font_size=45,
+        title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.44}}$",
+        xaxis_title=r"$\Huge \text{Time  } [\mu s] $",
+        yaxis_title=r"$\Huge \text{z  } [\mu m] $",
+        legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
     fig.show()
 
 def plot_freqs_z():
@@ -256,9 +302,10 @@ if __name__ == "__main__":
     #error_conv_rate()
     #error_conv_rate("Euler")
     # plot_xy_plane()
-    # plot_phase_diagrams()
+    plot_phase_diagrams()
+    # plot3d()
     # ex10_broad_plot_fraction_remaining()
-    plot_freqs_z()
-    ex_10_plot_both_tracks_z()
+    # plot_freqs_z()
+    # ex_10_plot_both_tracks_z()
     # ex_10_track_xy()
     #ex10_narrow_plot_no_ppi_fraction_remaining()
