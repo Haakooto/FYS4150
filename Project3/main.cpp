@@ -261,14 +261,13 @@ void ex10_particle_track(){  // delete me?
     double sd = 0.05;  // factor difference in d
     double sv = 4000;  // factor difference in v0
 
-    double f = 3;
-    double wV = 2.38;
+    double f = 0.4;
+    double wV = 0.44;
 
-    PenningTrap TimeTrap = PenningTrap(b, [](double t){return t;}, d * sd, false);
-    Particle p = Particle(arma::vec({10, 0, 10}), arma::vec({0,-10,0}), m, q);
+    PenningTrap TimeTrap = PenningTrap(b, [&](double t){return V(t, v / sv, f, wV);}, d * sd, false);
+    Particle p = Particle(arma::vec({50, 0, 50}), arma::vec({0, 250, 0}), m, q);
 	TimeTrap.insert_particles(p);
 
-    TimeTrap.set_tEfield([&](double t){return V(t, v / sv, f, wV);});
     TimeTrap.simulate(T, timestep);
 
 	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_TimeTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
@@ -281,6 +280,7 @@ void ex10_particle_track(){  // delete me?
     write_cube_to_file(RegularTrap.get_history(), RegularTrap.get_time(), "outputs/ex10_RegularTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
 }
 
+
 void run_all_experiments(){
 	single_particle_endurace();  // Ex9p1
 	single_particle_errors();  // Ex9p5/6
@@ -290,6 +290,7 @@ void run_all_experiments(){
     narrow_freq_search();  // Ex10p2
 }
 
+
 int main() {
 	// single_particle_endurace();  // Ex9p1
 	// single_particle_errors();  // Ex9p5/6
@@ -297,7 +298,8 @@ int main() {
 	// two_particle();  // Ex9p2/3/4
 	// broad_freq_search(); // Ex10p1
     // narrow_freq_search();  // Ex10p2
-
-	run_all_experiments();
+	ex10_particle_track();
+	
+	// run_all_experiments();
 	return 0;
 }

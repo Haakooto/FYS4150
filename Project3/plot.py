@@ -58,10 +58,10 @@ def plot_rel_errors(method="RK4"):  # Ex9p5
         traces.append(trace)
     fig = go.Figure(data=traces)
     fig.update_layout(title=f"Relative error as function of time using {method} for different timesteps",
-                      xaxis_title="Time [\mu s]",
+                      xaxis_title=r"$\Huge \text{Time} [\mu s]$",
                       yaxis_title="log10(relative error)",
-                      font_size=35,
-                      font_family="Garamond",
+                      font_size=45,
+                      font_family="Open sans",
                       )
     fig.show()
 
@@ -76,6 +76,7 @@ def error_conv_rate(method="RK4"):  # Ex9p6
     print(f"Error convergence rate for {method} is {conv}")  # print
 
 
+
 def ex_10_plot_track_z():
     fig = go.Figure()
     data = pd.read_csv("outputs/ex10_TimeTrap_particle_track_f0.4_w0.44.txt", header = 0, sep = " ")
@@ -83,19 +84,19 @@ def ex_10_plot_track_z():
     fig.add_trace(go.Scatter(x=data["time"], y=data["z"], mode="lines"))
 
     fig.update_layout(
-    xaxis_range=[0, 500],
-    yaxis_range=[-100,100],
-    font_family="Garamond",
-    font_size=30,
-    xaxis_title="Time",
-    yaxis_title="z",
-    title="Position along z-axis with f=0.4, frequency=0.44")
+    xaxis_range=[0, 200],
+    yaxis_range=[-500,500],
+    font_family="Open sans",
+    font_size=45,
+    xaxis_title=r"$\Huge \text{Time} [\mu s] $",
+    yaxis_title=r"$\Huge \text{z} [\mu m] $",
+    title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{f} = 0.4, \omega_V = 0.44}$")
     fig.show()
 
 
 def ex_10_plot_both_tracks_z():
-    f=3
-    w=2.38
+    f=0.4
+    w=0.44
     fig = go.Figure()
     dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
     dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
@@ -104,55 +105,63 @@ def ex_10_plot_both_tracks_z():
         x=dfTime["time"],
         y=dfTime["z"],
         mode="lines",
+        line=dict(width=4),
         name = "Time-dependent potential"))
 
     fig.add_trace(go.Scatter(
         x=dfRegular["time"],
         y=dfRegular["z"],
         mode="lines",
+        line=dict(width=4),
         name = "Constant potential"))
 
 
     fig.update_layout(
-    xaxis_range=[0, 500],
-    yaxis_range=[-100,100],
-    font_family="Garamond",
-    font_size=30,
-    title=f"Position along z-axis with f={f}, frequency={w}",
-    xaxis_title="Time",
-    yaxis_title="z",
+    xaxis_range=[0, 150],
+    yaxis_range=[-600,600],
+    font_family="Open sans",
+    font_size=45,
+    title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.44}}$",
+    xaxis_title=r"$\Huge \text{Time  } [\mu s] $",
+    yaxis_title=r"$\Huge \text{z  } [\mu m] $",
     legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
     fig.show()
 
 
 def ex_10_track_xy():
     fig = go.Figure()
-    f = 3
-    w = 2.38
+    f = 0.4
+    w = 0.44
+
     dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
     dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+
+    dfTime = dfTime.loc[lambda df: df["time"] < 130, :]
+    dfRegular = dfRegular.loc[lambda df: df["time"] < 130, :]
 
     fig.add_trace(go.Scatter(
         x=dfTime["x"],
         y=dfTime["y"],
         mode="lines",
+        line=dict(width=3),
         name = "Time-dependent potential"))
 
     fig.add_trace(go.Scatter(
         x=dfRegular["x"],
         y=dfRegular["y"],
         mode="lines",
+        line=dict(width=3),
         name = "Constant potential"))
 
 
     fig.update_layout(
-    xaxis_range=[-300, 250],
-    yaxis_range=[-100,500],
-    font_family="Garamond",
-    font_size=30,
-    title=f"Position in the xy-plane with f={f}, frequency={w}",
-    xaxis_title="x",
-    yaxis_title="y",
+    xaxis_range=[-200,300],
+    yaxis_range=[-300,200],
+    font_family="Open sans",
+    font_size=45,
+    title = r"$\Huge{\text{Position  in the xy-plane  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.44}}$",
+    xaxis_title=r"$\Huge \text{x  } [\mu m] $",
+    yaxis_title=r"$ \Huge \text{y  } [\mu m] $",
     legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
     fig.show()
 
@@ -168,15 +177,15 @@ def ex10_broad_plot_fraction_remaining():
         fig.add_trace(go.Scatter(x = data["wV"],
             y = data["fracRem"],
             mode = "lines",
-            line=dict(width=3),
+            line=dict(width=4),
             name = f"Amplitude: {f}"))
 
         fig.update_layout(
-            font_family="Garamond",
-            font_size=30,
-            title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds",
-            xaxis_title="Frequency",
-            yaxis_title="Fraction of particles remaining",
+            font_family="Open sans",
+            font_size=45,
+            title = r"$\Huge{\text{Fraction  of  particles  remaining  in  the  Penning  trap  after  0.5  } \mu s }$",
+            xaxis_title=r"$\Huge\omega_V$",
+            yaxis_title="Fraction",
             legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01)
             )
     fig.show()
@@ -191,15 +200,15 @@ def ex10_narrow_plot_no_ppi_fraction_remaining():
         fig.add_trace(go.Scatter(x = data["wV"],
         y = data["fracRem"],
         mode = "lines",
-        line=dict(width=3),
+        line=dict(width=4),
         name = f"Amplitude: {f}"))
 
     fig.update_layout(
-        font_family="Garamond",
-        font_size=30,
-        title="Fraction of particles remaining in the Penning trap after 0.5 milliseconds",
-        xaxis_title="Frequency",
-        yaxis_title="Fraction of particles remaining",
+        font_family="Open sans",
+        font_size=45,
+        title=r"$\uge{\text{Fraction  of  particles  remaining  in  the  Penning  trap  after  0.5  }  \mu s}$",
+        xaxis_title=r"$\Huge\omega_V$",
+        yaxis_title="Fraction",
         legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99)
         )
     fig.show()
@@ -210,10 +219,9 @@ if __name__ == "__main__":
     # plot_xy_plane()
     # plot_rel_errors()
     # plot_rel_errors("Euler")
-    # error_conv_rate()
-    # error_conv_rate("Euler")
-    # ex10_broad_plot_fraction_remaining()
-    #ex_10_plot_both_tracks_z()
-    # ex_10_track_xy()
-    # ex10_broad_plot_fraction_remaining()
+    #error_conv_rate()
+    #error_conv_rate("Euler")
+    ex10_broad_plot_fraction_remaining()
+    ex_10_plot_both_tracks_z()
+    ex_10_track_xy()
     #ex10_narrow_plot_no_ppi_fraction_remaining()
