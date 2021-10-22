@@ -272,25 +272,30 @@ def ex10_broad_plot_fraction_remaining():
     fig.show()
 
 
-def ex10_narrow_plot_no_ppi_fraction_remaining():
+def ex10_narrow_plot_ppi_fraction_remaining():
     fig = go.Figure()
-    file = pd.read_csv("outputs/narrow_freq_search_no_ppi.txt", header = 0, sep = " " )
-    #timestep er 0.0025
-    for f in [0.1, 0.4, 0.7]:
-        data = file.loc[lambda x: x["ampl"] == f, :]
-        fig.add_trace(go.Scatter(x = data["wV"],
-        y = data["fracRem"],
+
+    df_no_ppi = pd.read_csv("outputs/narrow_freq_search_no_ppi.txt", header = 0, sep = " " )
+    fig.add_trace(go.Scatter(x = df_no_ppi["wV"],
+        y = df_no_ppi["fracRem"],
         mode = "lines",
         line=dict(width=4),
-        name = f"Amplitude: {f}"))
+        name = f"Without ppi"))
+
+    df_with_ppi = pd.read_csv("outputs/narrow_freq_search_with_ppi.txt", header = 0, sep = " " )
+    fig.add_trace(go.Scatter(x = df_with_ppi["wV"],
+        y = df_with_ppi["fracRem"],
+        mode = "lines",
+        line=dict(width=4),
+        name = f"With ppi"))
 
     fig.update_layout(
         font_family="Open sans",
         font_size=45,
-        title=r"$\uge{\text{Fraction  of  particles  remaining  in  the  Penning  trap  after  0.5  }  \mu s}$",
+        title=r"$\Huge{\text{Fraction  of  particles  remaining  in  the  Penning  trap  after  0.5  }  \mu s}$",
         xaxis_title=r"$\Huge\omega_V$",
         yaxis_title="Fraction",
-        legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99)
+        legend=dict(yanchor="top", xanchor="left", x=0.5, y=0.99)
         )
     fig.show()
 
@@ -308,4 +313,4 @@ if __name__ == "__main__":
     # plot_freqs_z()
     # ex_10_plot_both_tracks_z()
     # ex_10_track_xy()
-    #ex10_narrow_plot_no_ppi_fraction_remaining()
+    ex10_narrow_plot_ppi_fraction_remaining()
