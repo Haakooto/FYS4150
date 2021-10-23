@@ -155,39 +155,6 @@ def error_conv_rate(method="RK4"):  # Ex9p6
     print(f"Error convergence rate for {method} is {conv}")  # print
 
 
-def ex_10_plot_both_tracks_z():
-    f=0.4
-    w=0.49
-    fig = go.Figure()
-    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header = 0, sep = " ")
-    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header = 0, sep = " ")
-
-    fig.add_trace(go.Scatter(
-        x=dfTime["time"],
-        y=dfTime["z"],
-        mode="lines",
-        line=dict(width=4),
-        name = "Time-dependent potential"))
-
-    fig.add_trace(go.Scatter(
-        x=dfRegular["time"],
-        y=dfRegular["z"],
-        mode="lines",
-        line=dict(width=4),
-        name = "Constant potential"))
-
-
-    fig.update_layout(
-        # xaxis_range=[0, 150],
-        yaxis_range=[-600,600],
-        font_family="Open sans",
-        font_size=45,
-        title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.44}}$",
-        xaxis_title=r"$\Huge \text{Time  } [\mu s] $",
-        yaxis_title=r"$\Huge \text{z  } [\mu m] $",
-        legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
-    fig.show()
-
 def plot_freqs_z():
     f = 0.4
     w = 0.49
@@ -207,16 +174,58 @@ def plot_freqs_z():
     fig.update_layout(legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
     fig.show()
 
-def ex_10_track_xy():
+
+def ex_10_plot_both_tracks_z():
+    f=0.4
+    w=0.49
     fig = go.Figure()
-    f = 0.7
-    w = 0.2
+
+    #dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header = 0, sep = " ")
+    #dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header = 0, sep = " ")
 
     dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
     dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
 
-    dfTime = dfTime.loc[lambda df: df["time"] < 400, :]
-    dfRegular = dfRegular.loc[lambda df: df["time"] < 400, :]
+
+    fig.add_trace(go.Scatter(
+        x=dfTime["time"],
+        y=dfTime["z"],
+        mode="lines",
+        line=dict(width=4),
+        name = "Time-dependent potential"))
+
+    fig.add_trace(go.Scatter(
+        x=dfRegular["time"],
+        y=dfRegular["z"],
+        mode="lines",
+        line=dict(width=4),
+        name = "Constant potential"))
+
+
+    fig.update_layout(
+        xaxis_range=[0, 500],
+        yaxis_range=[-500,500],
+        font_family="Open sans",
+        font_size=45,
+        title=r"$\Huge{\text{Position  along  z-axis  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.49}}$",
+        xaxis_title=r"$\Huge \text{Time  } [\mu s] $",
+        yaxis_title=r"$\Huge \text{z  } [\mu m] $",
+        legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+    fig.show()
+
+
+
+
+def ex_10_track_xy():
+    fig = go.Figure()
+    f = 0.4
+    w = 0.49
+
+    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{f}_w{w}.txt", header = 0, sep = " ")
+
+    dfTime = dfTime.loc[lambda df: df["time"] < 500, :]
+    dfRegular = dfRegular.loc[lambda df: df["time"] < 500, :]
 
     fig.add_trace(go.Scatter(
         x=dfTime["x"],
@@ -234,11 +243,11 @@ def ex_10_track_xy():
 
 
     fig.update_layout(
-    xaxis_range=[-200,300],
-    yaxis_range=[-300,200],
+    xaxis_range=[-500,500],
+    yaxis_range=[-500,500],
     font_family="Open sans",
     font_size=45,
-    title = r"$\Huge{\text{Position  in the xy-plane  with  } \textit{ f = 0.7}, \omega_V \textit{= 0.2}}$",
+    title = r"$\Huge{\text{Position  in the xy-plane  with  } \textit{ f = 0.4}, \omega_V \textit{= 0.49}}$",
     xaxis_title=r"$\Huge \text{x  } [\mu m] $",
     yaxis_title=r"$ \Huge \text{y  } [\mu m] $",
     legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
@@ -310,5 +319,5 @@ if __name__ == "__main__":
     #ex10_broad_plot_fraction_remaining()
     #plot_freqs_z()
     ex_10_plot_both_tracks_z()
-    ex_10_track_xy()
+    #ex_10_track_xy()
     #ex10_narrow_plot_ppi_fraction_remaining()
