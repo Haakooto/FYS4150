@@ -265,23 +265,49 @@ void ex10_particle_track(){
     double sv = 4000;  // factor difference in v0
 
     double f = 0.4;
-    double wV = 0.44;
+    double wV = 0.39;
 
     PenningTrap TimeTrap = PenningTrap(b, [&](double t){return V(t, v / sv, f, wV);}, d * sd, false);
-    Particle p = Particle(arma::vec({50, 0, 50}), arma::vec({0, 250, 0}), m, q);
+    Particle p = Particle(arma::vec({50, 50, 50}), arma::vec({0, 50, 30}), m, q);
 	TimeTrap.insert_particles(p);
 
     TimeTrap.simulate(T, timestep);
 
-	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_TimeTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
+	write_cube_to_file(TimeTrap.get_history(), TimeTrap.get_time(), "outputs/ex10_TimeTrap_particle_track_f0.4_w0.49.txt");
 
     PenningTrap RegularTrap = PenningTrap(b, v/sv, d * sd, false);
     RegularTrap.insert_particles(p);
 
     RegularTrap.simulate(T, timestep);
 
-    write_cube_to_file(RegularTrap.get_history(), RegularTrap.get_time(), "outputs/ex10_RegularTrap_particle_track_f" + to_string(f) + "_w" + to_string(wV) + ".txt");
+    write_cube_to_file(RegularTrap.get_history(), RegularTrap.get_time(), "outputs/ex10_RegularTrap_particle_track_f0.4_w0.49.txt");
 }
+
+
+void ex10_particles_escape(){
+    double T = 500;
+    double timestep = 0.005;
+    int N = 100;
+
+    double sd = 0.05;  // factor difference in d
+    double sv = 4000;  // factor difference in v0
+
+    double f = 0.7;
+    double wV = 2.38;
+
+    PenningTrap TimeTrap = PenningTrap(b, [&](double t){return V(t, v / sv, f, wV);}, d * sd, false);
+	TimeTrap.insert_particles(N, m, q);
+
+    TimeTrap.simulate(T, timestep);
+
+    double fraq = (double)(N - TimeTrap.escaped()) / N;
+
+    cout << "Particles remaining: " << fraq*100 << endl;
+
+
+    }
+
+
 
 
 void run_all_experiments(){
@@ -298,10 +324,11 @@ int main() {
 	// single_particle_endurace();  // Ex9p1
 	// single_particle_errors();  // Ex9p5/6
 	// single_particle_errors("Euler");  // Ex9p5/6 Euler
-	two_particle();  // Ex9p2/3/4
+	//two_particle();  // Ex9p2/3/4
 	// broad_freq_search(); // Ex10p1
     // narrow_freq_search();  // Ex10p2
-	// ex10_particle_track();
+	ex10_particle_track();
+    //ex10_particles_escape();
 
 	// run_all_experiments();
 	return 0;

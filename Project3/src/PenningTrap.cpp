@@ -94,7 +94,15 @@ void PenningTrap::simulate(double T, double timestep, string method){
 		// Check if any particle is outside trap
         for (int p=0; p < N; p++){
             if (arma::norm(R.slice(i + 1).rows(0, 2).col(p)) > d){
+<<<<<<< HEAD
+                if (Q(p) != 0){
+                    cout << "Escaped at time: " << t(i) << endl;
+                    cout << "Position: " << R.slice(i + 1).rows(0, 2).col(p) << endl;
+                }
+                Q(p) = 0;
+=======
                 Q(p) = 0;  // effectively set E and B-field to 0 outside trap
+>>>>>>> e05a778bec83d21af424cecf569c12a4e1c88cdb
             }
         }
 	}
