@@ -191,7 +191,7 @@ def plot_freqs_z():
         fig.add_trace(go.Scatter(x=xf[:stop], y=np.abs(yf)[:stop], mode="lines", name=name))
     fig.update_layout( #legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99),
                         title="Frequency analysis of motion along z-axis",
-                        xaxis_title=r"$\Huge \omega$",
+                        xaxis_title=r"$\Huge \omega \, [\mu s^{-1}]$",
                         yaxis_title=r"$\Huge \text{Amplitude}$",
                         font_family="Open sans",
                         font_size=45,)
@@ -295,7 +295,7 @@ def ex10_broad_plot_fraction_remaining():
             font_family="Open sans",
             font_size=45,
             title = r"$\Huge{\text{Fraction  of  particles  remaining  in  the  Penning  trap  after  0.5  } \mu s }$",
-            xaxis_title=r"$\Huge\omega_V$",
+            xaxis_title=r"$\Huge\omega_V \, [\mu s^{-1}]$",
             yaxis_title="Fraction",
             legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01)
             )
@@ -323,7 +323,7 @@ def ex10_narrow_plot_ppi_fraction_remaining():
         font_family="Open sans",
         font_size=45,
         title=r"$\Huge{\text{Fraction  of  particles  remaining  in  the  trap  after  0.5} \mu s \text{  for } \textit{ f =} 0.1}$",
-        xaxis_title=r"$\Huge\omega_V$",
+        xaxis_title=r"$\Huge\omega_V \, [\mu s^{-1}]$",
         yaxis_title="Fraction",
         legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01)
         )
@@ -337,19 +337,10 @@ if __name__ == "__main__":
     # error_conv_rate()
     # error_conv_rate("Euler")
     # plot_xy_plane()
-    make_cool_wallpaper()
+    # make_cool_wallpaper()
     # plot_phase_diagrams()
-<<<<<<< HEAD
-    # ex10_broad_plot_fraction_remaining()
+    ex10_broad_plot_fraction_remaining()
     plot_freqs_z()
     # ex_10_plot_both_tracks_z()
-    # ex_10_track_xy()
-    # ex10_narrow_plot_ppi_fraction_remaining()
-    # plot3d()
-=======
-    #ex10_broad_plot_fraction_remaining()
-    #plot_freqs_z()
-    # ex_10_plot_both_tracks_z()
     #ex_10_track_xy()
-    # ex10_narrow_plot_ppi_fraction_remaining()
->>>>>>> d8f4470acd331e4a7b9b8a85897fcd81c1e442f9
+    ex10_narrow_plot_ppi_fraction_remaining()
