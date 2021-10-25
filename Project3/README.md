@@ -1,10 +1,10 @@
 # Project3 - Numerical Study of the Penning Trap with N Particles
 Sara Pernille Jensen, Alec Elías Sigurðarson, Håkon Olav Torvik
 
-This repository contains our code for Project 2 of FYS4150 fall 2021.
+This repository contains our code for Project 3 of FYS4150 fall 2021.
 
-# TODO: 
-- reimplement choice of integration method (Euler vs RK4)
-- do experiment studying convergence rates and error calculation
-- do experiment using narrower frequency band, with and without ppi
-- do all plotting and looking at results
+## Running code
+The c++ code can be compiled and run though the `makefile`, by using the command "`$ make all`" in the terminal. This uses c++ version 20, so might not work if this is not install. Changing this to version 14 or 17 should also correctly compile the code. By calling this, all the implemented experiments will be run. This can take a while. Specific experiments can be run by calling it in the main-function. The results are saved in the directory `outputs`, so make sure this is present.
+
+The plots are made by calling "`$ python plot.py`". If all experiments have been run, all plots in the rapport should be recreated.
+

@@ -133,7 +133,7 @@ void two_particle(){  // Ex9p2/3/4
 	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/twoP_no_ppi.txt");
 }
 
-void wallpaper(){  // For fun. Run make_cool_wallpaper in plot.py after.
+void wallpaper(){  // For fun. Run make_cool_wallpaper in plot.py after. Look at the resulting figure from above
 	double T = 10000;
 	double h = 0.01;
 
@@ -320,15 +320,6 @@ void run_all_experiments(){
 
 
 int main() {
-	// single_particle_endurace();  // Ex9p1
-	// single_particle_errors();  // Ex9p5/6
-	// single_particle_errors("Euler");  // Ex9p5/6 Euler
-	//two_particle();  // Ex9p2/3/4
-	// broad_freq_search(); // Ex10p1
-    // narrow_freq_search();  // Ex10p2
-	ex10_particle_track();
-    //ex10_particles_escape();
-
-	// run_all_experiments();
+	run_all_experiments();
 	return 0;
 }
