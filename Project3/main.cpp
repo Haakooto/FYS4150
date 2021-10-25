@@ -134,7 +134,7 @@ void two_particle(){  // Ex9p2/3/4
 }
 
 void wallpaper(){  // For fun. Run make_cool_wallpaper in plot.py after.
-	double T = 100;
+	double T = 10000;
 	double h = 0.01;
 
 	PenningTrap Trap = PenningTrap(b, v, d, true);
@@ -311,8 +311,11 @@ void run_all_experiments(){
 	single_particle_errors();  // Ex9p5/6
 	single_particle_errors("Euler");  // Ex9p5/6 Euler
 	two_particle();  // Ex9p2/3/4
+	wallpaper();
 	broad_freq_search(); // Ex10p1
     narrow_freq_search();  // Ex10p2
+	ex10_particle_track();
+	ex10_particles_escape();
 }
 
 
