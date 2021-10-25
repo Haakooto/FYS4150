@@ -28,9 +28,16 @@ def plot_z():  # Ex9p1
 
     anal = 0.5 * (np.exp(1j * wz * df["time"]) + np.exp(-1j * wz * df["time"]))
 
-    trace = go.Scatter(x=df["time"], y=df["z"] / df["z"][0], mode="lines", line=dict(width=5))
-    trace2 = go.Scatter(x=df["time"], y=np.real(anal), mode="lines", line=dict(dash="dot"))
+    trace = go.Scatter(x=df["time"], y=df["z"] / df["z"][0], mode="lines", line=dict(width=5), name="(RK4)")
+    trace2 = go.Scatter(x=df["time"], y=np.real(anal), mode="lines", line=dict(dash="dot"), name="Analytical")
     fig = go.Figure(data=[trace, trace2])
+
+    fig.update_layout(title="Relative position on z-axis of a single particle",
+                    xaxis_title=r"$\Huge t \,[\mu s]$",
+                    yaxis_title=r"$\Huge \frac{z}{z_0}$",
+                    font_family="Open sans",
+                    font_size=45,
+                    )
 
     fig.show()
 
@@ -38,25 +45,20 @@ def plot_z():  # Ex9p1
 def plot_xy_plane():
     max_time = 20
     fig = go.Figure()
-    for b in ["", "_no"]:
-        df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
+    for b in ["", "no_"]:
+        df = pd.read_csv(f"outputs/twoP_{b}ppi.txt", header=0, sep=" ")
         df = df.loc[lambda x: x["time"] < max_time, :]
         for i in range(1, 3):
             dP = df.loc[lambda x: x["particle"] == i, :]
-            fig.add_trace(go.Scatter(x=dP["x"], y=dP["y"], mode="lines", line=dict(width=4), name=f"particle {i} {b} ppi"))
+            fig.add_trace(go.Scatter(x=dP["x"], y=dP["y"], mode="lines", line=dict(width=4), name=f"particle {i} {b}ppi"))
             start = dP.loc[lambda x: x["time"] == 0, :]
             fig.add_layout_image(giffel(start["x"], start["y"]))
 
-    fig.update_layout(title="Position of 2 particles in xy-plane, with and without interaction",
-<<<<<<< HEAD
-                      xaxis_title=r"$\huge \text{x} [\mu m]$",
-                      yaxis_title=r"$\huge \text{y} [\mu m]$",
-=======
-                      xaxis_title="$x [\mu m]",
-                      yaxis_title="$y [\mu m]",
->>>>>>> e05a778bec83d21af424cecf569c12a4e1c88cdb
+    fig.update_layout(title="Position of 2 particles in xy-plane",
+                      xaxis_title=r"$\Huge x \,[\mu m]$",
+                      yaxis_title=r"$\Huge y \,[\mu m]$",
                       font_family="Open sans",
-                      font_size=30,
+                      font_size=45,
                       )
     fig.show()
 
@@ -66,8 +68,8 @@ def plot_phase_diagrams():
     c = 0
     for x in "xyz":
         fig = go.Figure()
-        for b in ["", "_no"]:
-            df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
+        for b in ["", "no_"]:
+            df = pd.read_csv(f"outputs/twoP_{b}ppi.txt", header=0, sep=" ")
             df = df.loc[lambda df: df["time"] < max_time, :]
             for i in range(1, 2):
                 dP = df.loc[lambda df: df["particle"] == i, :]
@@ -78,35 +80,37 @@ def plot_phase_diagrams():
                 fig.add_trace(go.Scatter(x=end[x], y=end["v" + x], mode="markers", marker=dict(size=20, color=colors[c % 2]), name="End point"))
                 c += 1
         fig.update_layout(title=f"Phase space plot for {x}, with and without interaction",
-                    xaxis_title=f"{x} [\mu m]",
-                    yaxis_title=f"v{x} [\mu m / \mu s]",
+                    xaxis_title=rf"$\Huge {x} \,[\mu m]$",
+                    yaxis_title=rf"$\Huge v_{x} \,[\mu m / \mu s]$",
                     font_family="Open sans",
-                    font_size=45,
+                    font_size=40,
                     )
         fig.show()
 
 def plot3d():
-    max_time = 1000 # lag meg for 30 og 100
+    max_time = 30 # lag meg for 30 og 100
     fig = go.Figure()
     colors = px.colors.qualitative.Plotly
     c = 0
-    for b in ["", "_no"]:
-        df = pd.read_csv(f"outputs/twoP{b}_ppi.txt", header=0, sep=" ")
+    for b in ["", "no_"]:
+        df = pd.read_csv(f"outputs/twoP_{b}ppi.txt", header=0, sep=" ")
         df = df.loc[lambda x: x["time"] < max_time, :]
         for i in range(1, 3):
             dP = df.loc[lambda x: x["particle"] == i, :]
-            fig.add_trace(go.Scatter3d(x=dP["x"], y=dP["y"], z=dP["z"], mode="lines", line=dict(width=4, color=colors[c]), name=f"p {i} {b} ppi"))
+            fig.add_trace(go.Scatter3d(x=dP["x"], y=dP["y"], z=dP["z"], mode="lines", line=dict(width=4, color=colors[c]), name=f'p {i} {b}ppi'))
             start = dP.loc[lambda x: x["time"] == 0, :]
             fig.add_trace(go.Scatter3d(x=start["x"], y=start["y"], z=start["z"], mode="markers", marker=dict(size=5, color=colors[c]), showlegend=False))
             c += 1
     fig.update_layout(
                 xaxis_range=[-40, 40],
                 yaxis_range=[-40, 40],
-                # title=f"Phase space plot for {x}, with and without interaction",
-                # xaxis_title=f"{x} [\mu m]",
-                # yaxis_title=f"v{x} [\mu m / \mu s]",
-                # font_family="Open sans",
-                # font_size=45,
+                legend_font_size = 45,
+                title="3d plot of two particles",
+                title_font_size = 45,
+                # xaxis_title=rf"${x} \, [\mu m]$",
+                # yaxis_title=rf"$v_{x} \, [\mu m / \mu s]$",
+                font_family="Open sans",
+                # font_size=20,
                 )
     fig.show()
 
@@ -146,9 +150,9 @@ def plot_rel_errors(method="RK4"):  # Ex9p5
         trace = go.Scatter(x=data["t"], y=np.log10(data["err"]), mode="lines", line=dict(width=5), name=f"log10(h) = - {dt}")
         traces.append(trace)
     fig = go.Figure(data=traces)
-    fig.update_layout(title=f"Relative error as function of time using {method} for different timesteps",
-                      xaxis_title=r"$\Huge \text{Time} [\mu s]$",
-                      yaxis_title="log10(relative error)",
+    fig.update_layout(title=f"Relative error with {method} for different timesteps",
+                      xaxis_title=r"$\Huge \text{Time } [\mu s]$",
+                      yaxis_title=r"$\Huge log_{10}(\text{relative error})$",
                       font_size=45,
                       font_family="Open sans",
                       )
@@ -169,10 +173,10 @@ def plot_freqs_z():
     f = 0.4
     w = 0.49
     fig = go.Figure()
-    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header=0, sep=" ")
-    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{str(f).ljust(8, '0')}_w{str(w).ljust(8, '0')}.txt", header=0, sep=" ")
+    dfTime = pd.read_csv(f"outputs/ex10_TimeTrap_particle_track_f{str(f).ljust(2, '0')}_w{str(w).ljust(2, '0')}.txt", header=0, sep=" ")
+    dfRegular = pd.read_csv(f"outputs/ex10_RegularTrap_particle_track_f{str(f).ljust(2, '0')}_w{str(w).ljust(2, '0')}.txt", header=0, sep=" ")
     s = 1
-    for df, name in zip((dfTime, dfRegular),("Time dependent potential", "Constant potential")):
+    for df, name in zip((dfTime, dfRegular),("Time dependent <br> potential", "Constant <br> potential")):
         N = df.shape[0]
 
         dt = df["time"][1]
@@ -181,7 +185,12 @@ def plot_freqs_z():
         stop = np.argmin(abs(xf - s))
 
         fig.add_trace(go.Scatter(x=xf[:stop], y=np.abs(yf)[:stop], mode="lines", name=name))
-    fig.update_layout(legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+    fig.update_layout( #legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99),
+                        title="Frequency analysis of motion along z-axis",
+                        xaxis_title=r"$\Huge \omega$",
+                        yaxis_title=r"$\Huge \text{Amplitude}$",
+                        font_family="Open sans",
+                        font_size=45,)
     fig.show()
 
 
@@ -309,7 +318,7 @@ def ex10_narrow_plot_ppi_fraction_remaining():
     fig.update_layout(
         font_family="Open sans",
         font_size=45,
-        title=r"$\Huge{\text{Fraction  of  particles  remaining  in  the  trap  after  0.5} \mu s \text{  for } \textit{ f =} 0.4}$",
+        title=r"$\Huge{\text{Fraction  of  particles  remaining  in  the  trap  after  0.5} \mu s \text{  for } \textit{ f =} 0.1}$",
         xaxis_title=r"$\Huge\omega_V$",
         yaxis_title="Fraction",
         legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01)
@@ -321,12 +330,13 @@ if __name__ == "__main__":
     # plot_z()
     # plot_rel_errors()
     # plot_rel_errors("Euler")
-    #error_conv_rate()
-    #error_conv_rate("Euler")
+    # error_conv_rate()
+    # error_conv_rate("Euler")
     # plot_xy_plane()
     # plot_phase_diagrams()
-    #ex10_broad_plot_fraction_remaining()
-    #plot_freqs_z()
-    ex_10_plot_both_tracks_z()
-    #ex_10_track_xy()
-    #ex10_narrow_plot_ppi_fraction_remaining()
+    # ex10_broad_plot_fraction_remaining()
+    plot_freqs_z()
+    # ex_10_plot_both_tracks_z()
+    # ex_10_track_xy()
+    # ex10_narrow_plot_ppi_fraction_remaining()
+    # plot3d()

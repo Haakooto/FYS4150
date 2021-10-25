@@ -265,7 +265,7 @@ void ex10_particle_track(){
     double sv = 4000;  // factor difference in v0
 
     double f = 0.4;
-    double wV = 0.39;
+    double wV = 0.5;
 
     PenningTrap TimeTrap = PenningTrap(b, [&](double t){return V(t, v / sv, f, wV);}, d * sd, false);
     Particle p = Particle(arma::vec({50, 50, 50}), arma::vec({0, 50, 30}), m, q);
