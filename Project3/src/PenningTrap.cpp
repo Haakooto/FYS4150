@@ -65,7 +65,7 @@ void PenningTrap::simulate(double T, double timestep, string method){
 	r_cutoff = cut * d;
 
 
-	// initiate simulation, 
+	// initiate simulation,
 	for (int i=0; i < N; i++){
 		Particle p = particles[i];
 		R.slice(0).rows(0, 2).col(i) = p.r; // set positions
@@ -89,20 +89,18 @@ void PenningTrap::simulate(double T, double timestep, string method){
 
 		R.slice(i + 1).rows(0, 2) = u.slice(0);  // write new positions
 		R.slice(i + 1).rows(3, 5) = u.slice(1);  // write new velocities
-		t(i + 1) = (i + 1) * dt; 
+		t(i + 1) = (i + 1) * dt;
 
 		// Check if any particle is outside trap
         for (int p=0; p < N; p++){
             if (arma::norm(R.slice(i + 1).rows(0, 2).col(p)) > d){
-<<<<<<< HEAD
                 if (Q(p) != 0){
                     cout << "Escaped at time: " << t(i) << endl;
                     cout << "Position: " << R.slice(i + 1).rows(0, 2).col(p) << endl;
                 }
-                Q(p) = 0;
-=======
+
                 Q(p) = 0;  // effectively set E and B-field to 0 outside trap
->>>>>>> e05a778bec83d21af424cecf569c12a4e1c88cdb
+
             }
         }
 	}
@@ -161,7 +159,7 @@ arma::mat PenningTrap::sum_particle_forces(arma::mat ri){
 
 	else {
 		for (int i=0; i < N; i++){
-			for (int j=0; j < i; j++){  
+			for (int j=0; j < i; j++){
 				arma::vec diff_ri = ri.col(i)-ri.col(j);
 				double norm = arma::norm(diff_ri);
 				if (norm < r_cutoff){  // speed-up
