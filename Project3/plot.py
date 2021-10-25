@@ -223,7 +223,6 @@ def ex_10_plot_both_tracks_z():
     fig.show()
 
 
-
 def ex_10_track_xy():
     fig = go.Figure()
     f = 0.4
@@ -317,16 +316,16 @@ def ex10_narrow_plot_ppi_fraction_remaining():
 
 
 if __name__ == "__main__":
-    # plot_z()
-    # plot_rel_errors()
-    # plot_rel_errors("Euler")
-    #error_conv_rate()
-    #error_conv_rate("Euler")
-    # plot_xy_plane()
+    plot_z()
+    plot_rel_errors()
+    plot_rel_errors("Euler")
+    error_conv_rate()
+    error_conv_rate("Euler")
+    plot_xy_plane()
     make_cool_wallpaper()
-    # plot_phase_diagrams()
-    #ex10_broad_plot_fraction_remaining()
-    #plot_freqs_z()
-    # ex_10_plot_both_tracks_z()
-    #ex_10_track_xy()
-    # ex10_narrow_plot_ppi_fraction_remaining()
+    plot_phase_diagrams()
+    ex10_broad_plot_fraction_remaining()
+    plot_freqs_z()
+    ex_10_plot_both_tracks_z()
+    ex_10_track_xy()
+    ex10_narrow_plot_ppi_fraction_remaining()
