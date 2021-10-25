@@ -134,6 +134,10 @@ def make_cool_wallpaper():
                 paper_bgcolor="rgba(1,1,1,1)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 )
+    fig.update_scenes(xaxis_visible=False,
+                yaxis_visible=False,
+                zaxis_visible=False,
+                )
     fig.show()
 
 
@@ -333,10 +337,19 @@ if __name__ == "__main__":
     # error_conv_rate()
     # error_conv_rate("Euler")
     # plot_xy_plane()
+    make_cool_wallpaper()
     # plot_phase_diagrams()
+<<<<<<< HEAD
     # ex10_broad_plot_fraction_remaining()
     plot_freqs_z()
     # ex_10_plot_both_tracks_z()
     # ex_10_track_xy()
     # ex10_narrow_plot_ppi_fraction_remaining()
     # plot3d()
+=======
+    #ex10_broad_plot_fraction_remaining()
+    #plot_freqs_z()
+    # ex_10_plot_both_tracks_z()
+    #ex_10_track_xy()
+    # ex10_narrow_plot_ppi_fraction_remaining()
+>>>>>>> d8f4470acd331e4a7b9b8a85897fcd81c1e442f9

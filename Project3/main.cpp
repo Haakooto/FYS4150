@@ -115,28 +115,6 @@ void single_particle_errors(string method="RK4"){  // Ex9p5/6
 	}
 }
 
-void two_particle_old(){  // delete me?
-	double T = 100;
-	double h = 0.005;
-
-	Particle p1 = Particle(arma::vec({20, 0, 0}), arma::vec({0, 0, 0}), m, q);
-	Particle p2 = Particle(arma::vec({-20, 0, 0}), arma::vec({0, 0, 0}), m, q);
-
-	PenningTrap Trap = PenningTrap(b, v, d, true);
-	PenningTrap Trap_no_ppi = PenningTrap(b, v, d, false);
-
-	Trap.insert_particles(p1);
-	Trap.insert_particles(p2);
-	Trap.simulate(T, h);
-
-	Trap_no_ppi.insert_particles(p1);
-	Trap_no_ppi.insert_particles(p2);
-	Trap_no_ppi.simulate(T, h);
-
-	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/twoP_ppi.txt");
-	write_cube_to_file(Trap_no_ppi.get_history(), Trap_no_ppi.get_time(), "outputs/twoP_no_ppi.txt");
-}
-
 void two_particle(){  // Ex9p2/3/4
 	double T = 100;
 	double h = 0.01;
@@ -153,6 +131,24 @@ void two_particle(){  // Ex9p2/3/4
 	Trap.ppi = false;
 	Trap.simulate(T, h);
 	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/twoP_no_ppi.txt");
+}
+
+void wallpaper(){  // For fun. Run make_cool_wallpaper in plot.py after.
+	double T = 10000;
+	double h = 0.01;
+
+	PenningTrap Trap = PenningTrap(b, v, d, true);
+	Particle p1 = Particle(arma::vec({20, 0, 20}), arma::vec(3, arma::fill::randn), m, q);
+	Particle p2 = Particle(arma::vec({-20, 0, -20}), arma::vec(3, arma::fill::randn), m, q);
+
+	Trap.insert_particles(p1);
+	Trap.insert_particles(p2);
+	Trap.simulate(T, h);
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/twoP_ppi_tall.txt");
+
+	Trap.ppi = false;
+	Trap.simulate(T, h);
+	write_cube_to_file(Trap.get_history(), Trap.get_time(), "outputs/twoP_no_ppi_tall.txt");
 }
 
 double V(double t, double V0, double f, double w){
@@ -315,8 +311,11 @@ void run_all_experiments(){
 	single_particle_errors();  // Ex9p5/6
 	single_particle_errors("Euler");  // Ex9p5/6 Euler
 	two_particle();  // Ex9p2/3/4
+	wallpaper();
 	broad_freq_search(); // Ex10p1
     narrow_freq_search();  // Ex10p2
+	ex10_particle_track();
+	ex10_particles_escape();
 }
 
 
