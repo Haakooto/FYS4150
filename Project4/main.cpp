@@ -26,15 +26,19 @@ int main()
 		DEs(i) = exp(-beta * j);
 	}
 
-	int M = 50000;
+	int M = 500;
 
 	double E = -8;
 	double E_sum = E;
+	double E_2_sum = E * E;
+	int m = 4;
+	double m_sum = m;
+	double m_2_sum = m * m;
 
 	arma::mat Lattice(L, L, arma::fill::ones);
 	// Lattice[1, 0] = -1;
 
-	for (int mc = 0; mc < M; mc++)
+	for (int mc = 0; mc < M * N; mc++)
 	{
 		int idx = unifN(rng);
 		int y = idx % L;
@@ -53,13 +57,22 @@ int main()
 		{
 			Lattice(x, y) *= -1;
 			E += DeltaE;
+			m += Lattice(x, y) * 2;
 		}
 		E_sum += E;
+		E_2_sum += E * E;
+		m_sum += abs(m);
+		m_2_sum += m * m;
 	}
 
-	double E_ave = E_sum / M;
+	double E_avg = E_sum / (M * N * N);
+	E_2_sum /= M * N * N;
+	double Cv = beta / T * (E_2_sum - E_avg * E_avg);
+	double m_avg = m_sum / (M * N * N);
+	m_2_sum /= M * N * N;
+	double chi = beta * (m_2_sum - m_avg * m_avg);
 
-	cout << E_ave << endl;
+	cout << E_avg << " " << Cv << " " << m_avg << " " << chi << endl;
 
 	return 0;
 }
