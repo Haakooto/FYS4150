@@ -1,0 +1,7 @@
++ Implementere en ordenlig rng så vi kan begynne å teste
++ Teste hvor mange sykluser vi trenger til å få gode resultater
++ Teste og plotte convergens m.h.t. burn-in time
++ Implementere en ny funksjon som dropper de resultatene før burn-in time
++ Tenker vi skal gjøre alle paralleliseringer i main fila, vi skal parallelisere over temperatur og
+ forskjellige initialiseringer (kanskje gjøre en funksjon som finner gjennomsnittet av forskjellige initialiseringer)
++ Lagre data og plotte
