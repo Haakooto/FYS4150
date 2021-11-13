@@ -251,3 +251,62 @@ void mc_run_single(int L, int M, double T, double& e_ave, double& m_ave, double&
     Cv_ave /= M;
     chi_ave /= M;
 }
+
+arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){
+    /*
+    Gives the probability density function as estimated by Monte-Carlo runs.
+    
+    Arguments:
+        Lattice: arma::mat
+            Object describing the lattice of spins.
+        T: double
+            The temperature of the system.
+        M: int
+            Number of Monte-Carlo cycles.
+    XXX Godt spørsmål her om vi skal gjøre det på denne måten eller ha en funksjon for en syklus og legge dem alle sammen til slutt?
+    */
+
+    int L = Lattice.n_rows;
+    int N = L * L;
+    double E = calc_E(Lattice);
+    arma::vec E_vals = arma::linspace(-2 * N, 2 * N, N + 1);
+    E_vals /= N;
+    arma::vec E_density(N + 1, arma::fill::zeros);
+
+	std::random_device dev;
+	std::mt19937 rng(dev());
+	std::uniform_int_distribution<std::mt19937::result_type> unifN(0, N - 1); // distribution in range [0, N - 1] for random index of attempted flip
+	std::uniform_real_distribution<> flip(0.0, 1.0);						  // distribution in range [0, 1] for chance of flip
+
+	double beta = 1 / T;
+	arma::vec DEs(5, arma::fill::zeros);
+	for (int i = 0; i <= 4; i += 1)
+	{
+		int j = -8 + i * 4;
+		DEs(i) = exp(-beta * j);
+	}
+    
+    for (int mc = 0; mc < N * M; mc++)
+	{
+        int idx = unifN(rng);
+		int y = idx % L;
+		int x = (idx - y) / L;
+		int sum_neighours = Lattice((x + L - 1) % L, y) + Lattice((x + 1) % L, y) + Lattice(x, (y + L - 1) % L) + Lattice(x, (y + 1) % L);
+		int DeltaE = sum_neighours * Lattice(x, y) * 2;
+		int DeltaEidx = DeltaE / 4 + 2;
+		double Boltzmann = DEs[DeltaEidx];
+		
+		if (Boltzmann > flip(rng))
+		{
+			Lattice(x, y) *= -1;
+			E += DeltaE;
+		}
+        int Eidx = (E + 2 * N) / 4;
+        E_density(Eidx) += 1;
+	}
+    E_density /= N * M;
+    arma::mat E_prob;
+    E_prob.insert_cols(0, E_vals);
+    E_prob.insert_cols(1, E_density);
+    return E_prob;
+}
