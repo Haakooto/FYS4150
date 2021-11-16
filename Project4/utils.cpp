@@ -315,9 +315,29 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){
     return E_prob;
 }
 
-void multi_mc(){
+void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, int burnin=0){
     /*
     Her skal lages en funksjon som løper over fleire initialiseringer og regner gjennomsnittet (av gjennomsnittene).
     Den skal ha en opsjon om den er parallelisert eller ikke.
     */
+    double e;
+    double m;
+    double Cv;
+    double chi;
+    e_ave = 0;
+    m_ave = 0;
+    Cv_ave = 0;
+    chi_ave = 0;
+    #pragma omp parallel for
+    for (int i = 0; i <= R; i++){
+        mc_run_single(L, M, T, e, m, Cv, chi, burnin);
+        e_ave += e;
+        m_ave += m;
+        Cv_ave += Cv;
+        chi_ave += chi;
+    }
+    e_ave /= R;
+    m_ave /= R;
+    Cv_ave /= R;
+    chi_ave /= R;
 }
