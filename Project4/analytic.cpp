@@ -17,18 +17,29 @@ int main()
     int L = 2;
     int N = L*L;
     double T = 1;
-    int M = 100000;
+    int M = 10000;
     double e, m, Cv, chi;
 
-    mc_run(L, M, T, e, m, Cv, chi, "random", 100);
+    int N_avg = 1000;
 
-    cout << "" << endl;
-    cout << "Numerical solutions" << endl;
-    cout << "Average energy per spin: " << e << endl;
-    cout << "Average magnetisation per spin: " << m << endl;
-    cout << "Specific heat capacity: " << Cv << endl;
-    cout << "Susceptibility: " << chi << endl;
-    
+    double E, M, CV, CHI;
+    double e, m, Cv, chi;
+
+
+    for (int i = 0; i < N_avg; i++) {
+        mc_run(L, M, T, e, m, Cv, chi, "random", 10);
+        E += e;
+        M += m;
+        CV += Cv;
+        CHI += chi
+        }
+
+    e = E/N_avg;
+    m = M/N_avg;
+    Cv = CV/N_avg;
+    chi = CHI/N_avg;
+
+
     // Analytic solutions
     double E_a = (-8*sinh(8/T))/(3+cosh(8/T));
     double e_a = E_a/N;
@@ -53,6 +64,13 @@ int main()
     cout << "Specific heat capacity: " << Cv_a << endl;
     cout << "Susceptibility: " << chi_a << endl;
     cout << "" << endl;
+
+    cout << "" << endl;
+    cout << "Numerical solutions" << endl;
+    cout << "Average energy per spin: " << e << endl;
+    cout << "Average magnetisation per spin: " << m << endl;
+    cout << "Specific heat capacity: " << Cv << endl;
+    cout << "Susceptibility: " << chi << endl;
 
 
 
