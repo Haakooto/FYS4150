@@ -30,7 +30,7 @@ arma::mat make_sys(int L, std::string method="random"){
         Her må settes inn en annen rng, denne defaulten gir alltid de samme tallene.
         HO, jeg stoler på at du finner ut av det
         */
-        arma_rng::set_seed_random();
+        arma::arma_rng::set_seed_random();
         Lattice = arma::randi<arma::mat>(L, L, arma::distr_param(0, 1));
         Lattice *= 2;
         Lattice -= 1;
