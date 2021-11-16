@@ -1,23 +1,24 @@
 import numpy as np
-import plotly.express as ex
+import plotly.express as px
+import matplotlib.pyplot as plt
 from glob import glob
 import subprocess
 import sys
 import pandas as pd
 
-
 datapath = "./data/"
 
 
 def burntime(fname, M=0, new_run=False):
+    runname = fname
     if fname[-4:] != ".csv":
         fname += ".csv"
     file = datapath + fname
-    M = int(M)
-    if file in glob(datapath + "*") and not new_run:
-        data = pd.read_csv(file, header=0, sep="  ")
-        print(data)
+    if file not in glob(datapath + "*") or new_run:
+        subprocess.Popen(f"./burn {runname} {M}".split(" ")).wait()
 
+    data = pd.read_csv(file, header=0, sep="  ")
+    print(data["er1"])
 
 
 def main():
@@ -33,7 +34,7 @@ def main():
             args = [a for a in sys.argv[2:]]
         else:
             args = None
-
+        print(args)
         func = sys.argv[1]
         if args is not None:
             exec(func + f"(*{args})")
@@ -41,6 +42,6 @@ def main():
             exec(func + "()")
     except:
         print("Bad usage! Pass 'help' from commandline to see guide")
-
+        raise
 if __name__ == "__main__":
     main()
