@@ -151,7 +151,7 @@ void mc_cycle(arma::mat& Lattice, double& T, double& e, double& m, double& Cv, d
 	chi = beta * (M_2_sum - m * m);
 }
 
-arma::mat mc_run_culm(int L, int M, double T, std::string method="random"){
+arma::mat mc_run_culm(int L, int M, double T, std::string method="random", int burnin=0){
     /*
     Runs a number of Monte-Carlo cycles and saves the output at each cycle.
 
@@ -192,24 +192,24 @@ arma::mat mc_run_culm(int L, int M, double T, std::string method="random"){
         Data(2, i) = m;
         Data(4, i) = Cv;
         Data(6, i) = chi;
-        if (i == 0){
+        if (i >= burnin){
             Data(1, i) = Data(0, i);
             Data(3, i) = Data(2, i);
             Data(5, i) = Data(4, i);
             Data(7, i) = Data(6, i);
         }
         else{
-            Data(1, i) = (Data(1, i - 1) * i + Data(0, i)) / (i + 1);
-            Data(3, i) = (Data(3, i - 1) * i + Data(2, i)) / (i + 1);
-            Data(5, i) = (Data(5, i - 1) * i + Data(4, i)) / (i + 1);
-            Data(7, i) = (Data(7, i - 1) * i + Data(6, i)) / (i + 1);
+            Data(1, i) = (Data(1, i - 1) * i + Data(0, i)) / (i + 1 - burnin);
+            Data(3, i) = (Data(3, i - 1) * i + Data(2, i)) / (i + 1 - burnin);
+            Data(5, i) = (Data(5, i - 1) * i + Data(4, i)) / (i + 1 - burnin);
+            Data(7, i) = (Data(7, i - 1) * i + Data(6, i)) / (i + 1 - burnin);
         }
     }
     return Data;
 }
 
 
-void mc_run_single(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, std::string method="random"){
+void mc_run_single(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, std::string method="random", int burnin=0){
     /*
     Runs a number of Monte-Carlo cycles and gives the final output.
 
@@ -224,6 +224,8 @@ void mc_run_single(int L, int M, double T, double& e_ave, double& m_ave, double&
             Method used to initialise the lattice.
             Can be one of "random", "lowest" or "highest".
             Default is set as "random".
+        burnin: int
+            Number of Monte-Carlo cycles to skip over after initialisation.
 
     XXX
     */
@@ -241,15 +243,17 @@ void mc_run_single(int L, int M, double T, double& e_ave, double& m_ave, double&
 
     for (int i = 0; i < M; i++){
         mc_cycle(Lattice, T, e, m, Cv, chi);
-        e_ave += e;
-        m_ave += m;
-        Cv_ave += Cv;
-        chi_ave += chi;
+        if (i >= burnin){
+            e_ave += e;
+            m_ave += m;
+            Cv_ave += Cv;
+            chi_ave += chi;
+        }
     };
-    e_ave /= M;
-    m_ave /= M;
-    Cv_ave /= M;
-    chi_ave /= M;
+    e_ave /= (M - burnin);
+    m_ave /= (M - burnin);
+    Cv_ave /= (M - burnin);
+    chi_ave /= (M - burnin);
 }
 
 arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){
@@ -309,4 +313,11 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){
     E_prob.insert_cols(0, E_vals);
     E_prob.insert_cols(1, E_density);
     return E_prob;
+}
+
+void multi_mc(){
+    /*
+    Her skal lages en funksjon som løper over fleire initialiseringer og regner gjennomsnittet (av gjennomsnittene).
+    Den skal ha en opsjon om den er parallelisert eller ikke.
+    */
 }
