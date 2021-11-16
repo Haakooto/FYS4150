@@ -143,12 +143,17 @@ void mc_cycle(arma::mat& Lattice, double& T, double& e, double& m, double& Cv, d
 		M_2_sum += M * M;
 	}
 
+
 	e = E_sum / (N * N);
-	E_2_sum /= N * N;
-	Cv = beta / T * (E_2_sum - e * e);
+	//E_2_sum /= N * N;
+	//Cv = beta / T * (E_2_sum - e * e * N);
+
+
+    Cv = beta/(T*N) * (E_2_sum/N -  pow(E_sum/N, 2));
+
 	m = M_sum / (N * N);
 	M_2_sum /= N * N;
-	chi = beta * (M_2_sum - m * m);
+	chi = beta * (M_2_sum - m * m * N);
 }
 
 arma::mat mc_run_culm(int L, int M, double T, std::string method="random", int burnin=0){
