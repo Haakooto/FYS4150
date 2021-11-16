@@ -152,7 +152,7 @@ void mc_cycle(arma::mat& Lattice, double& T, double& E_sum, double& M_sum, doubl
 	// chi = beta * (M_sq - m * m * N);
 }
 
-arma::mat mc_run_culm(int L, int M, double T, std::string method="random", int burnin=0){
+arma::mat mc_run_cuml(int L, int M, double T, std::string method="random", int burnin=0){
     /*
     Runs a number of Monte-Carlo cycles and saves the output at each cycle.
 
@@ -171,13 +171,13 @@ arma::mat mc_run_culm(int L, int M, double T, std::string method="random", int b
         Data: arma::mat
             Matrix containing all of the data from the Monte-Carlo cycles:
                 Line 0: Values of the energy per spin given by the Monte-Carlo cycle.
-                Line 1: Culmulative average of the energy per spin.
+                Line 1: Cumulative average of the energy per spin.
                 Line 2: Values of the magnetisation per spin given by the Monte-Carlo cycle.
-                Line 3: Culmulative average of the magnetisation per spin.
+                Line 3: Cumulative average of the magnetisation per spin.
                 Line 4: Values of the specific heat capacity given by the Monte-Carlo cycle.
-                Line 5: Culmulative average of the specific heat capacity.
+                Line 5: Cumulative average of the specific heat capacity.
                 Line 6: Values of the susceptibility given by the Monte-Carlo cycle.
-                Line 7: Culmulative average of the susceptibility.
+                Line 7: Cumulative average of the susceptibility.
     */
 
     double e;
@@ -258,7 +258,7 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
     m_ave /= N;
 }
 
-arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){
+arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
     /*
     Gives the probability density function as estimated by Monte-Carlo runs.
 
@@ -307,8 +307,10 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){
 			Lattice(x, y) *= -1;
 			E += DeltaE;
 		}
-        int Eidx = (E + 2 * N) / 4;
-        E_density(Eidx) += 1;
+        if (mc >= burnin){
+            int Eidx = (E + 2 * N) / 4;
+            E_density(Eidx) += 1;
+        }
 	}
     E_density /= N * M;
     arma::mat E_prob;
@@ -330,7 +332,7 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
     m_ave = 0;
     Cv_ave = 0;
     chi_ave = 0;
-    for (int i = 0; i <= R; i++){
+    for (int i = 0; i < R; i++){
         mc_run(L, M, T, e, m, Cv, chi, "random", burnin);
         e_ave += e;
         m_ave += m;
@@ -341,4 +343,17 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
     m_ave /= R;
     Cv_ave /= R;
     chi_ave /= R;
+}
+
+arma::mat multi_prob(int L, int M, int R, double T, int burnin=0){
+    int N = L * L;
+    arma::mat Total(N + 1, 2, arma::fill::zeros);
+    arma::mat sum;
+    for (int i = 0; i < R; i++){
+        arma::mat Lattice = make_sys(L, "random");
+        sum = mc_e_prob(Lattice, T, M, burnin);
+        Total += sum;
+    }
+    Total /= R;
+    return Total;
 }
