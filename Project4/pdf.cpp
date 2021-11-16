@@ -29,7 +29,7 @@ int main(int argc, char* argv[]){
     out2.open("data/" + fname2 + ".csv");
     
     mat Lattice = make_sys(20, "random");
-    mat Prob = mc_e_prob(Lattice, 1., M);
+    mat Prob = mc_run(Lattice, 1., M);
     Prob.save(out1, raw_ascii);
     
     Prob = mc_e_prob(Lattice, 2.4, M);

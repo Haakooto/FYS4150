@@ -16,35 +16,37 @@ int main(int argc, char* argv[]) {
 	Uses the 3 different initializations, and saves e and m to file.
 	*/
 
-	int M, L = 20;
+	int M, T, L = 20;
 	string fname;
-	if (argc != 3){
-		std::cout << "Bad usage! This program takes two params";
-		std::cout << "\nfilename, and number of monte carlo cycles\n";
+	if (argc != 4){
+		cout << "Bad usage! This program takes three params";
+		cout << "\nfilename, temperature, and number of monte carlo cycles\n";
 		return 1;
-	}else{
+	} else {
 		fname = argv[1];
-        M = atoi(argv[2]);
+		T = atoi(argv[2]);
+        M = atoi(argv[3]);
     }
-	arma::mat data;
-
+	mat data;
+	
 	// open outfile
 	ofstream out;
-	out.open(fname + ".csv");
-	out << "er1 mr1 er24 mr24 el1 ml1 el24 ml24 eh1 mh1 eh24 mh24\n";
+	out.open("data/" + fname + ".csv");
+	out << "e_rnd,avg_e_rnd,m_rnd,avg_m_rnd,";
+	out << "e_low,avg_e_low,m_low,avg_m_low,";
+	out << "e_hig,avg_e_hig,m_hig,avg_m_hig\n";
 
 	// loop over initializations
 	for (const char* start:{"random", "lowest", "highest"}){
-		for (int T: {1., 2.4}){  // loop over temperatures
-			// run cycles
-			arma::mat run = mc_run_culm(L, M, T, start, 0);
-			// get data
-			arma::vec e = run.row(0).t();
-			arma::vec m = run.row(2).t();
-			data = arma::join_rows(data, e);
-			data = arma::join_rows(data, m);
-		}
+		// run cycles
+		mat run = mc_run_culm(L, M, T, start, 0).t();
+		// get data
+		data = join_rows(data, run.col(0));  // energy
+		data = join_rows(data, run.col(1));  // energy, cumulative average
+		data = join_rows(data, run.col(2));  // energy
+		data = join_rows(data, run.col(3));  // energy, cumulative average
 	}
-	data.save(out, arma::raw_ascii);
+
+	data.save(out, csv_ascii);
 	return 0;
 }
