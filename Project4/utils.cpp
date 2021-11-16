@@ -30,7 +30,7 @@ arma::mat make_sys(int L, std::string method="random"){
         Her må settes inn en annen rng, denne defaulten gir alltid de samme tallene.
         HO, jeg stoler på at du finner ut av det
         */
-
+        arma_rng::set_seed_random();
         Lattice = arma::randi<arma::mat>(L, L, arma::distr_param(0, 1));
         Lattice *= 2;
         Lattice -= 1;
@@ -330,7 +330,7 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
     chi_ave = 0;
     #pragma omp parallel for
     for (int i = 0; i <= R; i++){
-        mc_run(L, M, T, e, m, Cv, chi, burnin);
+        mc_run(L, M, T, e, m, Cv, chi, "random", burnin);
         e_ave += e;
         m_ave += m;
         Cv_ave += Cv;
