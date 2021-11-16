@@ -9,10 +9,10 @@
 
 
 arma::mat make_sys(int L, std::string method="random"){
-    /* 
+    /*
     Initialises a Ising model lattice.
 
-    Arguments: 
+    Arguments:
         L: int
             Size of the periodic lattice
         method: std::string
@@ -57,7 +57,7 @@ arma::mat make_sys(int L, std::string method="random"){
 double calc_E(const arma::mat& Lattice){
     /*
     Calculates the initial energy of a system.
-    
+
     Arguments:
         Lattice: arma::mat
             Object describing the lattice of spins.
@@ -119,7 +119,7 @@ void mc_cycle(arma::mat& Lattice, double& T, double& e, double& m, double& Cv, d
 		int j = -8 + i * 4;
 		DEs(i) = exp(-beta * j);
 	}
-    
+
     for (int mc = 0; mc < N; mc++)
 	{
         int idx = unifN(rng);
@@ -129,14 +129,14 @@ void mc_cycle(arma::mat& Lattice, double& T, double& e, double& m, double& Cv, d
 		int DeltaE = sum_neighours * Lattice(x, y) * 2;
 		int DeltaEidx = DeltaE / 4 + 2;
 		double Boltzmann = DEs[DeltaEidx];
-		
+
 		if (Boltzmann > flip(rng))
 		{
 			Lattice(x, y) *= -1;
 			E += DeltaE;
 			M += Lattice(x, y) * 2;
 		}
-        
+
         E_sum += E;
 		E_2_sum += E * E;
 		M_sum += abs(M);
@@ -192,7 +192,7 @@ arma::mat mc_run_culm(int L, int M, double T, std::string method="random", int b
         Data(2, i) = m;
         Data(4, i) = Cv;
         Data(6, i) = chi;
-        if (i >= burnin){
+        if (i <= burnin){
             Data(1, i) = Data(0, i);
             Data(3, i) = Data(2, i);
             Data(5, i) = Data(4, i);
@@ -259,7 +259,7 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
 arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){
     /*
     Gives the probability density function as estimated by Monte-Carlo runs.
-    
+
     Arguments:
         Lattice: arma::mat
             Object describing the lattice of spins.
@@ -289,7 +289,7 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){
 		int j = -8 + i * 4;
 		DEs(i) = exp(-beta * j);
 	}
-    
+
     for (int mc = 0; mc < N * M; mc++)
 	{
         int idx = unifN(rng);
@@ -299,7 +299,7 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){
 		int DeltaE = sum_neighours * Lattice(x, y) * 2;
 		int DeltaEidx = DeltaE / 4 + 2;
 		double Boltzmann = DEs[DeltaEidx];
-		
+
 		if (Boltzmann > flip(rng))
 		{
 			Lattice(x, y) *= -1;
