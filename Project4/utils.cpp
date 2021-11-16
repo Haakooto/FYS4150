@@ -328,7 +328,6 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
     m_ave = 0;
     Cv_ave = 0;
     chi_ave = 0;
-    #pragma omp parallel for
     for (int i = 0; i <= R; i++){
         mc_run(L, M, T, e, m, Cv, chi, "random", burnin);
         e_ave += e;
