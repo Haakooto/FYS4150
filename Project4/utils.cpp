@@ -143,12 +143,17 @@ void mc_cycle(arma::mat& Lattice, double& T, double& e, double& m, double& Cv, d
 		M_2_sum += M * M;
 	}
 
+
 	e = E_sum / (N * N);
-	E_2_sum /= N * N;
-	Cv = beta / T * (E_2_sum - e * e);
+	//E_2_sum /= N * N;
+	//Cv = beta / T * (E_2_sum - e * e * N);
+
+
+    Cv = beta/(T*N) * (E_2_sum/N -  pow(E_sum/N, 2));
+
 	m = M_sum / (N * N);
 	M_2_sum /= N * N;
-	chi = beta * (M_2_sum - m * m);
+	chi = beta * (M_2_sum - m * m * N);
 }
 
 arma::mat mc_run_culm(int L, int M, double T, std::string method="random", int burnin=0){
@@ -328,7 +333,6 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
     m_ave = 0;
     Cv_ave = 0;
     chi_ave = 0;
-    #pragma omp parallel for
     for (int i = 0; i <= R; i++){
         mc_run(L, M, T, e, m, Cv, chi, "random", burnin);
         e_ave += e;
