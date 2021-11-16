@@ -209,7 +209,7 @@ arma::mat mc_run_culm(int L, int M, double T, std::string method="random", int b
 }
 
 
-void mc_run_single(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, std::string method="random", int burnin=0){
+void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, std::string method="random", int burnin=0){
     /*
     Runs a number of Monte-Carlo cycles and gives the final output.
 
@@ -330,7 +330,7 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
     chi_ave = 0;
     #pragma omp parallel for
     for (int i = 0; i <= R; i++){
-        mc_run_single(L, M, T, e, m, Cv, chi, burnin);
+        mc_run(L, M, T, e, m, Cv, chi, burnin);
         e_ave += e;
         m_ave += m;
         Cv_ave += Cv;
