@@ -5,3 +5,6 @@ run:
 	./test.out
 
 all: compile run
+
+fire:
+	g++ burnin.cpp -o burn -larmadillo
