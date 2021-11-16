@@ -13,10 +13,10 @@ using namespace arma;
 int main(){
     int N = 4;
     
-    mat Lattice = make_sys(N, "random");
+    // mat Lattice = make_sys(N, "random");
     // mat Lattice1 = make_sys(N, "lowest");
     // mat Lattice2 = make_sys(N, "highest");
-    Lattice.print();
+    // Lattice.print();
     // cout << calc_E(Lattice) << endl;
     // Lattice1.print();
     // cout << calc_E(Lattice1) << endl;
@@ -35,11 +35,11 @@ int main(){
     // double Cv;
     // double chi;
 
-    // mc_run_single(N, 600, 100., e, m, Cv, chi, "random");
+    // mc_run(N, 600, 100., e, m, Cv, chi, "random");
     // cout << e << " " << m << " " << Cv << " " << chi << endl;
 
-    // mat Data = mc_run_culm(N, 10, 100., "random");
-    // Data.print();
+    mat Data = mc_run_culm(N, 10, 1., "lowest");
+    Data.print();
 
     // mat Prob = mc_e_prob(Lattice, 100., 150);
     // Prob.print();

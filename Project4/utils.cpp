@@ -78,7 +78,7 @@ double calc_E(const arma::mat& Lattice){
     return E;
 }
 
-void mc_cycle(arma::mat& Lattice, double& T, double& e, double& m, double& Cv, double& chi){
+void mc_cycle(arma::mat& Lattice, double& T, double& E_sum, double& M_sum, double& E_sq, double& M_sq){
     /*
     Runs a single Monte-Carlo cycle of the system.
 
@@ -99,11 +99,11 @@ void mc_cycle(arma::mat& Lattice, double& T, double& e, double& m, double& Cv, d
     */
 
     double E = calc_E(Lattice);
-	double E_sum = 0;
-	double E_2_sum = 0;
+	E_sum = 0;
+	E_sq = 0;
 	int M = arma::accu(Lattice);
-	double M_sum = 0;
-	double M_2_sum = 0;
+	M_sum = 0;
+	M_sq = 0;
     int L = Lattice.n_rows;
     int N = L * L;
 
@@ -138,22 +138,18 @@ void mc_cycle(arma::mat& Lattice, double& T, double& e, double& m, double& Cv, d
 		}
 
         E_sum += E;
-		E_2_sum += E * E;
+		E_sq += E * E;
 		M_sum += abs(M);
-		M_2_sum += M * M;
+		M_sq += M * M;
 	}
 
 
-	e = E_sum / (N * N);
-	//E_2_sum /= N * N;
-	//Cv = beta / T * (E_2_sum - e * e * N);
+	E_sum /= N;
+	E_sq /= N;
 
-
-    Cv = beta/(T*N) * (E_2_sum/N -  pow(E_sum/N, 2));
-
-	m = M_sum / (N * N);
-	M_2_sum /= N * N;
-	chi = beta * (M_2_sum - m * m * N);
+	M_sum /= N;
+	M_sq /= N ;
+	// chi = beta * (M_sq - m * m * N);
 }
 
 arma::mat mc_run_culm(int L, int M, double T, std::string method="random", int burnin=0){
@@ -186,28 +182,23 @@ arma::mat mc_run_culm(int L, int M, double T, std::string method="random", int b
 
     double e;
     double m;
-    double Cv;
-    double chi;
-    arma::mat Data(8, M);
+    double EE;
+    double MM;
+    double N = L * L;
+    arma::mat Data(4, M);
     arma::mat Lattice = make_sys(L, method);
 
     for (int i = 0; i < M; i++){
-        mc_cycle(Lattice, T, e, m, Cv, chi);
-        Data(0, i) = e;
-        Data(2, i) = m;
-        Data(4, i) = Cv;
-        Data(6, i) = chi;
+        mc_cycle(Lattice, T, e, m, EE, MM);
+        Data(0, i) = e / N;
+        Data(2, i) = m / N;
         if (i <= burnin){
             Data(1, i) = Data(0, i);
             Data(3, i) = Data(2, i);
-            Data(5, i) = Data(4, i);
-            Data(7, i) = Data(6, i);
         }
         else{
             Data(1, i) = (Data(1, i - 1) * i + Data(0, i)) / (i + 1 - burnin);
             Data(3, i) = (Data(3, i - 1) * i + Data(2, i)) / (i + 1 - burnin);
-            Data(5, i) = (Data(5, i - 1) * i + Data(4, i)) / (i + 1 - burnin);
-            Data(7, i) = (Data(7, i - 1) * i + Data(6, i)) / (i + 1 - burnin);
         }
     }
     return Data;
@@ -239,6 +230,7 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
     double m;
     double Cv;
     double chi;
+    double N = L * L;
     e_ave = 0;
     m_ave = 0;
     Cv_ave = 0;
@@ -255,10 +247,15 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
             chi_ave += chi;
         }
     };
+    
     e_ave /= (M - burnin);
     m_ave /= (M - burnin);
     Cv_ave /= (M - burnin);
     chi_ave /= (M - burnin);
+    Cv_ave = 1 / T / T / N * (Cv_ave - pow(e_ave, 2));
+    chi_ave = 1 / T / N * (chi_ave - pow(m_ave, 2));
+    e_ave /= N;
+    m_ave /= N;
 }
 
 arma::mat mc_e_prob(arma::mat& Lattice, double T, int M){

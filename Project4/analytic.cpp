@@ -20,7 +20,7 @@ int main()
     int M = 100000;
     double e, m, Cv, chi;
 
-    mc_run(L, M, T, e, m, Cv, chi, "random", 10);
+    mc_run(L, M, T, e, m, Cv, chi, "random", 100);
 
     cout << "" << endl;
     cout << "Numerical solutions" << endl;
