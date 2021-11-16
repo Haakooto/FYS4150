@@ -1,16 +1,23 @@
 import numpy as np
-import matplotlib.pyplot as plt
+import plotly.express as ex
 from glob import glob
 import subprocess
 import sys
 import pandas as pd
 
+
 datapath = "./data/"
 
-def burntime(fname, M, new_run=False):
+
+def burntime(fname, M=0, new_run=False):
+    if fname[-4:] != ".csv":
+        fname += ".csv"
+    file = datapath + fname
     M = int(M)
-    if fname in glob(datapath):
-        pass
+    if file in glob(datapath + "*") and not new_run:
+        data = pd.read_csv(file, header=0, sep="  ")
+        print(data)
+
 
 
 def main():
@@ -21,7 +28,6 @@ def main():
 
     try:
         if len(sys.argv) == 1:
-
             return
         elif len(sys.argv) > 2:
             args = [a for a in sys.argv[2:]]
