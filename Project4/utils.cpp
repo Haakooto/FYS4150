@@ -247,7 +247,7 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
             chi_ave += chi;
         }
     };
-    
+
     e_ave /= (M - burnin);
     m_ave /= (M - burnin);
     Cv_ave /= (M - burnin);
@@ -319,7 +319,7 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
     return E_prob;
 }
 
-void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, int burnin=0){
+void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, std::string method="random", int burnin=0){
     /*
     Her skal lages en funksjon som løper over fleire initialiseringer og regner gjennomsnittet (av gjennomsnittene).
     Den skal ha en opsjon om den er parallelisert eller ikke.
@@ -333,17 +333,20 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
     Cv_ave = 0;
     chi_ave = 0;
     for (int i = 0; i < R; i++){
-        mc_run(L, M, T, e, m, Cv, chi, "random", burnin);
+        mc_run(L, M, T, e, m, Cv, chi, method, burnin);
         e_ave += e;
         m_ave += m;
         Cv_ave += Cv;
         chi_ave += chi;
+        cout << "Round: " << R << endl;
     }
+
     e_ave /= R;
     m_ave /= R;
     Cv_ave /= R;
     chi_ave /= R;
 }
+
 
 arma::mat multi_prob(int L, int M, int R, double T, int burnin=0){
     int N = L * L;
