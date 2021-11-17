@@ -329,16 +329,17 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
     return E_prob;
 }
 
-void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, double& e_err, double& m_err, double& Cv_err, double& chi_err, std::string method="random", int burnin=0)
+
+
+void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method="random", int burnin=0, std::string parallel = "no")
 {
     /*
     Her skal lages en funksjon som løper over fleire initialiseringer og regner gjennomsnittet (av gjennomsnittene).
     Den skal ha en opsjon om den er parallelisert eller ikke.
+    //data = {e, m, Cv, chi, e_err, m_err, Cv_err, chi_err};
     */
-    double e;
-    double m;
-    double Cv;
-    double chi;
+
+    double e, m, Cv, chi;
 
     arma::vec e_vec(R, arma::fill::zeros);
     arma::vec m_vec(R, arma::fill::zeros);
@@ -354,17 +355,17 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
         chi_vec(i) = chi;
     }
 
-    e_ave = arma::mean(e_vec);
-    m_ave = arma::mean(m_vec);
-    Cv_ave = arma::mean(Cv_vec);
-    chi_ave = arma::mean(chi_vec);
+    data(0) = arma::mean(e_vec);
+    data(1) = arma::mean(m_vec);
+    data(2) = arma::mean(Cv_vec);
+    data(3) = arma::mean(chi_vec);
 
 
     //double mye = arma::stddev(e_vec)/sqrt(R);
-    e_err = arma::stddev(e_vec)/sqrt(R);
-    m_err = arma::stddev(m_vec)/sqrt(R);
-    Cv_err = arma::stddev(Cv_vec)/sqrt(R);
-    chi_err = arma::stddev(chi_vec)/sqrt(R);
+    data(4) = arma::stddev(e_vec)/sqrt(R);
+    data(5) = arma::stddev(m_vec)/sqrt(R);
+    data(6) = arma::stddev(Cv_vec)/sqrt(R);
+    data(7) = arma::stddev(chi_vec)/sqrt(R);
 
 }
 

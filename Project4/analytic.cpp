@@ -31,12 +31,15 @@ int main(int argc, char* argv[])
     int L = 2;
     int N = L*L;
     string method = "random";
+    string parallel = "no";
     int burnin = 0;
 
-    double E, Mag, CV, CHI;
+
     double e, m, Cv, chi, e_err, m_err, Cv_err, chi_err;
 
-    multi_mc(L, M, R, T, e, m, Cv, chi, e_err, m_err, Cv_err, chi_err, method, burnin);
+    arma::vec data = {e, m, Cv, chi, e_err, m_err, Cv_err, chi_err};
+
+    multi_mc(L, M, R, T, data, method, burnin, parallel);
 
 
     // Analytic solutions
@@ -60,13 +63,13 @@ int main(int argc, char* argv[])
     cout << "Susceptibility: " << chi_a << endl;
     cout << "" << endl;
 
+
     cout << "" << endl;
     cout << "Numerical solutions" << endl;
-    cout << "Average energy per spin: " << e << " ± " << e_err << endl;
-    cout << "Average magnetisation per spin: " << m << " ± " << m_err << endl;
-    cout << "Specific heat capacity: " << Cv << " ± " << Cv_err << endl;
-    cout << "Susceptibility: " << chi << " ± " << chi_err << endl;
-
+    cout << "Average energy per spin: " << data(0) << " ± " << data(4) << endl;
+    cout << "Average magnetisation per spin: " << data(1) << " ± " << data(5) << endl;
+    cout << "Specific heat capacity: " << data(2) << " ± " << data(6) << endl;
+    cout << "Susceptibility: " << data(3) << " ± " << data(7) << endl;
 
 
     return 0;
