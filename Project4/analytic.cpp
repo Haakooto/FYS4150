@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     int M, R;
     double T;
     if (argc != 4){
-        cout << "Bad usage! This program takes three params: ";
+        cout << "Bad usage! This program takes three parameters: ";
         cout << "temperature, number of monte carlo cycles, and rounds to average over \n";
         return 1;
     } else {
@@ -27,19 +27,16 @@ int main(int argc, char* argv[])
     }
 
 
-
     // Test the program against the analytical solution
     int L = 2;
     int N = L*L;
     string method = "random";
-    int burnin = 100;
+    int burnin = 0;
 
     double E, Mag, CV, CHI;
-    double e, m, Cv, chi;
+    double e, m, Cv, chi, e_err, m_err, Cv_err, chi_err;
 
-
-    multi_mc(L, M, R, T, e, m, Cv, chi, method, burnin);
-
+    multi_mc(L, M, R, T, e, m, Cv, chi, e_err, m_err, Cv_err, chi_err, method, burnin);
 
 
     // Analytic solutions
@@ -57,7 +54,7 @@ int main(int argc, char* argv[])
 
     cout << "" << endl;
     cout << "Analytic solutions" << endl;
-    cout << "Average energy per spin: " << e_a << endl;
+    cout << "Average energy per spin: " << e_a  << endl;
     cout << "Average magnetisation per spin: " << m_a << endl;
     cout << "Specific heat capacity: " << Cv_a << endl;
     cout << "Susceptibility: " << chi_a << endl;
@@ -65,10 +62,10 @@ int main(int argc, char* argv[])
 
     cout << "" << endl;
     cout << "Numerical solutions" << endl;
-    cout << "Average energy per spin: " << e << endl;
-    cout << "Average magnetisation per spin: " << m << endl;
-    cout << "Specific heat capacity: " << Cv << endl;
-    cout << "Susceptibility: " << chi << endl;
+    cout << "Average energy per spin: " << e << " ± " << e_err << endl;
+    cout << "Average magnetisation per spin: " << m << " ± " << m_err << endl;
+    cout << "Specific heat capacity: " << Cv << " ± " << Cv_err << endl;
+    cout << "Susceptibility: " << chi << " ± " << chi_err << endl;
 
 
 
