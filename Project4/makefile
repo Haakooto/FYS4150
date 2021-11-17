@@ -12,6 +12,9 @@ fire:
 ex_5:
 	python3 plot.py burntime burn_1 1 100 True
 	python3 plot.py burntime burn_24 2.4 300 True
+	
+compile_para:
+	g++ -std=c++11 analytic.cpp -Xpreprocessor -fopenmp -larmadillo -o para.out -lomp
 
 compile_analytic:
 	g++ -std=c++11 analytic.cpp -larmadillo -o analytic.out

@@ -5,7 +5,7 @@
 #include <cmath>
 #include <armadillo>
 
-#include "utils.cpp"
+#include "ising_model.cpp"
 
 using namespace std;
 using namespace arma;
@@ -39,7 +39,8 @@ int main(int argc, char* argv[]) {
 	// loop over initializations
 	for (const char* start:{"random", "lowest", "highest"}){
 		// run cycles
-		mat run = mc_run_culm(L, M, T, start, 0).t();
+		mat run = mc_run_cuml(L, M, T, start, 0).t();
+    	
 		// get data
 		data = join_rows(data, run.col(0));  // energy
 		data = join_rows(data, run.col(1));  // energy, cumulative average
