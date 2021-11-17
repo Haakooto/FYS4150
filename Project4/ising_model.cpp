@@ -5,10 +5,12 @@
 #include <cmath>
 #include <armadillo>
 #include <random>
+#include <omp.h>
+
 
 
 arma::vec make_de(double beta){
-    /* 
+    /*
     Arguments:
         beta: double
             1 over temperature of system
@@ -16,7 +18,7 @@ arma::vec make_de(double beta){
     Returns
         DEs: arma::vec
             vector with allowed energy changes
-    */ 
+    */
     arma::vec DeltaE(5, arma::fill::zeros);
     for (int i = 0; i <= 4; i += 1)
     {
@@ -110,8 +112,8 @@ void mc_cycle(arma::mat& Lattice, arma::vec& DEs, double& E_sum, double& M_sum, 
         M_sq: double
             The susceptibility of the system.
         seed: int
-            seed for random number generator. 
-            MUST NEVER BE THE SAME SEED FOR A RUN. 
+            seed for random number generator.
+            MUST NEVER BE THE SAME SEED FOR A RUN.
             For example, use loop indexer when calling mc_cycle in a loop
     */
 
@@ -321,7 +323,7 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
 
 
 
-void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method="random", int burnin=0, std::string parallel = "no")
+void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method="random", int burnin=0)
 {
     /*
     Her skal lages en funksjon som løper over fleire initialiseringer og regner gjennomsnittet (av gjennomsnittene).
@@ -329,21 +331,25 @@ void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method
     //data = {e, m, Cv, chi, e_err, m_err, Cv_err, chi_err};
     */
 
-    double e, m, Cv, chi;
 
     arma::vec e_vec(R, arma::fill::zeros);
     arma::vec m_vec(R, arma::fill::zeros);
     arma::vec Cv_vec(R, arma::fill::zeros);
     arma::vec chi_vec(R, arma::fill::zeros);
 
+    #pragma omp parallel for
+    {
     for (int i = 0; i < R; i++)
     {
+        double e, m, Cv, chi;
         mc_run(L, M, T, e, m, Cv, chi, method, burnin);
         e_vec(i) = e;
         m_vec(i) = m;
         Cv_vec(i) = Cv;
         chi_vec(i) = chi;
     }
+    }
+
 
     data(0) = arma::mean(e_vec);
     data(1) = arma::mean(m_vec);
