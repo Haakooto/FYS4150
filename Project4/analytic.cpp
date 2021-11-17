@@ -31,7 +31,6 @@ int main(int argc, char* argv[])
     int L = 2;
     int N = L*L;
     string method = "random";
-    string parallel = "no";
     int burnin = 0;
 
 
@@ -39,7 +38,7 @@ int main(int argc, char* argv[])
 
     arma::vec data = {e, m, Cv, chi, e_err, m_err, Cv_err, chi_err};
 
-    multi_mc(L, M, R, T, data, method, burnin, parallel);
+    multi_mc(L, M, R, T, data, method, burnin);
 
 
     // Analytic solutions
