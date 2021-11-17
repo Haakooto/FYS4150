@@ -258,7 +258,7 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
             chi_ave += chi;
         }
     };
-    
+
     e_ave /= (M - burnin);
     m_ave /= (M - burnin);
     Cv_ave /= (M - burnin);
@@ -330,7 +330,8 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
     return E_prob;
 }
 
-void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, int burnin=0){
+void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, double& e_err, double& m_err, double& Cv_err, double& chi_err, std::string method="random", int burnin=0)
+{
     /*
     Her skal lages en funksjon som løper over fleire initialiseringer og regner gjennomsnittet (av gjennomsnittene).
     Den skal ha en opsjon om den er parallelisert eller ikke.
@@ -339,22 +340,36 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
     double m;
     double Cv;
     double chi;
-    e_ave = 0;
-    m_ave = 0;
-    Cv_ave = 0;
-    chi_ave = 0;
-    for (int i = 0; i < R; i++){
-        mc_run(L, M, T, e, m, Cv, chi, "random", burnin);
-        e_ave += e;
-        m_ave += m;
-        Cv_ave += Cv;
-        chi_ave += chi;
+
+    arma::vec e_vec(R, arma::fill::zeros);
+    arma::vec m_vec(R, arma::fill::zeros);
+    arma::vec Cv_vec(R, arma::fill::zeros);
+    arma::vec chi_vec(R, arma::fill::zeros);
+
+    for (int i = 0; i < R; i++)
+    {
+        mc_run(L, M, T, e, m, Cv, chi, method, burnin);
+        e_vec(i) = e;
+        m_vec(i) = m;
+        Cv_vec(i) = Cv;
+        chi_vec(i) = chi;
     }
-    e_ave /= R;
-    m_ave /= R;
-    Cv_ave /= R;
-    chi_ave /= R;
+
+    e_ave = arma::mean(e_vec);
+    m_ave = arma::mean(m_vec);
+    Cv_ave = arma::mean(Cv_vec);
+    chi_ave = arma::mean(chi_vec);
+
+
+    //double mye = arma::stddev(e_vec)/sqrt(R);
+    e_err = arma::stddev(e_vec)/sqrt(R);
+    m_err = arma::stddev(m_vec)/sqrt(R);
+    Cv_err = arma::stddev(Cv_vec)/sqrt(R);
+    chi_err = arma::stddev(chi_vec)/sqrt(R);
+
 }
+
+
 
 arma::mat multi_prob(int L, int M, int R, double T, int burnin=0){
     int N = L * L;

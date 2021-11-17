@@ -11,55 +11,50 @@ using namespace std;
 using namespace arma;
 
 
-int main()
+int main(int argc, char* argv[])
+// Terminal input to run: ./analytic.out  T   M = #no. MC cycles  R = runs to average over
 {
+    int M, R;
+    double T;
+    if (argc != 4){
+        cout << "Bad usage! This program takes three parameters: ";
+        cout << "temperature, number of monte carlo cycles, and rounds to average over \n";
+        return 1;
+    } else {
+        T = atof(argv[1]);
+        M = atoi(argv[2]);
+        R = atoi(argv[3]);
+    }
+
+
     // Test the program against the analytical solution
     int L = 2;
     int N = L*L;
-    double T = 1;
-    int M = 10000;
-    double e, m, Cv, chi;
+    string method = "random";
+    int burnin = 0;
 
-    int N_avg = 1000;
+    double E, Mag, CV, CHI;
+    double e, m, Cv, chi, e_err, m_err, Cv_err, chi_err;
 
-    double E, M, CV, CHI;
-    double e, m, Cv, chi;
-
-
-    for (int i = 0; i < N_avg; i++) {
-        mc_run(L, M, T, e, m, Cv, chi, "random", 10);
-        E += e;
-        M += m;
-        CV += Cv;
-        CHI += chi
-        }
-
-    e = E/N_avg;
-    m = M/N_avg;
-    Cv = CV/N_avg;
-    chi = CHI/N_avg;
+    multi_mc(L, M, R, T, e, m, Cv, chi, e_err, m_err, Cv_err, chi_err, method, burnin);
 
 
     // Analytic solutions
     double E_a = (-8*sinh(8/T))/(3+cosh(8/T));
     double e_a = E_a/N;
-
     double E_sq = (64*sinh(8/T))/(3+cosh(8/T));
     double e_sq = E_sq/N;
-
     double Cv_a = 1/(T*T)*(e_sq - pow(e_a, 2)*N);
-
     double M_a = (4 + 2*exp(8/T))/(3+cosh(8/T));
     double m_a = M_a/N;
-
     double M_sq = (8 + 8*exp(8/T))/(3+cosh(8/T));
     double m_sq = M_sq/N;
-
     double chi_a = (1/T)*(m_sq - pow(m_a, 2)*N);
+
 
     cout << "" << endl;
     cout << "Analytic solutions" << endl;
-    cout << "Average energy per spin: " << e_a << endl;
+    cout << "Average energy per spin: " << e_a  << endl;
     cout << "Average magnetisation per spin: " << m_a << endl;
     cout << "Specific heat capacity: " << Cv_a << endl;
     cout << "Susceptibility: " << chi_a << endl;
@@ -67,10 +62,10 @@ int main()
 
     cout << "" << endl;
     cout << "Numerical solutions" << endl;
-    cout << "Average energy per spin: " << e << endl;
-    cout << "Average magnetisation per spin: " << m << endl;
-    cout << "Specific heat capacity: " << Cv << endl;
-    cout << "Susceptibility: " << chi << endl;
+    cout << "Average energy per spin: " << e << " ± " << e_err << endl;
+    cout << "Average magnetisation per spin: " << m << " ± " << m_err << endl;
+    cout << "Specific heat capacity: " << Cv << " ± " << Cv_err << endl;
+    cout << "Susceptibility: " << chi << " ± " << chi_err << endl;
 
 
 
