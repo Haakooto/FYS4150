@@ -5,7 +5,7 @@
 #include <armadillo>
 #include <random>
 
-#include "utils.cpp"
+#include "ising_model.cpp"
 
 using namespace std;
 using namespace arma;
