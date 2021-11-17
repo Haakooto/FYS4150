@@ -9,6 +9,9 @@ all: compile run
 fire:
 	g++ burnin.cpp -o burn -larmadillo
 
+compile_para:
+	g++ -std=c++11 analytic.cpp -Xpreprocessor -fopenmp -larmadillo -o para.out -lomp
+
 compile_analytic:
 	g++ -std=c++11 analytic.cpp -larmadillo -o analytic.out
 
