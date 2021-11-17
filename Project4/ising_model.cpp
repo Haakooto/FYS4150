@@ -181,10 +181,6 @@ arma::mat mc_run_cuml(int L, int M, double T, std::string method="random", int b
                 Line 1: Cumulative average of the energy per spin.
                 Line 2: Values of the magnetisation per spin given by the Monte-Carlo cycle.
                 Line 3: Cumulative average of the magnetisation per spin.
-                Line 4: Values of the specific heat capacity given by the Monte-Carlo cycle.
-                Line 5: Cumulative average of the specific heat capacity.
-                Line 6: Values of the susceptibility given by the Monte-Carlo cycle.
-                Line 7: Cumulative average of the susceptibility.
     */
 
     double e;
@@ -294,13 +290,7 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
 	std::uniform_int_distribution<std::mt19937::result_type> unifN(0, N - 1); // distribution in range [0, N - 1] for random index of attempted flip
 	std::uniform_real_distribution<> flip(0.0, 1.0);						  // distribution in range [0, 1] for chance of flip
 
-	double beta = 1 / T;
-	arma::vec DEs(5, arma::fill::zeros);
-	for (int i = 0; i <= 4; i += 1)
-	{
-		int j = -8 + i * 4;
-		DEs(i) = exp(-beta * j);
-	}
+	arma::vec DEs = make_de(1 / T);
 
     for (int mc = 0; mc < N * M; mc++)
 	{
