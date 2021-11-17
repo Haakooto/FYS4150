@@ -7,10 +7,28 @@
 #include <random>
 
 
+arma::mat make_de(double beta){
+    /* 
+    Arguments:
+        beta: double
+            1 over temperature of system
+
+    Returns
+        DEs: arma::vec
+            vector with allowed energy changes
+    */ 
+    arma::vec DeltaE(5, arma::fill::zeros);
+    for (int i = 0; i <= 4; i += 1)
+    {
+        int j = -8 + i * 4;
+        DeltaE(i) = exp(-beta * j);
+    }
+    return DeltaE;
+}
 
 arma::mat make_sys(int L, std::string method="random"){
     /*
-    Initialises a Ising model lattice.
+    Initialises an Ising model lattice.
 
     Arguments:
         L: int
@@ -26,10 +44,6 @@ arma::mat make_sys(int L, std::string method="random"){
 
     arma::mat Lattice(L, L);
     if (method == "random"){
-        /*
-        Her må settes inn en annen rng, denne defaulten gir alltid de samme tallene.
-        HO, jeg stoler på at du finner ut av det
-        */
         arma::arma_rng::set_seed_random();
         Lattice = arma::randi<arma::mat>(L, L, arma::distr_param(0, 1));
         Lattice *= 2;
@@ -56,7 +70,7 @@ arma::mat make_sys(int L, std::string method="random"){
 
 double calc_E(const arma::mat& Lattice){
     /*
-    Calculates the initial energy of a system.
+    Calculates the energy of a system.
 
     Arguments:
         Lattice: arma::mat
@@ -78,24 +92,27 @@ double calc_E(const arma::mat& Lattice){
     return E;
 }
 
-void mc_cycle(arma::mat& Lattice, double& T, double& E_sum, double& M_sum, double& E_sq, double& M_sq){
+void mc_cycle(arma::mat& Lattice, arma::mat& DEs, double& E_sum, double& M_sum, double& E_sq, double& M_sq, int seed){
     /*
     Runs a single Monte-Carlo cycle of the system.
 
     Arguments:
         Lattice: arma::mat
             Object describing the lattice of spins.
-        T: double
-            The temperature of the system.
-        e: double
+        DEs: arma::vec
+            Vector with possible energy changes
+        E_sum: double
             The energy per spin of the system.
-        m: double
+        M_sum: double
             The magnetisation per spin of the system.
-        Cv: double
+        E_sq: double
             The specific heat capacity of the system.
-        chi: double
+        M_sq: double
             The susceptibility of the system.
-    XXX Veit ikke mer om hvordan jeg skal sette dette her opp
+        seed: int
+            seed for random number generator. 
+            MUST NEVER BE THE SAME SEED FOR A RUN. 
+            For example, use loop indexer when calling mc_cycle in a loop
     */
 
     double E = calc_E(Lattice);
@@ -107,18 +124,10 @@ void mc_cycle(arma::mat& Lattice, double& T, double& E_sum, double& M_sum, doubl
     int L = Lattice.n_rows;
     int N = L * L;
 
-	std::random_device dev;
-	std::mt19937 rng(dev());
+	// std::random_device dev;
+	std::mt19937 rng(seed);
 	std::uniform_int_distribution<std::mt19937::result_type> unifN(0, N - 1); // distribution in range [0, N - 1] for random index of attempted flip
 	std::uniform_real_distribution<> flip(0.0, 1.0);						  // distribution in range [0, 1] for chance of flip
-
-	double beta = 1 / T;
-	arma::vec DEs(5, arma::fill::zeros);
-	for (int i = 0; i <= 4; i += 1)
-	{
-		int j = -8 + i * 4;
-		DEs(i) = exp(-beta * j);
-	}
 
     for (int mc = 0; mc < N; mc++)
 	{
@@ -149,7 +158,6 @@ void mc_cycle(arma::mat& Lattice, double& T, double& E_sum, double& M_sum, doubl
 
 	M_sum /= N;
 	M_sq /= N ;
-	// chi = beta * (M_sq - m * m * N);
 }
 
 arma::mat mc_run_cuml(int L, int M, double T, std::string method="random", int burnin=0){
@@ -187,9 +195,11 @@ arma::mat mc_run_cuml(int L, int M, double T, std::string method="random", int b
     double N = L * L;
     arma::mat Data(4, M);
     arma::mat Lattice = make_sys(L, method);
+    arma::vec DEs = make_de(1 / T);
+
 
     for (int i = 0; i < M; i++){
-        mc_cycle(Lattice, T, e, m, EE, MM);
+        mc_cycle(Lattice, DEs, e, m, EE, MM, i);
         Data(0, i) = e / N;
         Data(2, i) = m / N;
         if (i <= burnin){
@@ -237,9 +247,10 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
     chi_ave = 0;
     arma::mat Data(8, M);
     arma::mat Lattice = make_sys(L, method);
+    arma::vec DEs = make_de(1 / T);
 
     for (int i = 0; i < M; i++){
-        mc_cycle(Lattice, T, e, m, Cv, chi);
+        mc_cycle(Lattice, DEs, e, m, Cv, chi, i);
         if (i >= burnin){
             e_ave += e;
             m_ave += m;
