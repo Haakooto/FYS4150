@@ -7,7 +7,7 @@
 #include <random>
 
 
-arma::mat make_de(double beta){
+arma::vec make_de(double beta){
     /* 
     Arguments:
         beta: double
@@ -92,7 +92,7 @@ double calc_E(const arma::mat& Lattice){
     return E;
 }
 
-void mc_cycle(arma::mat& Lattice, arma::mat& DEs, double& E_sum, double& M_sum, double& E_sq, double& M_sq, int seed){
+void mc_cycle(arma::mat& Lattice, arma::vec& DEs, double& E_sum, double& M_sum, double& E_sq, double& M_sq, int seed){
     /*
     Runs a single Monte-Carlo cycle of the system.
 
@@ -124,7 +124,6 @@ void mc_cycle(arma::mat& Lattice, arma::mat& DEs, double& E_sum, double& M_sum, 
     int L = Lattice.n_rows;
     int N = L * L;
 
-	// std::random_device dev;
 	std::mt19937 rng(seed);
 	std::uniform_int_distribution<std::mt19937::result_type> unifN(0, N - 1); // distribution in range [0, N - 1] for random index of attempted flip
 	std::uniform_real_distribution<> flip(0.0, 1.0);						  // distribution in range [0, 1] for chance of flip
@@ -372,6 +371,9 @@ void multi_mc(int L, int M, int R, double T, double& e_ave, double& m_ave, doubl
 
 
 arma::mat multi_prob(int L, int M, int R, double T, int burnin=0){
+    /*
+    What do I do? Not even Enja can answer that one...
+    */
     int N = L * L;
     arma::mat Total(N + 1, 2, arma::fill::zeros);
     arma::mat sum;
