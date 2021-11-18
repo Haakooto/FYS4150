@@ -2,6 +2,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from glob import glob
+import time
 import subprocess
 import sys
 import pandas as pd
@@ -9,7 +10,47 @@ import pandas as pd
 datapath = "./data/"
 
 
-def burntime(fname, T=1, M=0, new_run=False):
+def analytic(T=1, M=[1,], R=1, paraRell=False):
+    """
+    Make table comparing numerical values against analytical ones
+
+    Arguments:
+        T: int
+            Temperature
+        M: list
+            log10 of cycles
+        R: int
+            Number of cocurrent runs
+    Returns:
+        nicely formatted table (hopefully)
+    """
+    M = [int(i) for i in M]
+    if paraRell:
+        compiled = "paralytic.out"
+    else:
+        compiled = "analytic.out"
+    table = []
+    cols = ["MC cycles", "\langle e \rangle", "\langle m \rangle", "C_v", "\chi"]
+    for i, m in enumerate(M):
+        table.append([f"10^{m}"])
+        do = subprocess.run(f"./{compiled} {T} {10**m} {R} ugly".split(" "), stdout=subprocess.PIPE)
+        result = do.stdout.decode().strip().split(" ")
+        analy = result[:4]
+        computed = result[4:]
+        for v in range(4):
+            table[-1].append(f"{float(computed[v]):.3f} \pm {float(computed[v + 4]):.3f}")
+
+    table.insert(0, ["Analytic"] + analy)
+    table = pd.DataFrame(table, columns=cols)
+    latex = table.to_latex(escape=False, index=False, column_format="lcccc")
+    latex = latex.splitlines()
+    latex.insert(5, "\midrule")
+    print("\n".join(latex))
+
+
+
+
+def burntime(fname, T=1, M=1, new_run=False):
     """
     Plot the energy and magnetization for the first M cycles
     Determine burntime
@@ -28,13 +69,13 @@ def burntime(fname, T=1, M=0, new_run=False):
     Returns:
         lines and dots with shiny colours
     """
-    runname = fname
-    if fname[-4:] != ".csv":
-        fname += ".csv"
     M = int(M)
+    fname += f"_{T}".replace(".", "")  # save temp in filename
+    runname = fname
+    fname += ".csv"
     file = datapath + fname
     if file not in glob(datapath + "*") or new_run:
-        subprocess.Popen(f"./burn {runname} {T} {M}".split(" ")).wait()
+        subprocess.Popen(f"./burn.out {runname} {T} {M}".split(" ")).wait()
 
     data = pd.read_csv(file, header=0, sep=",")
     data = data.head(M)
@@ -53,6 +94,7 @@ def burntime(fname, T=1, M=0, new_run=False):
             fig.add_trace(go.Scatter(y=data[raw], mode="markers", marker=dict(size=4, color=colors[c]), showlegend=False))
     fig.update_layout()
     fig.show()
+
 
 def main():
     if "help" in sys.argv:
@@ -75,6 +117,7 @@ def main():
     except:
         print("Bad usage! Pass 'help' from commandline to see guide")
         raise
+
 
 if __name__ == "__main__":
     main()
