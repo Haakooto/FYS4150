@@ -4,6 +4,7 @@
 
 # Our additions
 *.txt
+*.csv
 
 ### C++ ###
 # Prerequisites
