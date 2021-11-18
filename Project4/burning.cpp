@@ -41,11 +41,7 @@ int main(int argc, char* argv[]) {
 		// run cycles
 		mat run = mc_run_cuml(L, M, T, start, 0).t();
 
-		// get data
-		data = join_rows(data, run.col(0));  // energy
-		data = join_rows(data, run.col(1));  // energy, cumulative average
-		data = join_rows(data, run.col(2));  // energy
-		data = join_rows(data, run.col(3));  // energy, cumulative average
+		data = join_rows(data, run);
 	}
 
 	data.save(out, csv_ascii);
