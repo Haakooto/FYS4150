@@ -320,9 +320,9 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
     return E_prob;
 }
 
-void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method="random", int burnin=0)
+void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method="random", int burnin=0, bool para=false)
 {
-    /*
+     /*
     Run R cocurrent mcmc with the same temperature, return mean of calculated quantities
 
     Arguments:
@@ -350,67 +350,35 @@ void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method
             Number of burn-in cycles
     XXX
     */
+
     arma::vec e_vec(R, arma::fill::zeros);
     arma::vec m_vec(R, arma::fill::zeros);
     arma::vec Cv_vec(R, arma::fill::zeros);
     arma::vec chi_vec(R, arma::fill::zeros);
 
     arma::vec DEs = make_de(1 / T);
-
-    for (int i = 0; i < R; i++)
-    {
-        double e, m, Cv, chi;
-        mc_run(L, M, DEs, e, m, Cv, chi, method, burnin);
-        e_vec(i) = e;
-        m_vec(i) = m;
-        Cv_vec(i) = Cv;
-        chi_vec(i) = chi;
+    if (para){
+        #pragma omp parallel for
+            for (int i = 0; i < R; i++)
+            {
+                double e, m, Cv, chi;
+                mc_run(L, M, DEs, e, m, Cv, chi, method, burnin);
+                e_vec(i) = e;
+                m_vec(i) = m;
+                Cv_vec(i) = Cv;
+                chi_vec(i) = chi;
+            }
+    } else {
+            for (int i = 0; i < R; i++)
+            {
+                double e, m, Cv, chi;
+                mc_run(L, M, DEs, e, m, Cv, chi, method, burnin);
+                e_vec(i) = e;
+                m_vec(i) = m;
+                Cv_vec(i) = Cv;
+                chi_vec(i) = chi;
+            }
     }
-
-    // Flyttet denne skaleringen hit, for å ungå å sende T til mc_run
-    // Blir da langt færre kall på make_de()
-    // Skal ikke endre resultat, om det gjør det er det dette som er feilen (forhåpentligvis)
-    // Om dette endres, husk å gjøre det i multi_mc_paraRell og
-    Cv_vec /= (T * T);
-    chi_vec /= T;
-
-    data(0) = arma::mean(e_vec);
-    data(1) = arma::mean(m_vec);
-    data(2) = arma::mean(Cv_vec);
-    data(3) = arma::mean(chi_vec);
-
-    data(4) = arma::stddev(e_vec)/sqrt(R);
-    data(5) = arma::stddev(m_vec)/sqrt(R);
-    data(6) = arma::stddev(Cv_vec)/sqrt(R);
-    data(7) = arma::stddev(chi_vec)/sqrt(R);
-}
-
-void multi_mc_paraRell(int L, int M, int R, double T, arma::vec& data, std::string method="random", int burnin=0)
-{
-    /*
-    Same function as multi_mc, but parallelized over the R-loop
-
-    See that function for documentation
-    */
-
-    arma::vec e_vec(R, arma::fill::zeros);
-    arma::vec m_vec(R, arma::fill::zeros);
-    arma::vec Cv_vec(R, arma::fill::zeros);
-    arma::vec chi_vec(R, arma::fill::zeros);
-
-    arma::vec DEs = make_de(1 / T);
-
-    #pragma omp parallel for
-        for (int i = 0; i < R; i++)
-        {
-            double e, m, Cv, chi;
-            mc_run(L, M, DEs, e, m, Cv, chi, method, burnin);
-            e_vec(i) = e;
-            m_vec(i) = m;
-            Cv_vec(i) = Cv;
-            chi_vec(i) = chi;
-        }
-
 
     Cv_vec /= (T * T);
     chi_vec /= T;

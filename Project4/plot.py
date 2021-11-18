@@ -6,6 +6,8 @@ import time
 import subprocess
 import sys
 import pandas as pd
+from uncertainties import ufloat
+
 
 datapath = "./data/"
 
@@ -27,24 +29,31 @@ def analytic(T=1, M=[1,], R=1, paraRell=False):
     M = [int(i) for i in M]
     if paraRell:
         compiled = "paralytic.out"
+        print("Running parallelized")
     else:
         compiled = "analytic.out"
+        print("Running serialized")
     table = []
-    cols = ["MC cycles", "$\langle \varepsilon \rangle$", "$\langle m \rangle$", "$C_v$", "$\chi$"]
+    cols = ["M", "$\langle \varepsilon \rangle$", "$\langle m \rangle$", "$C_v$", "$\chi$"]
     for i, m in enumerate(M):
         table.append([f"$10^{m}$"])
+        t1 = time.time()
         do = subprocess.run(f"./{compiled} {T} {10**m} {R} ugly".split(" "), stdout=subprocess.PIPE)
+        t2 = time.time()
+        print(f"M: 10^{m}, duration: {t2 - t1}")
         result = do.stdout.decode().strip().split(" ")
         analy = result[:4]
         computed = result[4:]
         for v in range(4):
-            table[-1].append(f"${float(computed[v]):.3f} \pm {float(computed[v + 4]):.3f}$")
+            val = ufloat(float(computed[v]), float(computed[v + 4]))
+            table[-1].append(f"${val:.1u}$".replace("+/-", "\pm"))
 
-    table.insert(0, ["Analytic"] + analy)
-    table = pd.DataFrame(table, columns=cols)
-    latex = table.to_latex(escape=False, index=False, column_format="lcccc")
+    table.append(["Analytic"] + [f"${float(a):.4f}$" for a in analy])
+    table = pd.DataFrame(table, columns=cols).transpose()
+    latex = table.to_latex(escape=False, index=cols, column_format="c|" + "c"*len(M) + "|c")
     latex = latex.splitlines()
-    latex.insert(5, "\midrule")
+    toprule = latex.pop(4)
+    latex[2] = toprule
     print("\n".join(latex))
 
 
