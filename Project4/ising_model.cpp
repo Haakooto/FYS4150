@@ -8,7 +8,6 @@
 #include <omp.h>
 
 
-
 arma::vec make_de(double beta){
     /*
     Arguments:
@@ -97,6 +96,7 @@ double calc_E(const arma::mat& Lattice){
 void mc_cycle(arma::mat& Lattice, arma::vec& DEs, double& E_sum, double& M_sum, double& E_sq, double& M_sq, int seed){
     /*
     Runs a single Monte-Carlo cycle of the system.
+    Core of the matter
 
     Arguments:
         Lattice: arma::mat
@@ -164,6 +164,7 @@ void mc_cycle(arma::mat& Lattice, arma::vec& DEs, double& E_sum, double& M_sum, 
 arma::mat mc_run_cuml(int L, int M, double T, std::string method="random", int burnin=0){
     /*
     Runs a number of Monte-Carlo cycles and saves the output at each cycle.
+    Used for calculating burntime
 
     Arguments:
         L: int
@@ -211,8 +212,7 @@ arma::mat mc_run_cuml(int L, int M, double T, std::string method="random", int b
     return Data;
 }
 
-
-void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, std::string method="random", int burnin=0){
+void mc_run(int L, int M, arma::vec DEs, double& e_ave, double& m_ave, double& Cv_ave, double& chi_ave, std::string method="random", int burnin=0){
     /*
     Runs a number of Monte-Carlo cycles and gives the final output.
 
@@ -221,8 +221,8 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
             Size of the lattice.
         M: int
             Number of Monte-Carlo cycles.
-        T: double
-            The temperature of the system.
+        DEs: arma::vec
+            vector of allowed energy changes
         method: std::string
             Method used to initialise the lattice.
             Can be one of "random", "lowest" or "highest".
@@ -244,11 +244,10 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
     chi_ave = 0;
     arma::mat Data(8, M);
     arma::mat Lattice = make_sys(L, method);
-    arma::vec DEs = make_de(1 / T);
 
-    for (int i = 0; i < M; i++){
-        mc_cycle(Lattice, DEs, e, m, Cv, chi, i);
-        if (i >= burnin){
+    for (int mc = 0; mc < M; mc++){
+        mc_cycle(Lattice, DEs, e, m, Cv, chi, mc);
+        if (mc >= burnin){
             e_ave += e;
             m_ave += m;
             Cv_ave += Cv;
@@ -260,8 +259,8 @@ void mc_run(int L, int M, double T, double& e_ave, double& m_ave, double& Cv_ave
     m_ave /= (M - burnin);
     Cv_ave /= (M - burnin);
     chi_ave /= (M - burnin);
-    Cv_ave = 1 / T / T / N * (Cv_ave - pow(e_ave, 2));
-    chi_ave = 1 / T / N * (chi_ave - pow(m_ave, 2));
+    Cv_ave = 1 / N * (Cv_ave - pow(e_ave, 2));
+    chi_ave = 1 / N * (chi_ave - pow(m_ave, 2));
     e_ave /= N;
     m_ave /= N;
 }
@@ -321,64 +320,160 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
     return E_prob;
 }
 
-
-
 void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method="random", int burnin=0)
 {
     /*
-    Her skal lages en funksjon som løper over fleire initialiseringer og regner gjennomsnittet (av gjennomsnittene).
-    Den skal ha en opsjon om den er parallelisert eller ikke.
-    //data = {e, m, Cv, chi, e_err, m_err, Cv_err, chi_err};
+    Run R cocurrent mcmc with the same temperature, return mean of calculated quantities
+
+    Arguments:
+        L: int
+            Size if lattice
+        M: int
+            Number of MCMC cycles
+        R: int
+            Number of cocurrent runs for same temperature
+        T: double
+            Temperature of system
+        data: arma::vec
+            data-containing vector
+                index 0: energy / spin
+                index 1: magnetizaton / spin
+                index 2: heatcapacity
+                index 3: suceptibility
+                index 4: std of index 0 from R runs
+                index 5: std of index 1 from R runs
+                index 6: std of index 2 from R runs
+                index 7: std of index 3 from R runs
+        method: string
+            Initialization method
+        burnin: int
+            Number of burn-in cycles
+    XXX
     */
-
-
     arma::vec e_vec(R, arma::fill::zeros);
     arma::vec m_vec(R, arma::fill::zeros);
     arma::vec Cv_vec(R, arma::fill::zeros);
     arma::vec chi_vec(R, arma::fill::zeros);
 
-    #pragma omp parallel for
-    {
+    arma::vec DEs = make_de(1 / T);
+
     for (int i = 0; i < R; i++)
     {
         double e, m, Cv, chi;
-        mc_run(L, M, T, e, m, Cv, chi, method, burnin);
+        mc_run(L, M, DEs, e, m, Cv, chi, method, burnin);
         e_vec(i) = e;
         m_vec(i) = m;
         Cv_vec(i) = Cv;
         chi_vec(i) = chi;
     }
-    }
 
+    // Flyttet denne skaleringen hit, for å ungå å sende T til mc_run
+    // Blir da langt færre kall på make_de()
+    // Skal ikke endre resultat, om det gjør det er det dette som er feilen (forhåpentligvis)
+    // Om dette endres, husk å gjøre det i multi_mc_paraRell og
+    Cv_vec /= (T * T);
+    chi_vec /= T;
 
     data(0) = arma::mean(e_vec);
     data(1) = arma::mean(m_vec);
     data(2) = arma::mean(Cv_vec);
     data(3) = arma::mean(chi_vec);
 
-
-    //double mye = arma::stddev(e_vec)/sqrt(R);
     data(4) = arma::stddev(e_vec)/sqrt(R);
     data(5) = arma::stddev(m_vec)/sqrt(R);
     data(6) = arma::stddev(Cv_vec)/sqrt(R);
     data(7) = arma::stddev(chi_vec)/sqrt(R);
-
 }
 
+void multi_mc_paraRell(int L, int M, int R, double T, arma::vec& data, std::string method="random", int burnin=0)
+{
+    /*
+    Same function as multi_mc, but parallelized over the R-loop
 
+    See that function for documentation
+    */
+
+    arma::vec e_vec(R, arma::fill::zeros);
+    arma::vec m_vec(R, arma::fill::zeros);
+    arma::vec Cv_vec(R, arma::fill::zeros);
+    arma::vec chi_vec(R, arma::fill::zeros);
+
+    arma::vec DEs = make_de(1 / T);
+
+    #pragma omp parallel for
+        for (int i = 0; i < R; i++)
+        {
+            double e, m, Cv, chi;
+            mc_run(L, M, DEs, e, m, Cv, chi, method, burnin);
+            e_vec(i) = e;
+            m_vec(i) = m;
+            Cv_vec(i) = Cv;
+            chi_vec(i) = chi;
+        }
+
+
+    Cv_vec /= (T * T);
+    chi_vec /= T;
+
+    data(0) = arma::mean(e_vec);
+    data(1) = arma::mean(m_vec);
+    data(2) = arma::mean(Cv_vec);
+    data(3) = arma::mean(chi_vec);
+
+    data(4) = arma::stddev(e_vec)/sqrt(R);
+    data(5) = arma::stddev(m_vec)/sqrt(R);
+    data(6) = arma::stddev(Cv_vec)/sqrt(R);
+    data(7) = arma::stddev(chi_vec)/sqrt(R);
+}
 
 arma::mat multi_prob(int L, int M, int R, double T, int burnin=0){
     /*
-    What do I do? Not even Enja can answer that one...
+    Runs mc_e_prob R times and averages result. Is parallellized over R
+    Arguments:
+        L: int
+            Think you know this shit by now
+        M: int
+            Like, seriously, there is nothing new under the LED-bubls
+        R: int
+            Maybe I should take up poetry?
+        T: double
+            Would keep me busy for a while
+        burnin: int
+            Actually, that is a great idea
     */
-    int N = L * L;
-    arma::mat Total(N + 1, 2, arma::fill::zeros);
+    arma::mat Total(L * L + 1, 2, arma::fill::zeros);
     arma::mat sum;
-    for (int i = 0; i < R; i++){
-        arma::mat Lattice = make_sys(L, "random");
-        sum = mc_e_prob(Lattice, T, M, burnin);
-        Total += sum;
-    }
+    #pragma omp parallel for
+
+        for (int i = 0; i < R; i++){
+            arma::mat Lattice = make_sys(L, "random");
+            sum = mc_e_prob(Lattice, T, M, burnin);
+            Total += sum;
+        }
+    
     Total /= R;
     return Total;
+}
+
+arma::mat thepoem(int L, int M, int R, double T, int burnin=0){
+    int N = L * L;
+    // What do I do? Not even Enya can answer that one...
+    arma::mat Total(N + 1, 2, arma::fill::zeros);
+    // Stay beautiful, keep it ugly
+    arma::mat sum;
+    // As with anything creative, change is inevitable
+    for (int i = 0; i < R; i++){
+        // Think I should exist in another file...
+        arma::mat Lattice = make_sys(L, "random");
+        // Would you destroy something perfect in order to make it beautiful
+        sum = mc_e_prob(Lattice, T, M, burnin);
+        // Perhaps I am already dead
+        Total += sum;
+        // At the very least living in another scope
+    }
+    // I wanted to become God, destroyer of death
+    Total /= R;
+    // I at least attempted to give back the sum of it all
+    return Total;
+    // Now, I walk gentle into that good night
 }
