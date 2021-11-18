@@ -16,7 +16,7 @@ arma::vec make_de(double beta){
 
     Returns
         DEs: arma::vec
-            vector with allowed energy changes
+            Vector with Boltzmann probability factors for allowed energy changes.
     */
     arma::vec DeltaE(5, arma::fill::zeros);
     for (int i = 0; i <= 4; i += 1)
@@ -102,7 +102,7 @@ void mc_cycle(arma::mat& Lattice, arma::vec& DEs, double& E_sum, double& M_sum, 
         Lattice: arma::mat
             Object describing the lattice of spins.
         DEs: arma::vec
-            Vector with possible energy changes
+            Vector with Boltzmann probability factors for allowed energy changes.
         E_sum: double
             The energy per spin of the system.
         M_sum: double
@@ -222,7 +222,7 @@ void mc_run(int L, int M, arma::vec DEs, double& e_ave, double& m_ave, double& C
         M: int
             Number of Monte-Carlo cycles.
         DEs: arma::vec
-            vector of allowed energy changes
+            Vector with Boltzmann probability factors for allowed energy changes.
         method: std::string
             Method used to initialise the lattice.
             Can be one of "random", "lowest" or "highest".
