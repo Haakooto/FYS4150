@@ -34,9 +34,9 @@ def analytic(T=1, M=[1,], R=1, paraRell=False):
         compiled = "analytic.out"
         print("Running serialized")
     table = []
-    cols = ["M", "\langle e \rangle", "\langle m \rangle", "C_v", "\chi"]
+    cols = ["M", "$\langle \varepsilon \rangle$", "$\langle m \rangle$", "$C_v$", "$\chi$"]
     for i, m in enumerate(M):
-        table.append([f"10^{m}"])
+        table.append([f"$10^{m}$"])
         t1 = time.time()
         do = subprocess.run(f"./{compiled} {T} {10**m} {R} ugly".split(" "), stdout=subprocess.PIPE)
         t2 = time.time()
@@ -46,9 +46,9 @@ def analytic(T=1, M=[1,], R=1, paraRell=False):
         computed = result[4:]
         for v in range(4):
             val = ufloat(float(computed[v]), float(computed[v + 4]))
-            table[-1].append(f"{val:.1u}".replace("+/-", "\pm"))
+            table[-1].append(f"${val:.1u}$".replace("+/-", "\pm"))
 
-    table.append(["Analytic"] + [f"{float(a):.4f}" for a  in analy])
+    table.append(["Analytic"] + [f"${float(a):.4f}$" for a in analy])
     table = pd.DataFrame(table, columns=cols).transpose()
     latex = table.to_latex(escape=False, index=cols, column_format="c|" + "c"*len(M) + "|c")
     latex = latex.splitlines()
