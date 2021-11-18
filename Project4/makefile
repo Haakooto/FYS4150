@@ -24,10 +24,5 @@ ex_5:
 	python3 plot.py burntime burn 2.4 300 True
 
 ex_4:
-	python3 plot.py analytic 1 2345 100 True
-	python3 plot.py analytic 2.4 2345 100 True
-# kjør manuelt, eller gjennom python
-# run_analytic:
-# 	./analytic.out
-
-# analytic_sol: compile_analytic run_analytic
+	python3 plot.py analytic 1 23456 100 True
+	python3 plot.py analytic 2.4 23456 100 True
