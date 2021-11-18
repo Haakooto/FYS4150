@@ -57,8 +57,6 @@ def analytic(T=1, M=[1,], R=1, paraRell=False):
     print("\n".join(latex))
 
 
-
-
 def burntime(fname, T=1, M=1, new_run=False):
     """
     Plot the energy and magnetization for the first M cycles
