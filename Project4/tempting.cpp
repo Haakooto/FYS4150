@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 	/*
 	Input: filename, M, R, L, Tmin, Tmax, Ts
 	*/
-    int M, R, Ts;   //Ts is the number of temperatures to iterate over
+    int M, R, L, Ts;   //Ts is the number of temperatures to iterate over
     double Tmin, Tmax;
 
 	string fname;
@@ -25,46 +25,38 @@ int main(int argc, char* argv[]) {
 		return 1;
 	} else {
         fname = argv[1];
-        M = atof(argv[2]);
+        M = atoi(argv[2]);
         R = atoi(argv[3]);
         L = atoi(argv[4]);
-        Tmin = atoi(argv[5]);
-        Tmax = atoi(argv[6]);
-        Ts = atof(argv[7]);
+        Tmin = atof(argv[5]);
+        Tmax = atof(argv[6]);
+        Ts = atoi(argv[7]);
     }
-	mat data;
+	mat data(Ts + 1, 9);
 
 	// open outfile
 	ofstream out;
 	out.open("data/" + fname + ".csv");
-    out << f"L = {L}, MC cycles = {M}, Repetitions = {R}";
-	out << "T,e_avg,m_avg,Cv,chi,e_err,m_err,Cv_err,chi_err";
+    out << "L = " << L << " MC cycles = " << M << " Repetitions = " << R << endl;
+	out << "T,e_avg,m_avg,Cv,chi,e_err,m_err,Cv_err,chi_err" << endl;
 
-    double inc = (Tmax - Tmin)/Ts
+    double inc = (Tmax - Tmin)/Ts;
+    int i = 0;
+    string method = "random";
+    int burnin = 100;
 
 
 	// loop over initializations
     #pragma omp parallel for
-        for (T = Tmin, T <= Tmax, T += inc){
-            mat run = multi_mc
-
-
-
-
+        for (i = 0; i <= Ts; i++)
+        {
+            double T = Tmin + inc * i;
+            arma::vec run(8, arma::fill::zeros);
+            multi_mc(L, M, R, T, run, method, burnin, false);
+            data(i, 0) = T;
+            data.submat(i, 1, i, 8) = run.t();
         }
 
-	for (const char* start:{"random", "lowest", "highest"}){
-		// run cycles
-
-        mat run =
-		mat run = mc_run_cuml(L, M, T, start, 0).t();
-
-		// get data
-		data = join_rows(data, run.col(0));  // energy
-		data = join_rows(data, run.col(1));  // energy, cumulative average
-		data = join_rows(data, run.col(2));  // energy
-		data = join_rows(data, run.col(3));  // energy, cumulative average
-	}
 
 	data.save(out, csv_ascii);
 	return 0;
