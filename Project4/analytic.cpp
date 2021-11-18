@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
     // vector with calculated quantities. See docstring of multi_mc for containts
     arma::vec data(8, arma::fill::zeros);
 
-    multi_mc_paraRell(L, M, R, T, data, method, burnin);
+    multi_mc(L, M, R, T, data, method, burnin, true);
 
     // Analytic solutions
     double E_a = (-8*sinh(8/T))/(3+cosh(8/T));
