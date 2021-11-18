@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <armadillo>
+#include <omp.h>
 
 #include "ising_model.cpp"
 
@@ -12,36 +13,50 @@ using namespace arma;
 
 int main(int argc, char* argv[]) {
 	/*
-	Dette er kun en kopi av burning.cpp
-	For å gjøre den til tempting, endre input parametre
-	og loop over temperatur i stedenfor initializeringen
-	Legg til pragma og kall multi_mc, ikke mc_run_cuml
-	Ellers skal alt være blomster og puter, mer eller mindre
+	Input: filename, M, R, L, Tmin, Tmax, Ts
 	*/
+    int M, R, Ts;   //Ts is the number of temperatures to iterate over
+    double Tmin, Tmax;
 
-	int M, T, L = 20;
 	string fname;
-	if (argc != 4){
-		cout << "Bad usage! This program takes three params";
-		cout << "\nfilename, temperature, and number of monte carlo cycles\n";
+	if (argc != 8){
+		cout << "Bad usage! This program takes seven params";
+		cout << "\n filename, MC cycles, Runs, L, Tmin, Tmax, # temperatures \n";
 		return 1;
 	} else {
-		fname = argv[1];
-		T = atoi(argv[2]);
-        M = atoi(argv[3]);
+        fname = argv[1];
+        M = atof(argv[2]);
+        R = atoi(argv[3]);
+        L = atoi(argv[4]);
+        Tmin = atoi(argv[5]);
+        Tmax = atoi(argv[6]);
+        Ts = atof(argv[7]);
     }
 	mat data;
 
 	// open outfile
 	ofstream out;
 	out.open("data/" + fname + ".csv");
-	out << "e_rnd,avg_e_rnd,m_rnd,avg_m_rnd,";
-	out << "e_low,avg_e_low,m_low,avg_m_low,";
-	out << "e_hig,avg_e_hig,m_hig,avg_m_hig\n";
+    out << f"L = {L}, MC cycles = {M}, Repetitions = {R}";
+	out << "T,e_avg,m_avg,Cv,chi,e_err,m_err,Cv_err,chi_err";
+
+    double inc = (Tmax - Tmin)/Ts
+
 
 	// loop over initializations
+    #pragma omp parallel for
+        for (T = Tmin, T <= Tmax, T += inc){
+            mat run = multi_mc
+
+
+
+
+        }
+
 	for (const char* start:{"random", "lowest", "highest"}){
 		// run cycles
+
+        mat run =
 		mat run = mc_run_cuml(L, M, T, start, 0).t();
 
 		// get data
