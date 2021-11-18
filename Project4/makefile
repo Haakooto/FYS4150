@@ -1,25 +1,33 @@
-compile:
-	g++ -std=c++11 test.cpp -larmadillo -o test.out
 
-run:
-	./test.out
-
-all: compile run
-
-fire:
-	g++ burnin.cpp -o burn -larmadillo
-
-ex_5:
-	python3 plot.py burntime burn_1 1 100 True
-	python3 plot.py burntime burn_24 2.4 300 True
-	
-compile_para:
-	g++ -std=c++11 analytic.cpp -Xpreprocessor -fopenmp -larmadillo -o para.out -lomp
-
-compile_analytic:
+analytic:
 	g++ -std=c++11 analytic.cpp -larmadillo -o analytic.out
 
-run_analytic:
-	./analytic.out
+paralytic_mac:
+	g++ -std=c++11 analytic.cpp -Xpreprocessor -fopenmp -larmadillo -o paralytic.out -lomp
 
-analytic_sol: compile_analytic run_analytic
+paralytic_ubuntu:
+	g++ -std=c++11 analytic.cpp -fopenmp -larmadillo -o paralytic.out
+
+fire:
+	g++ burning.cpp -o burn.out -larmadillo
+
+pdf:
+	g++ pdf.cpp -o pdf.out -larmadillo
+
+paradef:
+	g++ pdf.cpp -o pdf.out -fopenmp -larmadillo
+
+compile_all: analytic paralytic_ubuntu fire pdf paradef
+
+ex_5:
+	python3 plot.py burntime burn 1 100 True
+	python3 plot.py burntime burn 2.4 300 True
+
+ex_4:
+	python3 plot.py analytic 1 2345 100 True
+	python3 plot.py analytic 2.4 2345 100 True
+# kjør manuelt, eller gjennom python
+# run_analytic:
+# 	./analytic.out
+
+# analytic_sol: compile_analytic run_analytic
