@@ -16,7 +16,8 @@ int main(int argc, char* argv[])
 {
     int M, R;
     double T;
-    if (argc != 4){
+    bool ugly_out = false;
+    if (argc != 4 && argc != 5){
         cout << "Bad usage! This program takes three parameters: ";
         cout << "temperature, number of monte carlo cycles, and rounds to average over \n";
         return 1;
@@ -25,7 +26,9 @@ int main(int argc, char* argv[])
         M = atoi(argv[2]);
         R = atoi(argv[3]);
     }
-
+    if (argc == 5){
+        ugly_out = true;
+    }
 
     // Test the program against the analytical solution
     int L = 2;
@@ -33,13 +36,10 @@ int main(int argc, char* argv[])
     string method = "random";
     int burnin = 0;
 
+    // vector with calculated quantities. See docstring of multi_mc for containts
+    arma::vec data(8, arma::fill::zeros);
 
-    double e, m, Cv, chi, e_err, m_err, Cv_err, chi_err;
-
-    arma::vec data = {e, m, Cv, chi, e_err, m_err, Cv_err, chi_err};
-
-    multi_mc(L, M, R, T, data, method, burnin);
-
+    multi_mc_paraRell(L, M, R, T, data, method, burnin);
 
     // Analytic solutions
     double E_a = (-8*sinh(8/T))/(3+cosh(8/T));
@@ -53,23 +53,28 @@ int main(int argc, char* argv[])
     double m_sq = M_sq/N;
     double chi_a = (1/T)*(m_sq - pow(m_a, 2)*N);
 
+    if (ugly_out) {  // If called from python, just print outputs
+        arma::rowvec out(12);
+        out(0) = e_a; out(1) = m_a; out(2) = Cv_a; out(3) = chi_a;
+        out.cols(4, 11) = data.t();
+        out.raw_print(std::cout);
 
-    cout << "" << endl;
-    cout << "Analytic solutions" << endl;
-    cout << "Average energy per spin: " << e_a  << endl;
-    cout << "Average magnetisation per spin: " << m_a << endl;
-    cout << "Specific heat capacity: " << Cv_a << endl;
-    cout << "Susceptibility: " << chi_a << endl;
-    cout << "" << endl;
+    } else {  // if not called from python, make nice prints
+        cout << "" << endl;
+        cout << "Analytic solutions" << endl;
+        cout << "Average energy per spin: " << e_a  << endl;
+        cout << "Average magnetisation per spin: " << m_a << endl;
+        cout << "Specific heat capacity: " << Cv_a << endl;
+        cout << "Susceptibility: " << chi_a << endl;
+        cout << "" << endl;
 
-
-    cout << "" << endl;
-    cout << "Numerical solutions" << endl;
-    cout << "Average energy per spin: " << data(0) << " ± " << data(4) << endl;
-    cout << "Average magnetisation per spin: " << data(1) << " ± " << data(5) << endl;
-    cout << "Specific heat capacity: " << data(2) << " ± " << data(6) << endl;
-    cout << "Susceptibility: " << data(3) << " ± " << data(7) << endl;
-
+        cout << "" << endl;
+        cout << "Numerical solutions" << endl;
+        cout << "Average energy per spin: " << data(0) << " ± " << data(4) << endl;
+        cout << "Average magnetisation per spin: " << data(1) << " ± " << data(5) << endl;
+        cout << "Specific heat capacity: " << data(2) << " ± " << data(6) << endl;
+        cout << "Susceptibility: " << data(3) << " ± " << data(7) << endl;
+    }
 
     return 0;
 }
