@@ -179,7 +179,6 @@ def plot_temps(Ls, Ts):
     for i, (L, info) in enumerate(Ls.items()):
         l.append(L)
         data = pd.read_csv(info["data"], header=1, sep=",")
-        print(Ts == data["T"])  # check if temperatures are as expected
         e[i] = data["e_avg"]
         m[i] = data["m_avg"]
         Cv[i] = data["Cv"]
