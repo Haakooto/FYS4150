@@ -242,9 +242,7 @@ void mc_run(int L, int M, arma::vec DEs, double& e_ave, double& m_ave, double& C
     m_ave = 0;
     Cv_ave = 0;
     chi_ave = 0;
-    arma::mat Data(8, M);
     arma::mat Lattice = make_sys(L, method);
-
     for (int mc = 0; mc < M; mc++){
         mc_cycle(Lattice, DEs, e, m, Cv, chi, mc);
         if (mc >= burnin){
