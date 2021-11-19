@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
         Tmax = atof(argv[6]);
         Ts = atoi(argv[7]);
     }
-	mat data(Ts + 1, 9);
+	mat data(Ts, 9);
 
 	// open outfile
 	ofstream out;
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     out << "L = " << L << " MC cycles = " << M << " Repetitions = " << R << endl;
 	out << "T,e_avg,m_avg,Cv,chi,e_err,m_err,Cv_err,chi_err" << endl;
 
-    double inc = (Tmax - Tmin)/Ts;
+    double inc = (Tmax - Tmin)/(Ts - 1);
     int i = 0;
     string method = "random";
     int burnin = 100;
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 
 	// loop over initializations
     #pragma omp parallel for
-        for (i = 0; i <= Ts; i++)
+        for (i = 0; i < Ts; i++)
         {
             double T = Tmin + inc * i;
             arma::vec run(8, arma::fill::zeros);
@@ -56,7 +56,6 @@ int main(int argc, char* argv[]) {
             data(i, 0) = T;
             data.submat(i, 1, i, 8) = run.t();
         }
-
 
 	data.save(out, csv_ascii);
 	return 0;
