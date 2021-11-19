@@ -103,6 +103,72 @@ def burntime(fname, T=1, M=1, new_run=False):
     fig.show()
 
 
+def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80,100]):
+    """
+    Make datafile for each L in temperature analysis.
+    Run this func as if it plots the result, while
+    in fact is only makes sure the data files are there.
+    It then call on plot_temps() to do the actual plotting. 
+    This is just to separate the tasks-
+    It is not nessisary to understand how this function works.
+    It works. 
+
+    Arguments:
+        fname: str
+            filename for run. datafiles will get added L and csv
+        Tmin: float
+            start temp
+        Tmax: float
+            end temp, inclusive
+        Ts: int
+            Number of temps to run
+        M: int
+            log10 of cycles
+        R: int
+            Number of cocurrent runs
+        new_run: bool
+            wether to force new run
+        L: list of ints
+            Lattice sizes to run for
+    Returns:
+        lines and dots with shiny colours    
+    """
+
+    Ls = [int(i) for i in L]
+    Lruns = {}  # make dict with all L
+    for L in Ls:
+        Lruns[L] = {}  # each element is a dict
+        runname = fname + f"_{l}" 
+        name = runname + ".csv" 
+        file = datapath + name  
+        Lruns[L]["data"] = file
+        if file not in glob(datapath + "*") or new_runs:
+            Lruns[L]["process"] = subprocess.Popen(f"./tempting.out {runname} {int(M)} {int(R)} {L} {float(Tmin)} {float(Tmax)} {Ts}".split(" "))
+            Lruns[L]["done"] = None
+        else:
+            Lruns[L]["done"] = True  # mark as done
+    done = np.ones(len(Ls))
+    while sum(done):
+        for L in Ls:
+            if Lruns[L]["done"] is None:
+                Lruns[L]["done"] = Lruns[L]["process"].poll()
+            else:
+                done[L] = 0
+
+    plot_temps(Lruns)
+
+def plot_temps(Ls):
+    """
+    Does the actual plotting of temperature plots.
+    Do not run this func directly, rather call upon run_temps()
+
+    The real arguments are in that function
+    """
+    pass
+    
+
+
+
 def main():
     if "help" in sys.argv:
         print("First argument after 'python plot.py' must be a function in this file")
