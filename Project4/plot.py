@@ -109,10 +109,10 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
     Make datafile for each L in temperature analysis.
     Run this func as if it plots the result, while
     in fact is only makes sure the data files are there.
-    It then call on plot_temps() to do the actual plotting. 
+    It then call on plot_temps() to do the actual plotting.
     This is just to separate the tasks-
     It is not nessisary to understand how this function works.
-    It works. 
+    It works.
 
     Arguments:
         fname: str
@@ -132,16 +132,16 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
         L: list of ints
             Lattice sizes to run for
     Returns:
-        lines and dots with shiny colours    
+        lines and dots with shiny colours
     """
 
     Ls = [int(i) for i in L]
     Lruns = {}  # make dict with all L
     for L in Ls:
         Lruns[L] = {}  # each element is a dict
-        runname = fname + f"_{L}" 
-        name = runname + ".csv" 
-        file = datapath + name  
+        runname = fname + f"_{L}"
+        name = runname + ".csv"
+        file = datapath + name
         Lruns[L]["data"] = file
         if file not in glob(datapath + "*") or new_runs:
             print(f"Starting run with L = {L}")
@@ -187,9 +187,53 @@ def plot_temps(Ls, Ts):
     m = pd.DataFrame(m, columns=l)
     Cv = pd.DataFrame(Cv, columns=l)
     chi = pd.DataFrame(chi, columns=l)
-    
+
     plt.plot(Ts, e)
     plt.show()
+
+
+
+def plot_pdf():
+
+    data_T_low = pd.read_csv("data/pdf_T1.csv", header = 0, sep = ",")
+    data_T_high = pd.read_csv("data/pdf_T2.4.csv", header = 0, sep = ",")
+
+    fig_low = px.histogram(
+        x=data_T_low["e_avg"],
+        y=data_T_low["prob"],
+        nbins=250)
+
+    fig_low.update_layout(
+        #xaxis_range=[-2, 0.2],   #all p=0 after e=0.2
+        #yaxis_range=[0,0.9],
+        font_family="Open sans",
+        font_size=30,
+        title="Histogram of measured probability distribution of the energy for T = 1",
+        xaxis_title=r"$ \huge \text{Energy  }  \epsilon$",
+        yaxis_title="Probability",
+        legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+
+
+
+
+    fig_high = px.histogram(
+        x=data_T_high["e_avg"],
+        y=data_T_high["prob"],
+        nbins=250)
+
+    fig_high.update_layout(
+        #xaxis_range=[-2, 0.2],   #all p=0 after e=0.2
+        #yaxis_range=[0, 0.9],
+        font_family="Open sans",
+        font_size=30,
+        title="Histogram of measured probability distribution of the energy for T = 2.4",
+        xaxis_title=r"$ \huge \text{Energy  }  \epsilon$",
+        yaxis_title="Probability",
+        legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+
+    fig_low.show()
+    fig_high.show()
+
 
 
 
@@ -217,4 +261,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    plot_pdf()

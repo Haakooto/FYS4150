@@ -8,11 +8,11 @@ paralytic_mac:
 paralytic_ubuntu:
 	g++ -std=c++11 analytic.cpp -fopenmp -larmadillo -o paralytic.out
 
-fire:
+fire:	
 	g++ burning.cpp -o burn.out -larmadillo
 
 pdf:
-	g++ pdf.cpp -o pdf.out -larmadillo
+	g++ -std=c++11 pdf.cpp -larmadillo -o pdf.out
 
 paradef:
 	g++ pdf.cpp -o pdf.out -fopenmp -larmadillo
@@ -26,3 +26,4 @@ ex_5:
 ex_4:
 	python3 plot.py analytic 1 23456 100 True
 	python3 plot.py analytic 2.4 23456 100 True
+
