@@ -7,6 +7,7 @@ import subprocess
 import sys
 import pandas as pd
 from uncertainties import ufloat
+import matplotlib.pyplot as plt
 
 
 datapath = "./data/"
@@ -138,14 +139,16 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
     Lruns = {}  # make dict with all L
     for L in Ls:
         Lruns[L] = {}  # each element is a dict
-        runname = fname + f"_{l}" 
+        runname = fname + f"_{L}" 
         name = runname + ".csv" 
         file = datapath + name  
         Lruns[L]["data"] = file
         if file not in glob(datapath + "*") or new_runs:
+            print(f"Starting run with L = {L}")
             Lruns[L]["process"] = subprocess.Popen(f"./tempting.out {runname} {int(M)} {int(R)} {L} {float(Tmin)} {float(Tmax)} {Ts}".split(" "))
             Lruns[L]["done"] = None
         else:
+            print(f"There was already data for L = {L}")
             Lruns[L]["done"] = True  # mark as done
     done = np.ones(len(Ls))
     while sum(done):
@@ -153,19 +156,41 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
             if Lruns[L]["done"] is None:
                 Lruns[L]["done"] = Lruns[L]["process"].poll()
             else:
-                done[L] = 0
+                if done[Ls.index(L)] != 0:
+                    print(f"{L} now done")
+                done[Ls.index(L)] = 0
+    print(f"Data now ready for all L")
+    Ts = np.linspace(float(Tmin), float(Tmax), int(Ts))
+    plot_temps(Lruns, Ts)
 
-    plot_temps(Lruns)
-
-def plot_temps(Ls):
+def plot_temps(Ls, Ts):
     """
     Does the actual plotting of temperature plots.
     Do not run this func directly, rather call upon run_temps()
+    See that function for docstring
 
-    The real arguments are in that function
+    The errors in the values have not yet been accounted for, and are assumed to be 0
     """
-    pass
+    e = np.zeros((len(Ls), len(Ts)))
+    m = np.zeros((len(Ls), len(Ts)))
+    Cv = np.zeros((len(Ls), len(Ts)))
+    chi = np.zeros((len(Ls), len(Ts)))
+    l = []
+    for i, (L, info) in enumerate(Ls.items()):
+        l.append(L)
+        data = pd.read_csv(info["data"], header=1, sep=",")
+        print(Ts == data["T"])  # check if temperatures are as expected
+        e[i] = data["e_avg"]
+        m[i] = data["m_avg"]
+        Cv[i] = data["Cv"]
+        chi[i] = data["chi"]
+    e = pd.DataFrame(e, columns=l)
+    m = pd.DataFrame(m, columns=l)
+    Cv = pd.DataFrame(Cv, columns=l)
+    chi = pd.DataFrame(chi, columns=l)
     
+    plt.plot(Ts, e)
+    plt.show()
 
 
 
