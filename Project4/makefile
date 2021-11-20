@@ -48,3 +48,6 @@ it_happen:
 	echo -ne '\007'
 	sleep 0.2
 	echo -ne '\007'
+
+plots:
+	python3 plot.py run_temps temp_broad_search 2.1 2.4 20 10000 100
