@@ -8,7 +8,7 @@ paralytic_mac:
 paralytic_ubuntu:
 	g++ -std=c++11 analytic.cpp -fopenmp -larmadillo -o paralytic.out
 
-fire:	
+fire:
 	g++ burning.cpp -o burn.out -larmadillo
 
 pdf:
@@ -17,11 +17,15 @@ pdf:
 paradef:
 	g++ pdf.cpp -o pdf.out -fopenmp -larmadillo
 
+cant_touch_this:
+	g++ MC_Hammer.cpp -o time.out -larmadillo -fopenmp
+	g++ MC_Hammer.cpp -o optime.out -larmadillo -fopenmp -O3
+
 compile_all: analytic paralytic_ubuntu fire pdf paradef
 
 ex_5:
-	python3 plot.py burntime burn 1 100 True
-	python3 plot.py burntime burn 2.4 300 True
+	python3 plot.py burntime burn 1 1000
+	python3 plot.py burntime burn 2.4 3000
 
 ex_4:
 	python3 plot.py analytic 1 23456 100 True
