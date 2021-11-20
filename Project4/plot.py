@@ -154,6 +154,8 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
         else:
             print(f"There was already data for L = {L}")
             Lruns[L]["done"] = True  # mark as done
+            Lruns[L]["start"] = time.time()
+
     done = np.ones(len(Ls))
     while sum(done):
         for L in Ls:
@@ -187,10 +189,12 @@ def plot_temps(Ls, Ts):
         m[i] = data["m_avg"]
         Cv[i] = data["Cv"]
         chi[i] = data["chi"]
-    e = pd.DataFrame(e, columns=l)
-    m = pd.DataFrame(m, columns=l)
-    Cv = pd.DataFrame(Cv, columns=l)
-    chi = pd.DataFrame(chi, columns=l)
+    print(e.shape)
+    print(l)
+    e = pd.DataFrame(e.T, columns=l)
+    m = pd.DataFrame(m.T, columns=l)
+    Cv = pd.DataFrame(Cv.T, columns=l)
+    chi = pd.DataFrame(chi.T, columns=l)
 
     plt.plot(Ts, e)
     plt.show()
@@ -271,5 +275,5 @@ def main():
 
 
 if __name__ == "__main__":
-    #main()
-    plot_pdf()
+    main()
+    # plot_pdf()
