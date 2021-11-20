@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     string method = "random";
     int burnin = 100;
 
-
+    omp_set_num_threads(4);
 	// loop over initializations
     #pragma omp parallel for
         for (i = 0; i < Ts; i++)
