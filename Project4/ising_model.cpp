@@ -313,8 +313,8 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
 	}
     E_density /= N * M;
     arma::mat E_prob;
-    E_prob.insert_cols(0, E_vals);
-    E_prob.insert_cols(1, E_density);
+    E_prob.insert_cols(0, E_vals);     //the possible e-values
+    E_prob.insert_cols(1, E_density);   // the likelyhood of each e-value
     return E_prob;
 }
 
@@ -416,7 +416,7 @@ arma::mat multi_prob(int L, int M, int R, double T, int burnin=0){
             sum = mc_e_prob(Lattice, T, M, burnin);
             Total += sum;
         }
-    
+
     Total /= R;
     return Total;
 }
