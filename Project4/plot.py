@@ -160,6 +160,8 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
     """
     if type(L) == str:
         L = eval(L)
+    if type(new_runs) == str:
+        new_runs = eval(new_runs)
     Ls = [int(i) for i in L]
     Lruns = {}  # make dict with all L
     for L in Ls:
@@ -219,7 +221,11 @@ def plot_temps(Ls, Ts):
     m = pd.DataFrame(m.T, columns=l)
     Cv = pd.DataFrame(Cv.T, columns=l)
     chi = pd.DataFrame(chi.T, columns=l)
-
+    print(data)
+    print(e)
+    print(m)
+    print(Cv)
+    print(chi)
     plt.plot(Ts, e)
     plt.show()
     plt.plot(Ts, m)
@@ -274,6 +280,28 @@ def pdf():
     fig_high.show()
 
 
+def paralympics():
+    """
+    MC STOP. Hammer time!
+
+    Arguments:
+        None. All shit is hard coded
+    Returns:
+        Speed-up factor
+    """
+
+    M = 2000
+    R = 100
+    L = 20
+    T = 2
+    A = 10
+    for p in ["nopara", "para"]:
+        for o in ["time", "optime"]:
+            times = np.zeros(A)
+            for i in range(A):
+                run = subprocess.run(f"./{o}.out {M} {R} {L} {T} {p}".split(" "), stdout=subprocess.PIPE)#.wait()
+                times[i] = float(run.stdout.decode().strip())
+            print(p, o, np.mean(times))
 
 
 def main():
