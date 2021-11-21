@@ -20,42 +20,31 @@ cant_touch_this:
 	g++ MC_Hammer.cpp -o time.out -larmadillo -fopenmp
 	g++ MC_Hammer.cpp -o optime.out -larmadillo -fopenmp -O3
 
-compile_all: analytic paralytic_ubuntu fire pdf paradef
+tempting:
+	g++ tempting.cpp -o tempting.out -larmadillo -fopenmp -O3
 
-ex_5:
-	python3 plot.py burntime burn 1 1000
-	python3 plot.py burntime burn 2.4 3000
+compile_all: analytic paralytic_ubuntu fire pdf paradef cant_touch_this tempting
 
 ex_4:
 	python3 plot.py analytic 1 23456 100 True
 	python3 plot.py analytic 2.4 23456 100 True
 
-my_day:
-	g++ tempting.cpp -fopenmp -larmadillo -o tempting.out
-	python3 plot.py run_temps temp_broad_search_test1 2.1 2.4 20 200 100 True '40,60,80,100'
-	echo -ne '\007'
-	sleep 0.2
-	echo -ne '\007'
-	sleep 0.2
-	echo -ne '\007'
-	sleep 0.2
-	echo -ne '\007'
+ex_5:
+	python3 plot.py burntime burn 1 1000
+	python3 plot.py burntime burn 2.4 3000
 
-it_happen:
-	g++ tempting.cpp -fopenmp -larmadillo -o tempting.out
-	python3 plot.py run_temps temp_ghu 2.1 2.4 20 500 100 True '40,60,80,100'
-	echo -ne '\007'
-	sleep 0.2
-	echo -ne '\007'
-	sleep 0.2
-	echo -ne '\007'
-	sleep 0.2
-	echo -ne '\007'
+ex_6:
+	python3 plot.py pdf
 
-plots:
-	python3 plot.py run_temps temp_broad_search 2.1 2.4 20 10000 100
+ex_7:
+	python3 plot.py paralympics
 
-god_help_us:
-	g++ tempting.cpp -fopenmp -larmadillo -o tempting.out -O3
-	python3 plot.py run_temps temp_less_sampling_highL 2.1 2.5 30 10000 100 True '40,60,80,100'
+ex_8:
+	python3 plot.py run_temps temps 2.1 2.5 30 1000000 1 True '40,60,80,100'
+	python3 plot.py run_temps temps 2.25 2.325 15 5000000 1 True '40,60,80,100'
 
+ex_9:
+	py plot.py critical_temp temps 2.1 2.5 30 '40,60,80,100'
+
+all:
+	ex_4 ex_5 ex_6 ex_7 ex_8 ex_9 
