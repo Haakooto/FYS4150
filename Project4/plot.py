@@ -78,7 +78,7 @@ def burntime(fname, T=1, M=1, new_run=False):
         lines and dots with shiny colours
     """
     M = int(M)
-    fname += f"_{T}".replace(".", "")  # save temp in filename
+    fname += f"_{T}"
     runname = fname
     fname += ".csv"
     file = datapath + fname
@@ -88,20 +88,44 @@ def burntime(fname, T=1, M=1, new_run=False):
     data = pd.read_csv(file, header=0, sep=",")
     data = data.head(M)
 
-    fig = go.Figure()
+    fig1 = go.Figure()
     colors = px.colors.qualitative.Plotly
     c = -1
-    for init in ["rnd", "low", "hig"]:
+    for init, method in zip(["rnd", "low"], ["Random ", "Low energy "]):
+        raw = f"e_{init}"
         c += 1
-        for quant in ["e", "m"]:
-            q = "energy" if quant == "e" else "magnetization"
-            raw = f"{quant}_{init}"
-            avg = "avg_" + raw
-            name = q + " with " + init
-            fig.add_trace(go.Scatter(y=data[avg], mode="lines", line=dict(width=4, color=colors[c]), name=name))
-            fig.add_trace(go.Scatter(y=data[raw], mode="markers", marker=dict(size=4, color=colors[c]), showlegend=False))
-    fig.update_layout()
-    fig.show()
+        name = method + " spin initialisation"
+        fig1.add_trace(go.Scatter(y=data[raw], mode="markers", marker=dict(size=7, color=colors[c]), name=name))
+
+    fig1.update_layout(
+        font_family="Open sans",
+        font_size=30,
+        title=f"Mean energy as function of MC cycles for a 20 x 20 lattice at T = {T}",
+        xaxis_title="MC cycles",
+        yaxis_title="Mean energy",
+        legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
+
+
+    fig2 = go.Figure()
+    c = -1
+    for init, method in zip(["rnd", "low"], ["Random ", "Low energy "]):
+        raw = f"m_{init}"
+        c += 1
+        name = method + "spin initialisation"
+        fig2.add_trace(go.Scatter(y=data[raw], mode="markers", marker=dict(size=7, color=colors[c]), name=name))
+
+
+    fig2.update_layout(
+        font_family="Open sans",
+        font_size=30,
+        title=f"Mean magnetisation as function of MC cycles for a 20 x 20 lattice at T = {T}",
+        xaxis_title="MC cycles",
+        yaxis_title="Mean magnetisation",
+        legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01, font_size=30))
+
+    fig1.show()
+    fig2.show()
+
 
 
 def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80,100]):
@@ -136,6 +160,8 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
     """
     if type(L) == str:
         L = eval(L)
+    if type(new_runs) == str:
+        new_runs = eval(new_runs)
     Ls = [int(i) for i in L]
     Lruns = {}  # make dict with all L
     for L in Ls:
@@ -195,7 +221,11 @@ def plot_temps(Ls, Ts):
     m = pd.DataFrame(m.T, columns=l)
     Cv = pd.DataFrame(Cv.T, columns=l)
     chi = pd.DataFrame(chi.T, columns=l)
-
+    print(data)
+    print(e)
+    print(m)
+    print(Cv)
+    print(chi)
     plt.plot(Ts, e)
     plt.show()
     plt.plot(Ts, m)
@@ -249,13 +279,35 @@ def plot_pdf():
     fig_high.show()
 
 
+def paralympics():
+    """
+    MC STOP. Hammer time!
+
+    Arguments:
+        None. All shit is hard coded
+    Returns:
+        Speed-up factor
+    """
+
+    M = 2000
+    R = 100
+    L = 20
+    T = 2
+    A = 10
+    for p in ["nopara", "para"]:
+        for o in ["time", "optime"]:
+            times = np.zeros(A)
+            for i in range(A):
+                run = subprocess.run(f"./{o}.out {M} {R} {L} {T} {p}".split(" "), stdout=subprocess.PIPE)#.wait()
+                times[i] = float(run.stdout.decode().strip())
+            print(p, o, np.mean(times))
 
 
 def main():
     if "help" in sys.argv:
         print("First argument after 'python plot.py' must be a function in this file")
         print("If this function takes any arguments, the are to be passed as well")
-        print("Example: 'python plot.py burntime burn 2.4 10")
+        print("Example: 'python3 plot.py burntime burn 2.4 10")
 
     try:
         if len(sys.argv) == 1:
