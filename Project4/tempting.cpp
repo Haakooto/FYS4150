@@ -43,16 +43,16 @@ int main(int argc, char* argv[]) {
     double inc = (Tmax - Tmin)/(Ts - 1);
     int i = 0;
     string method = "random";
-    int burnin = 100;
+    int burnin = 1000;
 
-    omp_set_num_threads(4);
+    // omp_set_num_threads(4);
 	// loop over initializations
     #pragma omp parallel for
         for (i = 0; i < Ts; i++)
         {
             double T = Tmin + inc * i;
             arma::vec run(8, arma::fill::zeros);
-            multi_mc(L, M, R, T, run, method, burnin, false);
+            single_mc(L, M, T, run, method, burnin);
             data(i, 0) = T;
             data.submat(i, 1, i, 8) = run.t();
         }

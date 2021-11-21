@@ -8,6 +8,9 @@ import sys
 import pandas as pd
 from uncertainties import ufloat
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d, UnivariateSpline
+from scipy.optimize import curve_fit
+from scipy.stats import linregress
 
 
 datapath = "./data/"
@@ -176,7 +179,6 @@ def run_temps(fname, Tmin=2.1, Tmax=2.4, Ts=20, M=1, R=1, new_runs=False, L=[40,
             Lruns[L]["start"] = time.time()
             Lruns[L]["process"] = subprocess.Popen(f"./tempting.out {runname} {int(M)} {int(R)} {L} {float(Tmin)} {float(Tmax)} {Ts}".split(" "))#.wait()
             Lruns[L]["done"] = None
-            # print(f"{L} now done. Time spent: {time.time() - Lruns[L]['start']}")
 
         else:
             print(f"There was already data for L = {L}")
@@ -192,7 +194,10 @@ def run_temps(fname, Tmin=2.1, Tmax=2.4, Ts=20, M=1, R=1, new_runs=False, L=[40,
             else:
                 if done[Ls.index(L)] != 0:
                     print(f"{L} now done. Time spent: {time.time() - Lruns[L]['start']}")
+                    # subprocess.Popen(["teletext '{L} now done. Time spent: {time.time() - Lruns[L]['start']}")
+                    subprocess.call(["/home/hakon/julia/julia", "/home/hakon/Documents/send.jl", f"L={L} now done. Time spent: {time.time() - Lruns[L]['start']}"], shell=False)
                     done[Ls.index(L)] = 0
+        time.sleep(2)  # only check for finished programs every 2 seconds
     print(f"Data now ready for all L")
     Ts = np.linspace(float(Tmin), float(Tmax), int(Ts))
     plot_temps(Lruns, Ts)
@@ -212,7 +217,6 @@ def plot_temps(Ls, Ts):
     chi = np.zeros((len(Ls), len(Ts)))
     l = []
 
-
     for i, (L, info) in enumerate(Ls.items()):
         l.append(L)
         data = pd.read_csv(info["data"], header=1, sep=",")
@@ -225,7 +229,6 @@ def plot_temps(Ls, Ts):
     m = pd.DataFrame(m.T, columns=l)
     Cv = pd.DataFrame(Cv.T, columns=l)
     chi = pd.DataFrame(chi.T, columns=l)
-
 
     fig = go.Figure()
     colors = px.colors.qualitative.Plotly
@@ -255,6 +258,32 @@ def plot_temps(Ls, Ts):
 
 
         fig.show()
+
+
+def critical_temp(fname, Tmin, Tmax, Ts, L):
+    linear = lambda x, a, b: a * x + b
+
+    L = eval(L)
+    L = np.asarray(L)
+    T = np.linspace(float(Tmin), float(Tmax), int(Ts))
+    m = np.linspace(float(Tmin), float(Tmax), 10001)
+    Tc = np.zeros(len(L))
+    for i, l in enumerate(L):
+        file = datapath + fname + f"_{l}.csv"
+        data = pd.read_csv(file, header=1, sep=",")
+        spline = UnivariateSpline(T, data["Cv"], s=3)
+        plt.scatter(T, data["Cv"])
+        plt.plot(m, spline(m))
+        Tc[i] = m[np.argmax(spline(m))]
+    plt.show()
+
+    fit, _ = curve_fit(linear, 1 / L, Tc)
+    res = linregress(1 / L, Tc)
+    print(res)
+    print(fit)
+    print(_)
+    # print(Tc)
+    # print(1 / L)
 
 
 def pdf():
@@ -302,7 +331,7 @@ def pdf():
 
 def paralympics():
     """
-    MC STOP. Hammer time!
+    STOP. MC Hammer time!
 
     Arguments:
         None. All shit is hard coded
@@ -319,7 +348,7 @@ def paralympics():
         for o in ["time", "optime"]:
             times = np.zeros(A)
             for i in range(A):
-                run = subprocess.run(f"./{o}.out {M} {R} {L} {T} {p}".split(" "), stdout=subprocess.PIPE)#.wait()
+                run = subprocess.run(f"./{o}.out {M} {R} {L} {T} {p}".split(" "), stdout=subprocess.PIPE)
                 times[i] = float(run.stdout.decode().strip())
             print(p, o, np.mean(times))
 

@@ -232,7 +232,8 @@ void mc_run(int L, int M, arma::vec DEs, double& e_ave, double& m_ave, double& C
 
     XXX
     */
-
+    int desampler = 1000;
+    
     double e;
     double m;
     double Cv;
@@ -245,7 +246,7 @@ void mc_run(int L, int M, arma::vec DEs, double& e_ave, double& m_ave, double& C
     arma::mat Lattice = make_sys(L, method);
     for (int mc = 0; mc < M; mc++){
         mc_cycle(Lattice, DEs, e, m, Cv, chi, mc);
-        if (mc >= burnin){
+        if (mc >= burnin && mc % desampler == 0){
             e_ave += e;
             m_ave += m;
             Cv_ave += Cv;
@@ -253,10 +254,10 @@ void mc_run(int L, int M, arma::vec DEs, double& e_ave, double& m_ave, double& C
         }
     };
 
-    e_ave /= (M - burnin);
-    m_ave /= (M - burnin);
-    Cv_ave /= (M - burnin);
-    chi_ave /= (M - burnin);
+    e_ave /= (M - burnin) / desampler;
+    m_ave /= (M - burnin) / desampler;
+    Cv_ave /= (M - burnin) / desampler;
+    chi_ave /= (M - burnin) / desampler;
     Cv_ave = 1 / N * (Cv_ave - pow(e_ave, 2));
     chi_ave = 1 / N * (chi_ave - pow(m_ave, 2));
     e_ave /= N;
@@ -317,6 +318,7 @@ arma::mat mc_e_prob(arma::mat& Lattice, double T, int M, int burnin=0){
     E_prob.insert_cols(1, E_density);   // the likelyhood of each e-value
     return E_prob;
 }
+
 
 void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method="random", int burnin=0, bool para=false)
 {
@@ -390,6 +392,27 @@ void multi_mc(int L, int M, int R, double T, arma::vec& data, std::string method
     data(5) = arma::stddev(m_vec)/sqrt(R);
     data(6) = arma::stddev(Cv_vec)/sqrt(R);
     data(7) = arma::stddev(chi_vec)/sqrt(R);
+}
+
+void single_mc(int L, int M, double T, arma::vec& data, std::string method="random", int burnin=0){
+    /*
+    Same as multi_mc, but forces R=1.
+    */ 
+
+   double e, m, Cv, chi;
+   arma::vec DEs = make_de(1 / T);
+   mc_run(L, M, DEs, e, m, Cv, chi, method, burnin);
+   data(0) = e;
+   data(1) = m;
+   data(2) = Cv;
+   data(3) = chi;
+   // R = 1: no error
+   data(4) = 0;
+   data(5) = 0;
+   data(6) = 0;
+   data(7) = 0;
+
+
 }
 
 arma::mat multi_prob(int L, int M, int R, double T, int burnin=0){
