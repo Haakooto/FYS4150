@@ -1,3 +1,4 @@
+tellme = /home/hakon/julia/julia /home/hakon/Documents/send.jl
 
 analytic:
 	g++ -std=c++11 analytic.cpp -larmadillo -o analytic.out
@@ -40,7 +41,7 @@ my_day:
 
 it_happen:
 	g++ tempting.cpp -fopenmp -larmadillo -o tempting.out
-	python3 plot.py run_temps temp_broad_search 2.1 2.4 20 10000 100 True '40,60,80,100'
+	python3 plot.py run_temps temp_ghu 2.1 2.4 20 500 100 True '40,60,80,100'
 	echo -ne '\007'
 	sleep 0.2
 	echo -ne '\007'
@@ -51,3 +52,8 @@ it_happen:
 
 plots:
 	python3 plot.py run_temps temp_broad_search 2.1 2.4 20 10000 100
+
+god_help_us:
+	g++ tempting.cpp -fopenmp -larmadillo -o tempting.out -O3
+	python3 plot.py run_temps temp_less_sampling_highL 2.1 2.5 30 10000 100 True '40,60,80,100'
+
