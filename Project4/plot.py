@@ -8,6 +8,9 @@ import sys
 import pandas as pd
 from uncertainties import ufloat
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d, UnivariateSpline
+from scipy.optimize import curve_fit
+from scipy.stats import linregress
 
 
 datapath = "./data/"
@@ -211,7 +214,6 @@ def plot_temps(Ls, Ts):
     chi = np.zeros((len(Ls), len(Ts)))
     l = []
 
-
     for i, (L, info) in enumerate(Ls.items()):
         l.append(L)
         data = pd.read_csv(info["data"], header=1, sep=",")
@@ -224,7 +226,6 @@ def plot_temps(Ls, Ts):
     m = pd.DataFrame(m.T, columns=l)
     Cv = pd.DataFrame(Cv.T, columns=l)
     chi = pd.DataFrame(chi.T, columns=l)
-
 
     fig = go.Figure()
     colors = px.colors.qualitative.Plotly
@@ -258,23 +259,30 @@ def plot_temps(Ls, Ts):
 
         fig.show()
 
+def critical_temp(fname, Tmin, Tmax, Ts, L):
+    linear = lambda x, a, b: a * x + b
 
-    #print(data)
-    #print(e)
-    #print(m)
-    #print(Cv)
-    #print(chi)
-    #plt.plot(Ts, e)
-    #plt.show()
-    #plt.plot(Ts, m)
-    #plt.show()
-    #plt.plot(Ts, Cv)
-    #plt.show()
-    #plt.plot(Ts, chi)
-    #plt.show()
+    L = eval(L)
+    L = np.asarray(L)
+    T = np.linspace(float(Tmin), float(Tmax), int(Ts))
+    m = np.linspace(float(Tmin), float(Tmax), 10001)
+    Tc = np.zeros(len(L))
+    for i, l in enumerate(L):
+        file = datapath + fname + f"_{l}.csv"
+        data = pd.read_csv(file, header=1, sep=",")
+        spline = UnivariateSpline(T, data["Cv"], s=3)
+        plt.scatter(T, data["Cv"])
+        plt.plot(m, spline(m))
+        Tc[i] = m[np.argmax(spline(m))]
+    plt.show()
 
-
-
+    fit, _ = curve_fit(linear, 1 / L, Tc)
+    res = linregress(1 / L, Tc)
+    print(res)
+    print(fit)
+    print(_)
+    # print(Tc)
+    # print(1 / L)
 
 
 def pdf():
