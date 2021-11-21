@@ -175,7 +175,6 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
             Lruns[L]["start"] = time.time()
             Lruns[L]["process"] = subprocess.Popen(f"./tempting.out {runname} {int(M)} {int(R)} {L} {float(Tmin)} {float(Tmax)} {Ts}".split(" "))#.wait()
             Lruns[L]["done"] = None
-            # print(f"{L} now done. Time spent: {time.time() - Lruns[L]['start']}")
 
         else:
             print(f"There was already data for L = {L}")
@@ -190,7 +189,10 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
             else:
                 if done[Ls.index(L)] != 0:
                     print(f"{L} now done. Time spent: {time.time() - Lruns[L]['start']}")
+                    # subprocess.Popen(["teletext '{L} now done. Time spent: {time.time() - Lruns[L]['start']}")
+                    subprocess.call(["/home/hakon/julia/julia", "/home/hakon/Documents/send.jl", f"L={L} now done. Time spent: {time.time() - Lruns[L]['start']}"], shell=False)
                     done[Ls.index(L)] = 0
+        time.sleep(2)  # only check for finished programs every 2 seconds
     print(f"Data now ready for all L")
     Ts = np.linspace(float(Tmin), float(Tmax), int(Ts))
     plot_temps(Lruns, Ts)
@@ -281,7 +283,7 @@ def plot_pdf():
 
 def paralympics():
     """
-    MC STOP. Hammer time!
+    STOP. MC Hammer time!
 
     Arguments:
         None. All shit is hard coded
@@ -298,7 +300,7 @@ def paralympics():
         for o in ["time", "optime"]:
             times = np.zeros(A)
             for i in range(A):
-                run = subprocess.run(f"./{o}.out {M} {R} {L} {T} {p}".split(" "), stdout=subprocess.PIPE)#.wait()
+                run = subprocess.run(f"./{o}.out {M} {R} {L} {T} {p}".split(" "), stdout=subprocess.PIPE)
                 times[i] = float(run.stdout.decode().strip())
             print(p, o, np.mean(times))
 
