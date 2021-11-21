@@ -102,7 +102,7 @@ def burntime(fname, T=1, M=1, new_run=False):
         font_size=30,
         title=f"Mean energy as function of MC cycles for a 20 x 20 lattice at T = {T}",
         xaxis_title="MC cycles",
-        yaxis_title="Mean energy",
+        yaxis_title="Mean energy [J]",
         legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
 
 
@@ -120,7 +120,7 @@ def burntime(fname, T=1, M=1, new_run=False):
         font_size=30,
         title=f"Mean magnetisation as function of MC cycles for a 20 x 20 lattice at T = {T}",
         xaxis_title="MC cycles",
-        yaxis_title="Mean magnetisation",
+        yaxis_title=r"$\huge \text{Mean  magnetisation } [\sqrt{J}] $",
         legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01, font_size=30))
 
     fig1.show()
@@ -237,42 +237,43 @@ def plot_temps(Ls, Ts):
 
 
 
-def plot_pdf():
+def pdf():
 
     data_T_low = pd.read_csv("data/pdf_T1.csv", header = 0, sep = ",")
     data_T_high = pd.read_csv("data/pdf_T2.4.csv", header = 0, sep = ",")
 
+    binwidth = 0.01
+
+
     fig_low = px.histogram(
         x=data_T_low["e_avg"],
         y=data_T_low["prob"],
-        nbins=250)
+        nbins=int(2.4/binwidth))
 
     fig_low.update_layout(
-        #xaxis_range=[-2, 0.2],   #all p=0 after e=0.2
+        xaxis_range=[-2.2, 0.2],   #all p=0 after e=0.2
         #yaxis_range=[0,0.9],
         font_family="Open sans",
         font_size=30,
         title="Histogram of measured probability distribution of the energy for T = 1",
-        xaxis_title=r"$ \huge \text{Energy  }  \epsilon$",
-        yaxis_title="Probability",
+        xaxis_title="Mean energy [J]",
+        yaxis_title="Frequency",
         legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
-
-
 
 
     fig_high = px.histogram(
         x=data_T_high["e_avg"],
         y=data_T_high["prob"],
-        nbins=250)
+        nbins=300)
 
     fig_high.update_layout(
-        #xaxis_range=[-2, 0.2],   #all p=0 after e=0.2
+        xaxis_range=[-2.2, 0.2],   #all p=0 after e=0.2
         #yaxis_range=[0, 0.9],
         font_family="Open sans",
         font_size=30,
         title="Histogram of measured probability distribution of the energy for T = 2.4",
-        xaxis_title=r"$ \huge \text{Energy  }  \epsilon$",
-        yaxis_title="Probability",
+        xaxis_title="Mean energy [J]",
+        yaxis_title="Frequency",
         legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
 
     fig_low.show()
