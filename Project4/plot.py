@@ -128,14 +128,14 @@ def burntime(fname, T=1, M=1, new_run=False):
 
 
 
-def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80,100]):
+def run_temps(fname, Tmin=2.1, Tmax=2.4, Ts=20, M=1, R=1, new_runs=False, L=[40,60,80,100]):
     """
     Make datafile for each L in temperature analysis.
     Run this func as if it plots the result, while
     in fact is only makes sure the data files are there.
     It then call on plot_temps() to do the actual plotting.
     This is just to separate the tasks-
-    It is not nessisary to understand how this function works.
+    It is not necessary to understand how this function works.
     It works.
 
     Arguments:
@@ -158,6 +158,7 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
     Returns:
         lines and dots with shiny colours
     """
+
     if type(L) == str:
         L = eval(L)
     if type(new_runs) == str:
@@ -181,6 +182,7 @@ def run_temps(fname, Tmin=1, Tmax=2, Ts=2, M=1, R=1, new_runs=False, L=[40,60,80
             print(f"There was already data for L = {L}")
             Lruns[L]["done"] = True  # mark as done
             Lruns[L]["start"] = time.time()
+
 
     done = np.ones(len(Ls))
     while sum(done):
@@ -208,6 +210,8 @@ def plot_temps(Ls, Ts):
     Cv = np.zeros((len(Ls), len(Ts)))
     chi = np.zeros((len(Ls), len(Ts)))
     l = []
+
+
     for i, (L, info) in enumerate(Ls.items()):
         l.append(L)
         data = pd.read_csv(info["data"], header=1, sep=",")
@@ -215,25 +219,61 @@ def plot_temps(Ls, Ts):
         m[i] = data["m_avg"]
         Cv[i] = data["Cv"]
         chi[i] = data["chi"]
-    print(e.shape)
-    print(l)
+
     e = pd.DataFrame(e.T, columns=l)
     m = pd.DataFrame(m.T, columns=l)
     Cv = pd.DataFrame(Cv.T, columns=l)
     chi = pd.DataFrame(chi.T, columns=l)
-    print(data)
-    print(e)
-    print(m)
-    print(Cv)
-    print(chi)
-    plt.plot(Ts, e)
-    plt.show()
-    plt.plot(Ts, m)
-    plt.show()
-    plt.plot(Ts, Cv)
-    plt.show()
-    plt.plot(Ts, chi)
-    plt.show()
+
+
+    fig = go.Figure()
+    colors = px.colors.qualitative.Plotly
+
+    for variable, title, unit in zip([e, m, Cv, chi], ["Mean energy ", "Mean magnetisation ", "Heat capacity ", "Susceptibility "], ["[J]", "[\sqrt J]", "[J/K]", ""]):
+        c = 0
+        fig = go.Figure()
+
+        for size in l:
+            name = f"Lattice size: {size} x {size}"
+            fig.add_trace(go.Scatter(x = Ts, y = variable[size], mode="lines", line=dict(width = 5, color=colors[c]), name=name))
+            c += 1
+
+        Title = title + "as function of temperature for different lattice sizes"
+
+        fig.update_layout(
+            font_family="Open sans",
+            font_size=30,
+            title = Title,
+            xaxis_title=r"$\LARGE \text{Temperature  } [J/k_b]$",
+            yaxis_title= title + unit,
+            legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
+
+        if title == "Mean energy ":
+            fig.update_layout(
+                legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+
+        elif title == "Mean magnetisation ":
+            fig.update_layout(
+                yaxis_title = r"$\LARGE \text{Magnetisation  } [\sqrt J]$" )
+
+        fig.show()
+
+
+    #print(data)
+    #print(e)
+    #print(m)
+    #print(Cv)
+    #print(chi)
+    #plt.plot(Ts, e)
+    #plt.show()
+    #plt.plot(Ts, m)
+    #plt.show()
+    #plt.plot(Ts, Cv)
+    #plt.show()
+    #plt.plot(Ts, chi)
+    #plt.show()
+
+
 
 
 
