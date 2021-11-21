@@ -120,7 +120,7 @@ def burntime(fname, T=1, M=1, new_run=False):
         font_size=30,
         title=f"Mean magnetisation as function of MC cycles for a 20 x 20 lattice at T = {T}",
         xaxis_title="MC cycles",
-        yaxis_title=r"$\huge \text{Mean  magnetisation } [\sqrt{J}] $",
+        yaxis_title="Mean  magnetisation",
         legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01, font_size=30))
 
     fig1.show()
@@ -197,6 +197,7 @@ def run_temps(fname, Tmin=2.1, Tmax=2.4, Ts=20, M=1, R=1, new_runs=False, L=[40,
     Ts = np.linspace(float(Tmin), float(Tmax), int(Ts))
     plot_temps(Lruns, Ts)
 
+
 def plot_temps(Ls, Ts):
     """
     Does the actual plotting of temperature plots.
@@ -229,7 +230,7 @@ def plot_temps(Ls, Ts):
     fig = go.Figure()
     colors = px.colors.qualitative.Plotly
 
-    for variable, title, unit in zip([e, m, Cv, chi], ["Mean energy ", "Mean magnetisation ", "Heat capacity ", "Susceptibility "], ["[J]", "[\sqrt J]", "[J/K]", ""]):
+    for variable, title, unit in zip([e, m, Cv, chi], ["Mean energy ", "Mean magnetisation ", "Heat capacity ", "Susceptibility "], ["[J]", "", "", "[1/J]"]):
         c = 0
         fig = go.Figure()
 
@@ -244,7 +245,7 @@ def plot_temps(Ls, Ts):
             font_family="Open sans",
             font_size=30,
             title = Title,
-            xaxis_title=r"$\LARGE \text{Temperature  } [J/k_b]$",
+            xaxis_title="Temperature [J]",
             yaxis_title= title + unit,
             legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
 
@@ -252,29 +253,8 @@ def plot_temps(Ls, Ts):
             fig.update_layout(
                 legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
 
-        elif title == "Mean magnetisation ":
-            fig.update_layout(
-                yaxis_title = r"$\LARGE \text{Magnetisation  } [\sqrt J]$" )
 
         fig.show()
-
-
-    #print(data)
-    #print(e)
-    #print(m)
-    #print(Cv)
-    #print(chi)
-    #plt.plot(Ts, e)
-    #plt.show()
-    #plt.plot(Ts, m)
-    #plt.show()
-    #plt.plot(Ts, Cv)
-    #plt.show()
-    #plt.plot(Ts, chi)
-    #plt.show()
-
-
-
 
 
 def pdf():
