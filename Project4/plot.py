@@ -7,9 +7,7 @@ import subprocess
 import sys
 import pandas as pd
 from uncertainties import ufloat
-import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d, UnivariateSpline
-from scipy.optimize import curve_fit
+from scipy.interpolate import UnivariateSpline
 from scipy.stats import linregress
 
 
@@ -194,13 +192,12 @@ def run_temps(fname, Tmin=2.1, Tmax=2.4, Ts=20, M=1, R=1, new_runs=False, L=[40,
             else:
                 if done[Ls.index(L)] != 0:
                     print(f"{L} now done. Time spent: {time.time() - Lruns[L]['start']}")
-                    # subprocess.Popen(["teletext '{L} now done. Time spent: {time.time() - Lruns[L]['start']}")
-                    subprocess.call(["/home/hakon/julia/julia", "/home/hakon/Documents/send.jl", f"L={L} now done. Time spent: {time.time() - Lruns[L]['start']}"], shell=False)
                     done[Ls.index(L)] = 0
         time.sleep(2)  # only check for finished programs every 2 seconds
     print(f"Data now ready for all L")
     Ts = np.linspace(float(Tmin), float(Tmax), int(Ts))
     plot_temps(Lruns, Ts)
+
 
 def plot_temps(Ls, Ts):
     """
@@ -262,29 +259,45 @@ def plot_temps(Ls, Ts):
         fig.show()
 
 def critical_temp(fname, Tmin, Tmax, Ts, L):
-    linear = lambda x, a, b: a * x + b
-
-    L = eval(L)
-    L = np.asarray(L)
+    L = np.asarray(eval(L))
     T = np.linspace(float(Tmin), float(Tmax), int(Ts))
     m = np.linspace(float(Tmin), float(Tmax), 10001)
     Tc = np.zeros(len(L))
+    Cvs = np.zeros(len(L))
+
+    splines = go.Figure()
+    c = 0
+    colors = px.colors.qualitative.Plotly
+
     for i, l in enumerate(L):
         file = datapath + fname + f"_{l}.csv"
         data = pd.read_csv(file, header=1, sep=",")
-        spline = UnivariateSpline(T, data["Cv"], s=3)
-        plt.scatter(T, data["Cv"])
-        plt.plot(m, spline(m))
+        spline = UnivariateSpline(T, data["Cv"], s=4)
         Tc[i] = m[np.argmax(spline(m))]
-    plt.show()
+        Cvs[i] = spline(Tc[i])
 
-    fit, _ = curve_fit(linear, 1 / L, Tc)
+        name = f"Lattice size: {l} x {l}"
+        splines.add_trace(go.Scatter(x=T, y=data["Cv"], mode="markers", marker=dict(size=10, color=colors[c]), name=name))
+        splines.add_trace(go.Scatter(x=m, y=spline(m), mode="lines", line=dict(width=4, color=colors[c]), name="Fitted line"))
+        c += 1
+
+    title = "Heat capacity with fitted lines for different lattice sizes"
+    splines.update_layout(
+            font_family="Open sans",
+            font_size=30,
+            title = title,
+            xaxis_title=r"$\LARGE \text{Temperature  } [J]$",
+            yaxis_title= r"C_v [1]",
+            legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
+
+    splines.show()
+    
     res = linregress(1 / L, Tc)
-    print(res)
-    print(fit)
-    print(_)
-    # print(Tc)
-    # print(1 / L)
+    slope = ufloat(res.slope, res.stderr)
+    Tinfty = ufloat(res.intercept, res.intercept_stderr)
+    print(f"Tc(L=∞) = {Tinfty:.1u}")
+    print(f"slope a = {slope:.1u}")
+
 
 
 def pdf():
