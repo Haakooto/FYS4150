@@ -266,16 +266,17 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
     splines = go.Figure()
     c = 0
     colors = px.colors.qualitative.Plotly
+    q = "Cv"
 
     for i, l in enumerate(L):
         file = datapath + fname + f"_{l}.csv"
         data = pd.read_csv(file, header=1, sep=",")
-        spline = UnivariateSpline(T, data["Cv"], s=4)
+        spline = UnivariateSpline(T, data[q], k=5, s=4)
         Tc[i] = m[np.argmax(spline(m))]
         Cvs[i] = spline(Tc[i])
 
         name = f"Lattice size: {l} x {l}"
-        splines.add_trace(go.Scatter(x=T, y=data["Cv"], mode="markers", marker=dict(size=10, color=colors[c]), name=name))
+        splines.add_trace(go.Scatter(x=T, y=data[q], mode="markers", marker=dict(size=10, color=colors[c]), name=name))
         splines.add_trace(go.Scatter(x=m, y=spline(m), mode="lines", line=dict(width=4, color=colors[c]), name="Fitted line"))
         c += 1
 
