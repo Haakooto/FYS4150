@@ -12,8 +12,17 @@ using namespace arma;
 
 int main(int argc, char* argv[]) {
 	/*
-	Study burnin time for L=20 for T=1 and T=2.4
-	Uses the 3 different initializations, and saves e and m to file.
+	Study burnin time for L=20.
+	Uses the 3 different initializations (random, low energy and high energy),
+    and saves the calculated mean energy and magnetisation to file.
+
+    Arguments:
+        fname: string
+            Desired filename
+        T: double
+            Temperature
+        M: int
+            No. of Monte Carlo cycles
 	*/
 
 	int M, T, L = 20;

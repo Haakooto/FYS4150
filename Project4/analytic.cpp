@@ -12,7 +12,18 @@ using namespace arma;
 
 
 int main(int argc, char* argv[])
-// Terminal input to run: ./analytic.out  T   M = #no. MC cycles  R = runs to average over
+/*
+Calculates the analytical solutions for L=2, and the average of R numerical solutions over M Monte Carlo cycles.
+The results are printed in the terminal, either in text form or as a Latex table.
+
+Arguments:
+    T: double
+        Temperature
+    M: int
+        No. of Monte Carlo cycles
+    R: int
+        No. of runs to take the average over
+*/
 {
     int M, R;
     double T;
@@ -30,13 +41,13 @@ int main(int argc, char* argv[])
         ugly_out = true;
     }
 
-    // Test the program against the analytical solution
+
     int L = 2;
     int N = L*L;
     string method = "random";
     int burnin = 0;
 
-    // vector with calculated quantities. See docstring of multi_mc for containts
+    // vector with calculated quantities. See docstring of multi_mc for content
     arma::vec data(8, arma::fill::zeros);
 
     multi_mc(L, M, R, T, data, method, burnin, true);
