@@ -13,6 +13,16 @@ using namespace arma;
 
 
 int main(int argc, char* argv[]){
+    /*
+    Generates the data for the estimated probability distributions of the energies for temperatures T=1 and T=2.4
+    by calling on the multi_prob() function in ising_model. Writes the results to files.
+
+    Arguments:
+        M: int
+            No. of Monte Carlo cycles
+        R: int
+            No. of repetitions for each cycle
+    */
 
     int M, R, L=20;
     int burnin = 0;
