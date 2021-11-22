@@ -41,10 +41,10 @@ ex_7:
 
 ex_8:
 	python3 plot.py run_temps temps 2.1 2.5 30 1000000 1 True '40,60,80,100'
-	python3 plot.py run_temps temps 2.25 2.325 15 5000000 1 True '40,60,80,100'
+	python3 plot.py run_temps temps_narrow 2.25 2.325 15 5000000 1 True '40,60,80,100'
 
 ex_9:
-	py plot.py critical_temp temps 2.1 2.5 30 '40,60,80,100'
+	python3 plot.py critical_temp temps_narrow 2.25 2.325 15 '40,60,80,100'
 
 all:
 	ex_4 ex_5 ex_6 ex_7 ex_8 ex_9 

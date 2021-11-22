@@ -14,7 +14,7 @@ from scipy.stats import linregress
 datapath = "./data/"
 
 
-def analytic(T=1, M=[1,], R=1, paraRell=False):
+def analytic(T=1, M=[1,], R=1):
     """
     Make table comparing numerical values against analytical ones
 
@@ -29,18 +29,12 @@ def analytic(T=1, M=[1,], R=1, paraRell=False):
         nicely formatted table (hopefully)
     """
     M = [int(i) for i in M]
-    if paraRell:
-        compiled = "paralytic.out"
-        print("Running parallelized")
-    else:
-        compiled = "analytic.out"
-        print("Running serialized")
     table = []
     cols = ["M", "$\langle \varepsilon \rangle$", "$\langle m \rangle$", "$C_v$", "$\chi$"]
     for i, m in enumerate(M):
         table.append([f"$10^{m}$"])
         t1 = time.time()
-        do = subprocess.run(f"./{compiled} {T} {10**m} {R} ugly".split(" "), stdout=subprocess.PIPE)
+        do = subprocess.run(f"./paralytic.out {T} {10**m} {R} ugly".split(" "), stdout=subprocess.PIPE)
         t2 = time.time()
         print(f"M: 10^{m}, duration: {t2 - t1}")
         result = do.stdout.decode().strip().split(" ")
@@ -270,7 +264,10 @@ def plot_temps(Ls, Ts):
         fig.show()
 
 
-def critical_temp(fname, Tmin = 2.25, Tmax = 2.325, Ts = 15, L = "[40, 60, 80, 100]"):
+def critical_temp(fname, Tmin, Tmax, Ts, L):
+    """
+    Make fits to data and estimate critical temperature for infintate lattice
+    """
     L = np.asarray(eval(L))
     T = np.linspace(float(Tmin), float(Tmax), int(Ts))
     m = np.linspace(float(Tmin), float(Tmax), 10001)
@@ -319,10 +316,16 @@ def critical_temp(fname, Tmin = 2.25, Tmax = 2.325, Ts = 15, L = "[40, 60, 80, 1
 
 
 def pdf():
+<<<<<<< HEAD
     '''
     Plots all the histograms to estimate the probability distributions of the energies at T=1 and T=2.4.
     Assumes that the necessary data-files already exist.
     '''
+=======
+    """
+    Plot probability density fucntion for 2 temperatures
+    """
+>>>>>>> 536968d8a12fb1517fc3cd59dfbf93a5f9dcc64e
 
     data_T_low = pd.read_csv("data/pdf_T1.csv", header = 0, sep = ",")
     data_T_high = pd.read_csv("data/pdf_T2.4.csv", header = 0, sep = ",")
@@ -366,11 +369,6 @@ def pdf():
 def paralympics():
     """
     STOP. MC Hammer time!
-
-    Arguments:
-        None. All shit is hard coded
-    Returns:
-        Speed-up factor
     """
 
     M = 2000
