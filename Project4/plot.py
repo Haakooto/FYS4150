@@ -59,7 +59,7 @@ def analytic(T=1, M=[1,], R=1, paraRell=False):
     print("\n".join(latex))
 
 
-def burntime(fname, T=1, M=1, new_run=False):
+def burntime(fname, T=2.4, M=150, new_run=False):
     """
     Plot the energy and magnetization for the first M cycles
     Determine burntime
@@ -101,10 +101,17 @@ def burntime(fname, T=1, M=1, new_run=False):
     fig1.update_layout(
         font_family="Open sans",
         font_size=30,
-        title=f"Mean energy as function of MC cycles for a 20 x 20 lattice at T = {T}",
         xaxis_title="MC cycles",
         yaxis_title="Mean energy [J]",
         legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
+
+    if T == 1:
+        fig1.update_layout(
+        title=r"$\LARGE \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  1   } J/k_b$")
+    elif T == 2.4:
+        fig1.update_layout(
+        title=r"$\LARGE \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  2.4   } J/k_b$")
+
 
 
     fig2 = go.Figure()
@@ -119,10 +126,17 @@ def burntime(fname, T=1, M=1, new_run=False):
     fig2.update_layout(
         font_family="Open sans",
         font_size=30,
-        title=f"Mean magnetisation as function of MC cycles for a 20 x 20 lattice at T = {T}",
         xaxis_title="MC cycles",
         yaxis_title="Mean  magnetisation",
         legend=dict(yanchor="bottom", xanchor="right", x=0.99, y=0.01, font_size=30))
+
+    if T == 1:
+        fig2.update_layout(
+        title=r"$\LARGE \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  1   } J/k_b$")
+    elif T == 2.4:
+        fig2.update_layout(
+        title=r"$\LARGE \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  2.4   } J/k_b$")
+
 
     fig1.show()
     fig2.show()
@@ -229,7 +243,7 @@ def plot_temps(Ls, Ts):
     fig = go.Figure()
     colors = px.colors.qualitative.Plotly
 
-    for variable, title, unit in zip([e, m, Cv, chi], ["Mean energy ", "Mean magnetisation ", "Heat capacity ", "Susceptibility "], ["[J]", "", "", "[1/J]"]):
+    for variable, title, ax_label in zip([e, m, Cv, chi], ["Mean energy ", "Mean magnetisation ", "Heat capacity ", "Susceptibility "], ["Mean energy [J]", "Mean magnetisation", r"$\LARGE \text{Heat  capacity  } [k_b]$", "Susceptibility [1/J]"]):
         c = 0
         fig = go.Figure()
 
@@ -244,8 +258,8 @@ def plot_temps(Ls, Ts):
             font_family="Open sans",
             font_size=30,
             title = Title,
-            xaxis_title="Temperature [J]",
-            yaxis_title= title + unit,
+            xaxis_title=r"$\LARGE \text{Temperature  } [J/k_b]$",
+            yaxis_title= ax_label,
             legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
 
         if title == "Mean energy ":
@@ -260,7 +274,7 @@ def critical_temp(fname, Tmin = 2.25, Tmax = 2.325, Ts = 15, L = "[40, 60, 80, 1
     L = np.asarray(eval(L))
     T = np.linspace(float(Tmin), float(Tmax), int(Ts))
     m = np.linspace(float(Tmin), float(Tmax), 10001)
-    for q, qname, ylab in zip(["Cv", "chi"], ["Heat capacity", "Susceptibility"], ["Heat capacity", "Susceptibility [1/J]"]):
+    for q, qname, ylab in zip(["Cv", "chi"], ["Heat capacity", "Susceptibility"], [r"$\LARGE \text{Heat  capacity  } [k_b]$", "Susceptibility [1/J]"]):
         Tc = np.zeros(len(L))
         Qs = np.zeros(len(L))
 
@@ -275,9 +289,9 @@ def critical_temp(fname, Tmin = 2.25, Tmax = 2.325, Ts = 15, L = "[40, 60, 80, 1
             print(qname, "Size: ", l, "Tc: ", Tc[i])   #print the critical temperatures
             Qs[i] = spline(Tc[i])
 
-            name = f"Size: {l} x {l}"
+            name = f"Lattice size: {l} x {l}"
             splines.add_trace(go.Scatter(x=T, y=data[q], mode="markers", marker=dict(size=10, color=colors[c]), name=name))
-            splines.add_trace(go.Scatter(x=m, y=spline(m), mode="lines", line=dict(width=4, color=colors[c]), name="Fitted line"))
+            splines.add_trace(go.Scatter(x=m, y=spline(m), mode="lines", line=dict(width=4, color=colors[c]), showlegend = False)) #, name="Fitted line"))
             c += 1
 
         title = f"{qname} with fitted lines for different lattice sizes"
@@ -285,9 +299,14 @@ def critical_temp(fname, Tmin = 2.25, Tmax = 2.325, Ts = 15, L = "[40, 60, 80, 1
                 font_family="Open sans",
                 font_size=30,
                 title = title,
-                xaxis_title=r"$\LARGE \text{Temperature  } [J]$",
+                xaxis_title=r"$\LARGE \text{Temperature  } [J/k_b]$",
                 yaxis_title= ylab,
                 legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
+
+        if qname == "Susceptibility":
+            splines.update_layout(
+                    legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
+
 
         splines.show()
 
@@ -317,7 +336,7 @@ def pdf():
         #yaxis_range=[0,0.9],
         font_family="Open sans",
         font_size=30,
-        title="Histogram of measured probability distribution of the energy for T = 1",
+        title=r"$\LARGE \text{Histogram  of  measured  probability  distribution  of  the  energy  for  T  =  1   } J/k_b$",
         xaxis_title="Mean energy [J]",
         yaxis_title="Frequency",
         legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
@@ -333,7 +352,7 @@ def pdf():
         #yaxis_range=[0, 0.9],
         font_family="Open sans",
         font_size=30,
-        title="Histogram of measured probability distribution of the energy for T = 2.4",
+        title=r"$\LARGE \text{Histogram  of  measured  probability  distribution  of  the  energy  for  T  =  2.4   } J/k_b$",
         xaxis_title="Mean energy [J]",
         yaxis_title="Frequency",
         legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
