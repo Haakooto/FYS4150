@@ -29,13 +29,6 @@ int main(int argc, char* argv[]) {
     }
 	mat data;
 
-	// open outfile
-	ofstream out;
-	out.open("data/" + fname + ".csv");
-	out << "e_rnd,avg_e_rnd,m_rnd,avg_m_rnd,";
-	out << "e_low,avg_e_low,m_low,avg_m_low,";
-	out << "e_hig,avg_e_hig,m_hig,avg_m_hig\n";
-
 	// loop over initializations
 	for (const char* start:{"random", "lowest", "highest"}){
 		// run cycles
@@ -44,6 +37,12 @@ int main(int argc, char* argv[]) {
 		data = join_rows(data, run);
 	}
 
+	// open outfile
+	ofstream out;
+	out.open("data/" + fname + ".csv");
+	out << "e_rnd,avg_e_rnd,m_rnd,avg_m_rnd,";
+	out << "e_low,avg_e_low,m_low,avg_m_low,";
+	out << "e_hig,avg_e_hig,m_hig,avg_m_hig\n";
 	data.save(out, csv_ascii);
 	return 0;
 }

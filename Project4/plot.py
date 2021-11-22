@@ -101,10 +101,10 @@ def burntime(fname, T=2.4, M=150, new_run=False):
 
     if T == 1:
         fig1.update_layout(
-        title=r"$\LARGE \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  1   } J/k_b$")
+        title=r"$\huge \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  1   } J/k_b$")
     elif T == 2.4:
         fig1.update_layout(
-        title=r"$\LARGE \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  2.4   } J/k_b$")
+        title=r"$\huge \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  2.4   } J/k_b$")
 
 
 
@@ -126,10 +126,10 @@ def burntime(fname, T=2.4, M=150, new_run=False):
 
     if T == 1:
         fig2.update_layout(
-        title=r"$\LARGE \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  1   } J/k_b$")
+        title=r"$\huge \text{Magnetisation  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  1   } J/k_b$")
     elif T == 2.4:
         fig2.update_layout(
-        title=r"$\LARGE \text{Mean  energy  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  2.4   } J/k_b$")
+        title=r"$\huge \text{Magnetisation  as  function  of  MC  cycles  for  a  20  x  20  lattice  at  T  =  2.4   } J/k_b$")
 
 
     fig1.show()
@@ -310,9 +310,16 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
 
 
 def pdf():
+<<<<<<< HEAD
+    '''
+    Plots all the histograms to estimate the probability distributions of the energies at T=1 and T=2.4.
+    Assumes that the necessary data-files already exist.
+    '''
+=======
     """
     Plot probability density fucntion for 2 temperatures
     """
+>>>>>>> 536968d8a12fb1517fc3cd59dfbf93a5f9dcc64e
 
     data_T_low = pd.read_csv("data/pdf_T1.csv", header = 0, sep = ",")
     data_T_high = pd.read_csv("data/pdf_T2.4.csv", header = 0, sep = ",")
@@ -327,10 +334,9 @@ def pdf():
 
     fig_low.update_layout(
         xaxis_range=[-2.2, 0.2],   #all p=0 after e=0.2
-        #yaxis_range=[0,0.9],
         font_family="Open sans",
         font_size=30,
-        title=r"$\LARGE \text{Histogram  of  measured  probability  distribution  of  the  energy  for  T  =  1   } J/k_b$",
+        title=r"$\huge \text{Histogram  of  measured  probability  distribution  of  the  energy  for  T  =  1   } J/k_b$",
         xaxis_title="Mean energy [J]",
         yaxis_title="Frequency",
         legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))
@@ -343,10 +349,9 @@ def pdf():
 
     fig_high.update_layout(
         xaxis_range=[-2.2, 0.2],   #all p=0 after e=0.2
-        #yaxis_range=[0, 0.9],
         font_family="Open sans",
         font_size=30,
-        title=r"$\LARGE \text{Histogram  of  measured  probability  distribution  of  the  energy  for  T  =  2.4   } J/k_b$",
+        title=r"$\huge \text{Histogram  of  measured  probability  distribution  of  the  energy  for  T  =  2.4   } J/k_b$",
         xaxis_title="Mean energy [J]",
         yaxis_title="Frequency",
         legend=dict(yanchor="top", xanchor="left", x=0.01, y=0.99))

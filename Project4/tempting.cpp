@@ -12,13 +12,29 @@ using namespace std;
 using namespace arma;
 
 int main(int argc, char* argv[]) {
-	/*
-    Run MC-cylces over many temperatures
+    /*
+    Generates the data needed to find the critical temperature by calculating all the needed variables as
+    function of temperature for the given range by calling the single_mc() function from ising_model.
+    The results are written to a file.
 
-	Input: filename, M, R, L, Tmin, Tmax, Ts
-	Output: csv-file with measured quantities for each temperature
+    Arguments:
+        fname: string
+            Desired filename
+        M: int
+            No. of Monte Carlo cycles
+        R: int
+            No. of repetitions for each cycle
+        L: int
+            Lattice size
+        Tmin: double
+            Initial temperature
+        Tmax: double
+            Final temperature
+        Ts: int
+            No. of temperatures to iterate over
     */
-    int M, L, Ts;   //Ts is the number of temperatures to iterate over
+
+    int M, R, L, Ts;
     double Tmin, Tmax;
 
 	string fname;
