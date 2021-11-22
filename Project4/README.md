@@ -17,6 +17,13 @@ The makefile also includes the commands to run the `plot.py` to generate the res
 
 Alternatively, `plot.py` can be run directly from command line. Then the name of the desired function must be passed as a commandline argument, as well as the possible other arguments the function takes. These can be found the the respective docstrings.  
 
+Listed below are all the C++ experiment files, the corrosponding python function to analyse/visualize the data, and a short description of what it does.
+- `analytic.cpp` with `analytic()` Makes table of numerical vs analytical values and prints to terminal
+- `burning.cpp` with `burntime()`  Makes plot of energy and magnetization as function of MC-cycles
+- `pdf.cpp` with `pdf()` Makes histogram of energy distribution
+- `MC_Hammer.cpp` with `paralympics()`  Prints time taken by algorithm with and without optimizationflag and parallelization
+- `tempting.cpp` with `run_temps()`  Make plot of energy, magnetization, heat capacity and susceptibility as function of temperature for different lattice sizes. `critical_temp()` can further be used to fit the heat capacity and susceptibility and from this determine the critical temperature for an infinite lattice size. 
+
 ## Dependencies
 As noted already, Armadillo and OpenMP is used for the C++ code. The following modules not always in the standard python installation are used by `plot.py`:
 - numpy
