@@ -17,3 +17,11 @@ The makefile also includes the commands to run the `plot.py` to generate the res
 
 Alternatively, `plot.py` can be run directly from command line. Then the name of the desired function must be passed as a commandline argument, as well as the possible other arguments the function takes. These can be found the the respective docstrings.  
 
+## Dependencies
+As noted already, Armadillo and OpenMP is used for the C++ code. The following modules not always in the standard python installation are used by `plot.py`:
+- numpy
+- scipy
+- pandas
+- plotly
+- subprocess
+- uncertainties
