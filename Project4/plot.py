@@ -129,7 +129,7 @@ def burntime(fname, T=1, M=1, new_run=False):
 
 
 
-def run_temps(fname, Tmin=2.1, Tmax=2.4, Ts=20, M=1, R=1, new_runs=False, L=[40,60,80,100]):
+def run_temps(fname, Tmin=2.1, Tmax=2.5, Ts=30, M=1, R=1, new_runs=False, L=[40,60,80,100]):
     """
     Make datafile for each L in temperature analysis.
     Run this func as if it plots the result, while
@@ -289,7 +289,7 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
             legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
 
     splines.show()
-    
+
     res = linregress(1 / L, Tc)
     slope = ufloat(res.slope, res.stderr)
     Tinfty = ufloat(res.intercept, res.intercept_stderr)
