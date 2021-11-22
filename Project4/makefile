@@ -34,14 +34,15 @@ ex_5:
 	python3 plot.py burntime burn 2.4 3000
 
 ex_6:
+	./pdf.out 10000 1
 	python3 plot.py pdf
 
 ex_7:
 	python3 plot.py paralympics
 
 ex_8:
-	python3 plot.py run_temps temps 2.1 2.5 30 1000000 1 True '40,60,80,100'
-	python3 plot.py run_temps temps_narrow 2.25 2.325 15 5000000 1 True '40,60,80,100'
+	python3 plot.py run_temps temps 2.1 2.5 30 1000000 True '40,60,80,100'
+	python3 plot.py run_temps temps_narrow 2.25 2.325 15 5000000 True '40,60,80,100'
 
 ex_9:
 	python3 plot.py critical_temp temps_narrow 2.25 2.325 15 '40,60,80,100'

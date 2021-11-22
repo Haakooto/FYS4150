@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
     */
 
     int M, R, L=20;
-    int burnin = 0;
+    int burnin = 100;
 	if (argc != 3){
 		std::cout << "Bad usage! This program takes four params";
 		std::cout << "\n number of monte carlo cycles, and number of cocurrent mcc\n";
