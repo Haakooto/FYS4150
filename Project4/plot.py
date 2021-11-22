@@ -260,42 +260,41 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
     L = np.asarray(eval(L))
     T = np.linspace(float(Tmin), float(Tmax), int(Ts))
     m = np.linspace(float(Tmin), float(Tmax), 10001)
-    Tc = np.zeros(len(L))
-    Cvs = np.zeros(len(L))
+    for q, k, s in zip(["Cv", "chi"], [5, 3], [4, 4]):
+        Tc = np.zeros(len(L))
+        Qs = np.zeros(len(L))
 
-    splines = go.Figure()
-    c = 0
-    colors = px.colors.qualitative.Plotly
-    q = "Cv"
+        splines = go.Figure()
+        c = 0
+        colors = px.colors.qualitative.Plotly
+        for i, l in enumerate(L):
+            file = datapath + fname + f"_{l}.csv"
+            data = pd.read_csv(file, header=1, sep=",")
+            spline = UnivariateSpline(T, data[q], k=k, s=s)
+            Tc[i] = m[np.argmax(spline(m))]
+            Qs[i] = spline(Tc[i])
 
-    for i, l in enumerate(L):
-        file = datapath + fname + f"_{l}.csv"
-        data = pd.read_csv(file, header=1, sep=",")
-        spline = UnivariateSpline(T, data[q], k=5, s=4)
-        Tc[i] = m[np.argmax(spline(m))]
-        Cvs[i] = spline(Tc[i])
+            name = f"Lattice size: {l} x {l}"
+            splines.add_trace(go.Scatter(x=T, y=data[q], mode="markers", marker=dict(size=10, color=colors[c]), name=name))
+            splines.add_trace(go.Scatter(x=m, y=spline(m), mode="lines", line=dict(width=4, color=colors[c]), name="Fitted line"))
+            c += 1
 
-        name = f"Lattice size: {l} x {l}"
-        splines.add_trace(go.Scatter(x=T, y=data[q], mode="markers", marker=dict(size=10, color=colors[c]), name=name))
-        splines.add_trace(go.Scatter(x=m, y=spline(m), mode="lines", line=dict(width=4, color=colors[c]), name="Fitted line"))
-        c += 1
+        title = "Heat capacity with fitted lines for different lattice sizes"
+        splines.update_layout(
+                font_family="Open sans",
+                font_size=30,
+                title = title,
+                xaxis_title=r"$\LARGE \text{Temperature  } [J]$",
+                yaxis_title= r"C_v [1]",
+                legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
 
-    title = "Heat capacity with fitted lines for different lattice sizes"
-    splines.update_layout(
-            font_family="Open sans",
-            font_size=30,
-            title = title,
-            xaxis_title=r"$\LARGE \text{Temperature  } [J]$",
-            yaxis_title= r"C_v [1]",
-            legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
-
-    splines.show()
-    
-    res = linregress(1 / L, Tc)
-    slope = ufloat(res.slope, res.stderr)
-    Tinfty = ufloat(res.intercept, res.intercept_stderr)
-    print(f"Tc(L=∞) = {Tinfty:.1u}")
-    print(f"slope a = {slope:.1u}")
+        splines.show()
+        
+        res = linregress(1 / L, Tc)
+        slope = ufloat(res.slope, res.stderr)
+        Tinfty = ufloat(res.intercept, res.intercept_stderr)
+        print(f"Tc(L=∞) = {Tinfty:.1u}")
+        print(f"slope a = {slope:.1u}")
 
 
 
