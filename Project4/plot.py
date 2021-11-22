@@ -260,7 +260,7 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
     L = np.asarray(eval(L))
     T = np.linspace(float(Tmin), float(Tmax), int(Ts))
     m = np.linspace(float(Tmin), float(Tmax), 10001)
-    for q, qname, k, s in zip(["Cv", "chi"], ["Heat capacity", "Susceptibility"], [5, 3], [4, 4]):
+    for q, qname, ylab in zip(["Cv", "chi"], ["Heat capacity", "Susceptibility"], [r"C_v", r"\chi [1/J]"]):
         Tc = np.zeros(len(L))
         Qs = np.zeros(len(L))
 
@@ -270,7 +270,7 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
         for i, l in enumerate(L):
             file = datapath + fname + f"_{l}.csv"
             data = pd.read_csv(file, header=1, sep=",")
-            spline = UnivariateSpline(T, data[q], k=k, s=s)
+            spline = UnivariateSpline(T, data[q], k=5, s=4)
             Tc[i] = m[np.argmax(spline(m))]
             Qs[i] = spline(Tc[i])
 
@@ -285,7 +285,7 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
                 font_size=30,
                 title = title,
                 xaxis_title=r"$\LARGE \text{Temperature  } [J]$",
-                yaxis_title= r"C_v [1]",
+                yaxis_title= ylab,
                 legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
 
         splines.show()
