@@ -139,7 +139,7 @@ def burntime(fname, T=2.4, M=150, new_run=False):
 
 def run_temps(fname, Tmin=2.1, Tmax=2.5, Ts=30, M=1, new_runs='False', L='[40,60,80,100]'):
     """
-    Runs M monte-carlo cycles for Ts temperatures.
+    Runs M monte-carlo cycles for Ts temperatures for L lattice sizes.
     Then call on plot_temps to make plots
     If a datafile already exists, if does not overwrite, unless new_run is True
 
