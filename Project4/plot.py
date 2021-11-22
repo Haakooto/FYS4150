@@ -137,15 +137,11 @@ def burntime(fname, T=2.4, M=150, new_run=False):
 
 
 
-def run_temps(fname, Tmin=2.1, Tmax=2.5, Ts=30, M=1, R=1, new_runs=False, L=[40,60,80,100]):
+def run_temps(fname, Tmin=2.1, Tmax=2.5, Ts=30, M=1, new_runs='False', L='[40,60,80,100]'):
     """
-    Make datafile for each L in temperature analysis.
-    Run this func as if it plots the result, while
-    in fact is only makes sure the data files are there.
-    It then call on plot_temps() to do the actual plotting.
-    This is just to separate the tasks-
-    It is not necessary to understand how this function works.
-    It works.
+    Runs M monte-carlo cycles for Ts temperatures.
+    Then call on plot_temps to make plots
+    If a datafile already exists, if does not overwrite, unless new_run is True
 
     Arguments:
         fname: str
@@ -158,8 +154,6 @@ def run_temps(fname, Tmin=2.1, Tmax=2.5, Ts=30, M=1, R=1, new_runs=False, L=[40,
             Number of temps to run
         M: int
             log10 of cycles
-        R: int
-            Number of cocurrent runs
         new_run: bool
             wether to force new run
         L: list of ints
@@ -183,7 +177,7 @@ def run_temps(fname, Tmin=2.1, Tmax=2.5, Ts=30, M=1, R=1, new_runs=False, L=[40,
         if file not in glob(datapath + "*") or new_runs:
             print(f"Starting run with L = {L}")
             Lruns[L]["start"] = time.time()
-            Lruns[L]["process"] = subprocess.Popen(f"./tempting.out {runname} {int(M)} {int(R)} {L} {float(Tmin)} {float(Tmax)} {Ts}".split(" "))#.wait()
+            Lruns[L]["process"] = subprocess.Popen(f"./tempting.out {runname} {int(M)} {L} {float(Tmin)} {float(Tmax)} {Ts}".split(" "))#.wait()
             Lruns[L]["done"] = None
 
         else:
