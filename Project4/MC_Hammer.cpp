@@ -15,7 +15,19 @@ using namespace std::chrono;
 
 int main(int argc, char* argv[]) {
 	/*
-	Input: M, R, L
+    Measures the time spent running the algorithm. 
+
+    Arguments:
+        M: int
+            No. of Monte Carlo cycles
+        R: int
+            Number of concurrent runs
+        L: int
+            Lattice size
+        T: float
+            Temperature
+        para: bool
+            wether to parallelize loop over R
 	*/
     bool para;
     int M, R, L;
@@ -23,7 +35,7 @@ int main(int argc, char* argv[]) {
 
 	string fname;
 	if (argc != 6){
-		cout << "Bad usage! This program takes seven params";
+		cout << "Bad usage! This program takes five params";
 		cout << "\n MC cycles, Runs, L, temperature, parabool \n";
 		return 1;
 	} else {
