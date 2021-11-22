@@ -34,7 +34,6 @@ ex_5:
 	python3 plot.py burntime burn 2.4 3000
 
 ex_6:
-	./pdf.out 10000 1
 	python3 plot.py pdf
 
 ex_7:

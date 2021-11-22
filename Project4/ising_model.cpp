@@ -443,26 +443,3 @@ arma::mat multi_prob(int L, int M, int R, double T, int burnin=0){
     Total /= R;
     return Total;
 }
-
-arma::mat thepoem(int L, int M, int R, double T, int burnin=0){
-    int N = L * L;
-    // What do I do? Not even Enya can answer that one...
-    arma::mat Total(N + 1, 2, arma::fill::zeros);
-    // Stay beautiful, keep it ugly
-    arma::mat sum;
-    // As with anything creative, change is inevitable
-    for (int i = 0; i < R; i++){
-        // Think I should exist in another file...
-        arma::mat Lattice = make_sys(L, "random");
-        // Would you destroy something perfect in order to make it beautiful
-        sum = mc_e_prob(Lattice, T, M, burnin);
-        // Perhaps I am already dead
-        Total += sum;
-        // At the very least living in another scope
-    }
-    // I wanted to become God, destroyer of death
-    Total /= R;
-    // I at least attempted to give back the sum of it all
-    return Total;
-    // Now, I walk gentle into that good night
-}
