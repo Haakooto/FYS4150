@@ -312,8 +312,10 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
 def pdf():
     '''
     Plots all the histograms to estimate the probability distributions of the energies at T=1 and T=2.4.
-    Assumes that the necessary data-files already exist.
     '''
+    M = 10000
+    R = 1
+    subprocess.Popen(f"./pdf.out {M} {R}".split(" ")).wait()
 
     data_T_low = pd.read_csv("data/pdf_T1.csv", header = 0, sep = ",")
     data_T_high = pd.read_csv("data/pdf_T2.4.csv", header = 0, sep = ",")
