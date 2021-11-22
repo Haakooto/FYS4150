@@ -256,11 +256,11 @@ def plot_temps(Ls, Ts):
         fig.show()
 
 
-def critical_temp(fname, Tmin, Tmax, Ts, L):
+def critical_temp(fname, Tmin = 2.25, Tmax = 2.325, Ts = 15, L = "[40, 60, 80, 100]"):
     L = np.asarray(eval(L))
     T = np.linspace(float(Tmin), float(Tmax), int(Ts))
     m = np.linspace(float(Tmin), float(Tmax), 10001)
-    for q, qname, ylab in zip(["Cv", "chi"], ["Heat capacity", "Susceptibility"], [r"C_v", r"\chi [1/J]"]):
+    for q, qname, ylab in zip(["Cv", "chi"], ["Heat capacity", "Susceptibility"], ["Heat capacity", "Susceptibility [1/J]"]):
         Tc = np.zeros(len(L))
         Qs = np.zeros(len(L))
 
@@ -272,9 +272,10 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
             data = pd.read_csv(file, header=1, sep=",")
             spline = UnivariateSpline(T, data[q], k=5, s=4)
             Tc[i] = m[np.argmax(spline(m))]
+            print(qname, "Size: ", l, "Tc: ", Tc[i])   #print the critical temperatures
             Qs[i] = spline(Tc[i])
 
-            name = f"Lattice size: {l} x {l}"
+            name = f"Size: {l} x {l}"
             splines.add_trace(go.Scatter(x=T, y=data[q], mode="markers", marker=dict(size=10, color=colors[c]), name=name))
             splines.add_trace(go.Scatter(x=m, y=spline(m), mode="lines", line=dict(width=4, color=colors[c]), name="Fitted line"))
             c += 1
@@ -289,7 +290,7 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
                 legend=dict(yanchor="top", xanchor="right", x=0.99, y=0.99))
 
         splines.show()
-        
+
         res = linregress(1 / L, Tc)
         slope = ufloat(res.slope, res.stderr)
         Tinfty = ufloat(res.intercept, res.intercept_stderr)
