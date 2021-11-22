@@ -129,7 +129,7 @@ def burntime(fname, T=1, M=1, new_run=False):
 
 
 
-def run_temps(fname, Tmin=2.1, Tmax=2.4, Ts=20, M=1, R=1, new_runs=False, L=[40,60,80,100]):
+def run_temps(fname, Tmin=2.1, Tmax=2.5, Ts=30, M=1, R=1, new_runs=False, L=[40,60,80,100]):
     """
     Make datafile for each L in temperature analysis.
     Run this func as if it plots the result, while
@@ -260,7 +260,7 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
     L = np.asarray(eval(L))
     T = np.linspace(float(Tmin), float(Tmax), int(Ts))
     m = np.linspace(float(Tmin), float(Tmax), 10001)
-    for q, k, s in zip(["Cv", "chi"], [5, 3], [4, 4]):
+    for q, qname, k, s in zip(["Cv", "chi"], ["Heat capacity", "Susceptibility"], [5, 3], [4, 4]):
         Tc = np.zeros(len(L))
         Qs = np.zeros(len(L))
 
@@ -279,7 +279,7 @@ def critical_temp(fname, Tmin, Tmax, Ts, L):
             splines.add_trace(go.Scatter(x=m, y=spline(m), mode="lines", line=dict(width=4, color=colors[c]), name="Fitted line"))
             c += 1
 
-        title = "Heat capacity with fitted lines for different lattice sizes"
+        title = f"{qname} with fitted lines for different lattice sizes"
         splines.update_layout(
                 font_family="Open sans",
                 font_size=30,
