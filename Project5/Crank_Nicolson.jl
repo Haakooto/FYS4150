@@ -74,6 +74,7 @@ function main()
     probs[1, 2:end] = abs2.(u)
 
     for i in 2:nT
+        print("time iteration i = $i\u001b[1000D")
         b = B * u
         u, _ = SOR(A, b, initial_guess=u, omega=1, tol=1e-13)
         probs[i, 2:end] = abs2.(u)
