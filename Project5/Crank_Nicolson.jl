@@ -121,7 +121,7 @@ function main()
     # Discretisation free parameters
     h = 0.005
     dt = 2.5e-5
-    T = 0.008
+    T = 0.002
 
     # System free parameters
     xc = 0.25
@@ -146,11 +146,15 @@ function main()
     probs[:, 1] = collect(range(0, T, nT))
     probs[1, 2:end] = abs2.(u)
 
-    @showprogress "Iterating over time:" for i in 2:nT
+    pbar = Progress(nT; showspeed=true, barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',), barlen=10)
+    for time in 2:nT
         b = B * u  # Problem 3 step 1
-        u, _ = SOR(A, b, initial_guess=u, omega=1, tol=1e-13)  # Problem 3 step 2
-        probs[i, 2:end] = abs2.(u)  # record
+        u, i = SOR(A, b, initial_guess=u, omega=1, tol=1e-13)  # Problem 3 step 2
+        P = abs2.(u)  # record
+        probs[time, 2:end] = P 
+        ProgressMeter.next!(pbar; showvalues=[(:time,time), (:i,i), (:prob,sum(P))])
     end
+    println("\n\n\n\n")
     println(sum(abs2.(u)))  # final total probability
     npzwrite("evolve3.npz", probs)
 end
