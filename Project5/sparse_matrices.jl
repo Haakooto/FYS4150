@@ -76,11 +76,40 @@ function *(A::SparseMat, x::Array)
     return b
 end
 
-function SOR(A::SparseMat, b::Array; initial_guess=0, omega=1.5, tol=1e-13)
-    max_iter = 1e5
+function SOR(A::SparseMat, b::Array; initial_guess=0, omega=1.5, tol=1e-13, max_iter=1e4)
+    """
+    Performs Successive Over Relaxation to solve matrix problem Ax=b
+    Starting with an initial guess of x, iteratively update it until convergence
+    for each iteration calculate each new element through the following equation
+        x_i^(k + 1) = (1 - w)x_i^k + (w / a_ii)*[b_i - sum from j=1 to j=N, skipping j = i, of a_ij * x_j]
+        
+    See https://en.wikipedia.org/wiki/Successive_over-relaxation for derivation and discussion of algorithm
+    
+    This particular implementation uses the fact that A is SparseMat to only loop over j where A is non-zero
+
+    Arguments
+        A: SparseMat
+            Matrix in equation
+        b: Array{ComplexF}
+            RHS of equation
+        initial_guess: Array{ComplexF}
+            Initial guess to start from. By default 0, in which case a zeros is used.
+            A good initial array can significantly speed up convergence
+        omega: Float
+            relaxation factor
+        tol: Float
+            Convergence criteria
+        max_iter: Int
+            Maximum number of iterations to try before giving up
+    Return:
+        x: Array{ComplexF}
+            Final solution to Ax=b
+        iters: Int
+            Number of iterations required to reach convergence
+    """
     n = length(b)
     if initial_guess == 0
-        x = similar(b)  #  make vector of same type
+        x = zeros(ComplexF64, n)  #  make vector of same type
     else
         x = initial_guess
     end
