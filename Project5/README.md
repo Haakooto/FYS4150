@@ -4,7 +4,7 @@ Sara Pernille Jensen, Alec Elías Sigurðarson, Håkon Olav Torvik
 This repository contains our code for Project 5 of FYS4150 fall 2021.
 
 # Double slit experiment
-We have studied the double slit experiment by solving the 2D Schrödinger equation for an initial wave packet and constant potential. The PDE was discretized using the Crank Nicolson method, such that the time evolution can be found by solving Au(t+dt) = Bu(t) where A and B are matrices, and u(t) a vector representing the quantum state at time t.
+We have modelled the double slit experiment by solving the 2D Schrödinger equation for an initial wave packet and constant potential. The PDE was discretized using the Crank Nicolson method, such that the time evolution can be found by solving Au(t+dt) = Bu(t) where A and B are matrices, and u(t) a vector representing the quantum state at time t.
 
 # Code
 The code was implemented in Julia. Python and/or Julia was used for plotting. See [julialang.org](julialang.org) or [github.com/JuliaLang/julia](github.com/JuliaLang/julia) for instructions for installing julia.
