@@ -14,3 +14,4 @@ The code was implemented in Julia. Python and/or Julia was used for plotting. Se
 - endre simulate og main.jl slik at vi ikke trenger å lagre hele tilstanden, og heller kun det vi trenger for hver oppgave. Må da kanskje lage en stor, liknende funksjon for hver oppgave 🤷 Er ikke et problem slik det er nå, så dette er ikke veldig prioritert.
 - Skrive plottekode
 - optimalisere? Fiksa en bug, så nå funker det, men tar ~20min å kjøre for 7a.
+- Fikse linkene over i readmeen
