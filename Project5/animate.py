@@ -2,16 +2,15 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-def main():
-    data = np.load("evolve2.npz")
-    # data = np.load("python_solver.npy")
+def animate():
+    data = np.load("npz/prob.npz")
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
-    Z = data[:, 1:]
+    Z = data[:, 1:].reshape(len(t), m, m)
     x = np.linspace(0, 1, m)
 
     data = go.Contour(x=x, y=x,
-                      z=Z[0].reshape(m, m),
+                      z=Z[0],
                       #   contours=dict(start=0, end=0.1, size=0.01, showlines=False),
                       )
 
@@ -25,6 +24,20 @@ def main():
     f.show()
 
 
+def plot_states():
+    prob = np.load("npz/prob.npz")
+    m = int(np.sqrt(prob.shape[1] - 1))
+    t = prob[:, 0]
+    p = prob[:, 1:].reshape(len(t), m, m)
+    x = np.linspace(0, 1, m)
+    fig = go.Figure(data=go.Contour(x=x, y=x, z=p[np.argmin(abs(t - 0))]))
+    fig.show()
+    fig = go.Figure(data=go.Contour(x=x, y=x, z=p[np.argmin(abs(t - 0.004))]))
+    fig.show()
+    fig = go.Figure(data=go.Contour(x=x, y=x, z=p[np.argmin(abs(t - 0.008))]))
+    fig.show()
+
+
 def plot_initial_u():
     data = np.load("initial_u.npz")
     data = np.conj(data) * data
@@ -35,5 +48,6 @@ def plot_initial_u():
 
 
 if __name__ == "__main__":
-    main()
+    animate()
+    # plot_states()
     # plot_initial_u()
