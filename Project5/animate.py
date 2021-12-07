@@ -6,7 +6,7 @@ def animate():
     data = np.load("npz/prob.npz")
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
-    Z = data[:, 1:].reshape(len(t), m, m)
+    Z = data[:, 2:].reshape(len(t), m, m)
     x = np.linspace(0, 1, m)
 
     data = go.Contour(x=x, y=x,
@@ -28,7 +28,7 @@ def plot_states():
     prob = np.load("npz/prob.npz")
     m = int(np.sqrt(prob.shape[1] - 1))
     t = prob[:, 0]
-    p = prob[:, 1:].reshape(len(t), m, m)
+    p = prob[:, 2:].reshape(len(t), m, m)
     x = np.linspace(0, 1, m)
     fig = go.Figure(data=go.Contour(x=x, y=x, z=p[np.argmin(abs(t - 0))]))
     fig.show()
