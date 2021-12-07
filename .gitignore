@@ -5,6 +5,7 @@
 # Our additions
 *.txt
 *.csv
+*.npz
 
 ### C++ ###
 # Prerequisites
