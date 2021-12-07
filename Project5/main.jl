@@ -104,5 +104,3 @@ if abspath(PROGRAM_FILE) == @__FILE__
     # problem9_two_slit()
     # problem9_three_slit()
 end
-
-main()
