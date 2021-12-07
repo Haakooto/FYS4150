@@ -145,6 +145,14 @@ function simulate(args, name, realimag=false)
                   to save real and imag part seperately, in addition to popbability
     Returns
         saves datafile with name name
+        File contains matrix of size (length(t), points + 2),
+        where points = (M-2)^2.
+        The first column is the time-values, the second column is the total probability in domain at that time
+        The rest of each row is the (M-2)^2 probabilities corresponding to each point. Must be reshaped as (M-2 X M-2) for plotting
+
+        For problem 8, two additional save files are created, one for real part, one for imag part
+        These do NOT contain time nor probability, so size is (length(t), points).
+        Can simply be reshaped and plotted for each time as is.
     =#
     # unpack parameters
     h = args[1]
@@ -161,32 +169,46 @@ function simulate(args, name, realimag=false)
 
     M = Int(1 / h)
     points = (M - 2) ^ 2
-    total = points
-    if realimag
-        total *= 3
     t = range(0, T, step=dt)
 
     # set up storage mat, place in initial conditions
-    storage = zeros(Float32, length(t), total + 2)
+    storage = zeros(Float32, length(t), points + 2)
     storage[:, 1] = t
     storage[1, 2] = sum(abs2.(u))
-    storage[1, 3:points] = abs2.(u)
+    storage[1, 3:end] = abs2.(u)
+
+    # For problem 8, also save real and imag parts, seperatrely
+    if realimag
+        store_real = zeros(Float64, length(t), points)
+        store_imag = zeros(Float64, length(t), points)
+        store_real[1, :] = real.(u)
+        store_imag[1, :] = imag.(u)
+    end
 
     println("Starting simulation...")
-    pbar = Progress(nT; showspeed=true, barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',), barlen=10)
+    pbar = Progress(length(t); showspeed=true, barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',), barlen=10)
     for time in 2:length(t)
         b = B * u  # Problem 3 part 1
         u, i = SOR(A, b, initial_guess=u, omega=0.9)  # problem 3 part 2
         P = abs2.(u)  # Born rule
 
         storage[time, 2] = sum(P)  # total probability at time
-        storage[time, 3:points+2] = P  # probability as each points
+        storage[time, 3:end] = P  # probability as each points
         if realimag
-            storage[time, points+1:2*points] = real.(u)
-            storage[time, 2*points+1:3*points] = imag.(u)
+            store_real[time, 1:end] = real.(u)
+            store_imag[time, 1:end] = imag.(u)
+        end
         ProgressMeter.next!(pbar; showvalues=[(:time, time * dt), (:SOR_iters, i), (:Total_probability, sum(P))])
     end
     println("\n\n\n\n")
     npzwrite(file, storage)
     println("Saved data to file: ", file)
+
+    if realimag
+        file_r = "npz/" * name * "_real" * ".npz"
+        file_i = "npz/" * name * "_imag" * ".npz"
+        npzwrite(file_r, store_real)
+        npzwrite(file_i, store_imag)
+        println("Saved real and imaginary parts to seperate files.")
+    end
 end
