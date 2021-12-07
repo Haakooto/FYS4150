@@ -47,7 +47,71 @@ def plot_initial_u():
     fig.show()
 
 
+
+def p7_probs():
+    data = np.load("npz/p7_no_slit.npz")
+    m = int(np.sqrt(data.shape[1] - 1))
+    t = data[:, 0]
+    probs = (data[:, 1])
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(x = t, y = probs, mode="lines", line=dict(width = 5)))
+
+    fig.update_layout(
+        font_family="Garamond",
+        font_size=30,
+        title = "Deviance of total probability from 1",
+        xaxis_title= "Time",
+        yaxis_title= "Total probability deviance")
+
+    fig.show()
+
+
+
+def p8_three_steps():
+    data = np.load("npz/p8.npz")
+    m = int(np.sqrt(data.shape[1] - 1))
+    t = data[:, 0]
+    p = data[:, 2:].reshape(len(t), m, m)
+
+    real = np.load("npz/p8_real.npz")
+    imag = np.load("npz/p8_imag.npz")
+
+    axes = np.linspace(0, 1, m)
+
+    times = [0.0, 0.001, 0.002]
+
+    for time in times:
+        fig = go.Figure(data=go.Contour(x=axes, y=axes, z=p[np.argmin(abs(t - time))]))
+        fig.update_layout(
+            font_family="Garamond",
+            font_size=30,
+            title = f"Probability distribution at time t = {time}",
+            xaxis_title= "x",
+            yaxis_title= "y")
+
+        fig.show()
+
+
+    for time in times:
+        for name, part in zip(["Imaginary", "Real"], [imag, real]):
+            fig = go.Figure(data=go.Contour(x=axes, y=axes, z=part[np.argmin(abs(t - time))]))
+            fig.update_layout(
+                font_family="Garamond",
+                font_size=30,
+                title = f"{name} part of probability distribution at time t = {time}",
+                xaxis_title= "x",
+                yaxis_title= "y")
+
+            fig.show()
+
+
+
+
 if __name__ == "__main__":
-    animate()
+    #p7_no_slit()
+    p7_probs()
+    #animate()
     # plot_states()
     # plot_initial_u()

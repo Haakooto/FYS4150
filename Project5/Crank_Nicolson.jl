@@ -174,7 +174,7 @@ function simulate(args, name, realimag=false)
     # set up storage mat, place in initial conditions
     storage = zeros(Float32, length(t), points + 2)
     storage[:, 1] = t
-    storage[1, 2] = sum(abs2.(u))
+    storage[1, 2] = (1-sum(abs2.(u)))
     storage[1, 3:end] = abs2.(u)
 
     # For problem 8, also save real and imag parts, seperatrely
@@ -192,7 +192,7 @@ function simulate(args, name, realimag=false)
         u, i = SOR(A, b, initial_guess=u, omega=0.9)  # problem 3 part 2
         P = abs2.(u)  # Born rule
 
-        storage[time, 2] = sum(P)  # total probability at time
+        storage[time, 2] = 1-sum(P)  # total probability at time
         storage[time, 3:end] = P  # probability as each points
         if realimag
             store_real[time, 1:end] = real.(u)
