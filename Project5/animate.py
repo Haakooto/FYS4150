@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 
 def animate():
-    data = np.load("npz/prob.npz")
+    data = np.load("npz/p7_triple_slit.npz")
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
     Z = data[:, 2:].reshape(len(t), m, m)
@@ -48,7 +48,7 @@ def plot_initial_u():
 
 
 
-def p7_probs():
+def p7_probs_no_slit():
     data = np.load("npz/p7_no_slit.npz")
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
@@ -61,7 +61,7 @@ def p7_probs():
     fig.update_layout(
         font_family="Garamond",
         font_size=30,
-        title = "Deviance of total probability from 1",
+        title = "Deviance of total probability from 1 without slit",
         xaxis_title= "Time",
         yaxis_title= "Total probability deviance")
 
@@ -74,6 +74,7 @@ def p8_three_steps():
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
     p = data[:, 2:].reshape(len(t), m, m)
+
 
     real = np.load("npz/p8_real.npz")
     imag = np.load("npz/p8_imag.npz")
@@ -108,10 +109,22 @@ def p8_three_steps():
 
 
 
+def plot_potential(slits):  #Just for testing what the potential looks like
+    V = np.load(f"npz/potential_{slits}_slits.npz")
+    m = int(np.sqrt(V.shape[1] - 1))
+
+    x = np.linspace(0, 1, m)
+    fig = go.Figure(go.Contour(x=x, y=x, z=V))
+    fig.show()
+
+
+
 
 if __name__ == "__main__":
     #p7_no_slit()
-    p7_probs()
+    #p7_probs_no_slit()
+    #p8_three_steps()
     #animate()
+    plot_potential(3)
     # plot_states()
     # plot_initial_u()
