@@ -119,7 +119,7 @@ function make_V(h, v0=0, slits=1; thickness=0.02, position=0.5, aperture=0.05, s
 
     end
 
-    file = "npz/potential_" * string(slits) * "_slits.npz"   #write the potential to file to check what it looks like
+    file = "npz/potential_" * string(Int(slits)) * "_slits.npz"   #write the potential to file to check what it looks like
     npzwrite(file, V)
 
     return V
