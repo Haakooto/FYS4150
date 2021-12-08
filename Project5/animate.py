@@ -111,8 +111,7 @@ def p8_three_steps():
 
 def plot_potential(slits):  #Just for testing what the potential looks like
     V = np.load(f"npz/potential_{slits}_slits.npz")
-    m = int(np.sqrt(V.shape[1] - 1))
-
+    m = V.shape[0]
     x = np.linspace(0, 1, m)
     fig = go.Figure(go.Contour(x=x, y=x, z=V))
     fig.show()
@@ -125,6 +124,6 @@ if __name__ == "__main__":
     #p7_probs_no_slit()
     #p8_three_steps()
     #animate()
-    plot_potential(3)
+    plot_potential(2)
     # plot_states()
     # plot_initial_u()
