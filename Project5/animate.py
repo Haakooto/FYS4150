@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 
 
 def position_to_index(position, h = 0.005):
-    index = position/h + 1
+    index = position/h - 1
     return int(index)
 
 def time_to_index(time, step = 2.5e-5):
@@ -12,13 +12,13 @@ def time_to_index(time, step = 2.5e-5):
 
 
 def animate(h = 0.005):
-    data = np.load("npz/p7_triple_slit.npz")
+    data = np.load("npz/p9_one_slit.npz")
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
     Z = data[:, 2:].reshape(len(t), m, m)
     axes = np.linspace(h, 1-h, m)
 
-    data = go.Contour(x=x, y=x,
+    data = go.Contour(x=axes, y=axes,
                       z=Z[0],
                       #   contours=dict(start=0, end=0.1, size=0.01, showlines=False),
                       )
@@ -121,36 +121,34 @@ def p8_three_steps(h = 0.005):
             fig.show()
 
 
+
 def p9(slits, h = 0.005):
-    #data = np.load(f"npz/p9_{slits}_slits.npz")
-    data = np.load("npz/p7_no_slit_final.npz")
+    data = np.load(f"npz/p9_{slits}_slit.npz")
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
-
-    print(t[0])
-    print(t[-1])
 
     t_index = time_to_index(0.002)
 
     p = data[:, 2:].reshape(len(t), m, m)
     x_index = position_to_index(0.8)
 
-    screen = p[t_index, x_index, :]
 
-    norm = np.sum(screen)
-    screen /= norm
-
+    screen = p[t_index, : , x_index]
+    screen /= np.sum(screen)   #Normalise
     axis = np.linspace(h, 1-h, m)
+
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x = axis, y = screen, mode="lines", line=dict(width = 5)))
     fig.update_layout(
         font_family="Garamond",
         font_size=30,
-        title = "Probability distribution along y-axis at x = 0.8, t = 0.002",
+        title = f"Probability distribution along y-axis at x = 0.8, t = 0.002, for {slits} slits",
         xaxis_title= "Position along y-axis",
         yaxis_title= "Probability")
     fig.show()
+
+
 
 
 
@@ -174,5 +172,5 @@ if __name__ == "__main__":
     #animate()
     #plot_potential(2)
     #plot_states()
-    p9(2)
+    p9("three")
     # plot_initial_u()
