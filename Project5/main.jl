@@ -3,8 +3,13 @@ using Random
 # using Pkg
 # Pkg.add("NPZ")
 # Pkg.add("ProgressMeter")
+# Pkg.add("SparseArrays")
+# Pkg.add("IterativeSolvers")
 using NPZ
 using ProgressMeter
+using SparseArrays
+using IterativeSolvers
+
 
 include("Crank_Nicolson.jl")
 include("sparse_matrices.jl")
@@ -26,7 +31,7 @@ end
 
 function problem7_double_slit()
     # Free parameters
-    T = 0.0001
+    T = 0.002
     sy = 0.10
     v0 = 1e10
     slits = 2
@@ -40,7 +45,7 @@ end
 
 function problem8()
     # Free parameters
-    T = 0.008
+    T = 0.002
     sy = 0.20
     v0 = 1e10
     slits = 2
@@ -96,11 +101,10 @@ end
 
 if abspath(PROGRAM_FILE) == @__FILE__
     # potential is not made, only this one works
-    #problem7_no_slit()
-
+    problem7_no_slit()
     problem7_double_slit()
-    # problem8()
-    # problem9_one_slit()
-    # problem9_two_slit()
-    # problem9_three_slit()
+    problem8()
+    problem9_one_slit()
+    problem9_two_slit()
+    problem9_three_slit()
 end
