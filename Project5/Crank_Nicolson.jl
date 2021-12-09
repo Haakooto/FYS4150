@@ -5,14 +5,14 @@ function make_AB(h, dt, V)
 
     Arguments:
         h: Float
-           Step length in spatial discretisation
+            Step length in spatial discretisation
         dt: Float
             Step length in temporal discretisation
         V: Matrix{Float}
-           Matrix of potential values in each point
+            Matrix of potential values in each point
     Returns
         A, B: SparseMat
-              Sparse matrices, as defined in assignment
+            Sparse matrices, as defined in assignment
     =#
     m = Int(1 / h) - 1
     a = ones(ComplexF64, m*m)
@@ -31,63 +31,50 @@ function position_to_index(position, h=0.005)
     #=
     Translates a spatial position to the corresponding index for the internal points
     Arguments:
-        h: Float
-           Step length in spatial discretisation
-        position: float
+        position: Float
             position of whatever is going on there
+        h: Float
+            Step length in spatial discretisation
     =#
     index = round(position/h)
     return Int(index)
-
 end
 
 
 function make_V(h, v0=0, slits=1; thickness=0.02, position=0.5, aperture=0.05, separator=0.05)
     #=
     Sets up potential matrix V
-    Must still be written, currently no potential is used
-    Use parameters to calculate
-
-    It is possible the matrix has to be transposed,
-    as Julia is column-major,
-    but I have put no brain power into contemplating
-    this further than the potential nessescity
 
     Arguments:
         h: Float
-           Step length in spatial discretisation
+            Step length in spatial discretisation
         v0: Float
             Value of potential where not zero
         slits: Int
-               Number of slits in the slit experiment
+            Number of slits in the slit experiment
         thickness: Float
-                   width of wall
+            width of wall
         position: Float
-                  position along x-axis of wall
+            position along x-axis of wall
         aperture: Float
-                  width along y-axis of slit
+            width along y-axis of slit
         seperator: Float
-                   width of wall between slits
+            width of wall between slits
     Returns:
         V: Matrix{Float}
-           Potential matrix
+            Potential matrix
     =#
     m = Int(1 / h) - 1
     V = zeros(m, m)
 
-
     x_start = position_to_index(position - thickness/2, h)
     x_stop = position_to_index(position + thickness/2, h)
-
 
     if slits == 1
         y_start = position_to_index(0.5 - aperture/2, h)
         y_stop = position_to_index(0.5 + aperture/2, h)
         V[1:y_start-1, x_start:x_stop] .= v0
         V[y_stop:end, x_start:x_stop] .= v0
-
-
-
 
     elseif slits == 2
         y_start1 = position_to_index(0.5 - separator/2 - aperture, h)
@@ -99,8 +86,6 @@ function make_V(h, v0=0, slits=1; thickness=0.02, position=0.5, aperture=0.05, s
         V[1 : y_start1-1, x_start:x_stop] .= v0
         V[y_stop1 : y_start2-1, x_start:x_stop] .= v0
         V[y_stop2 : end, x_start:x_stop] .= v0
-
-
 
     else slits == 3
         y_start1 = position_to_index(0.5 - aperture*3/2 - separator, h)
@@ -132,13 +117,13 @@ function Gauss_wave_packet(h, xc, yc, px, py, sx, sy)
 
     Arguments:
         h: Float
-           Step length in spatial discretisation
+            Step length in spatial discretisation
         xc, yc: Float
-                Centre of wave packet in x and y coordinate
+            Centre of wave packet in x and y coordinate
         px, py: Float
-                wave packet momentum in x and y coordinate
+            wave packet momentum in x and y coordinate
         sx, sy: Float
-                Initial width of wave packet in x and y coordinate
+            Initial width of wave packet in x and y coordinate
     Returns
         u:  Array{ComplexF}
             Normalised, flattened array of initial wave packet
@@ -167,18 +152,18 @@ function initialize_system(dt, h, v0, slits, P)
         dt: Float
             Step length in temporal discretisation
         h: Float
-           Step length in spatial discretisation
+            Step length in spatial discretisation
         v0: Float
             Value of potential where not zero
         slits: Int
-               number of slits in the slit experiment
+            number of slits in the slit experiment
         P: Array{Float}
            Container for parameters to gaussian wave packet
     Returns:
         A, B: SparseMat
-              A and B as specified in assigmnet
+            A and B as specified in assigmnet
         u: Array{ComplexF}
-           Normalized, flattened complex array of initial wave packet
+            Normalized, flattened complex array of initial wave packet
     =#
     V = make_V(h, v0, slits)
     u = Gauss_wave_packet(h, P...)
@@ -206,9 +191,9 @@ function simulate(args, name, realimag=false)
                 10: v0, potential wall constant. Set at own perogative
                 11: slits, number of slits in wall. Set at own perogative
         name: String
-              name to save datafile as
+            name to save datafile as
         realimag: Bool
-                  to save real and imag part seperately, in addition to popbability
+            to save real and imag part seperately, in addition to popbability
     Returns
         saves datafile with name name
         File contains matrix of size (length(t), points + 2),
@@ -231,7 +216,7 @@ function simulate(args, name, realimag=false)
     file = "npz/" * name * ".npz"
 
     A, B, u = initialize_system(dt, h, v0, slits, gauss_params)
-    A = to_sparse(A)
+    A = to_sparse(A)  # to speed-up code, use SparseArrays, not our SparseMat
     println("Finished initialized system")
 
     M = Int(1 / h) + 1
@@ -260,7 +245,7 @@ function simulate(args, name, realimag=false)
     for time in 2:length(t)
         b = B * u  # Problem 3 part 1
         # u, i = SOR(A, b, initial_guess=u, omega=0.9)  # problem 3 part 2
-        ssor!(u, A, b, 0.9, maxiter=i)
+        ssor!(u, A, b, 0.9, maxiter=i)  # this is faster than our sor-solver
         P = abs2.(u)  # Born rule
 
         storage[time, 2] = 1-sum(P)  # deviation from 1 of total probability at time

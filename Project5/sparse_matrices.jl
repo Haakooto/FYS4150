@@ -57,6 +57,19 @@ function to_dense(SM::SparseMat)
 end
 
 function to_sparse(SM::SparseMat)
+    #=
+    Our implementation worked, but was slow, so convert SparseMat (our)
+    to SparseArrays (Julia-package).
+    Works similar to Armadillos' sp_cx_mat in C++
+
+    Arguments:
+        SM, SparseMat
+            instance of our SparseMat struct
+
+    Returns:
+        sparse: SparseMatrixCSC
+            Julias type of Sparse Arrays
+    =#
     n = SM.m^2
     I = []
     J = []
@@ -139,7 +152,7 @@ function SOR(A::Union{SparseMat, SparseMatrixCSC}, b::Array; initial_guess=0, om
         for i in 1:n
             Sigma = 0  # sum(Aij * xj)
             for j in indices
-                if 0 < i + j <= n
+                if 0 < i + j <= n  
                     Sigma += A[i, j + i] * x[i + j]
                 end
             end
