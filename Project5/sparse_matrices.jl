@@ -1,4 +1,3 @@
-using LinearAlgebra
 import Base.:*
 
 struct SparseMat
@@ -35,18 +34,6 @@ function Base.getindex(A::SparseMat, i::Int, j::Int)
     end
 end
 
-function over_index(a::Array, i::Int)
-    #=
-    To not deal with pesky indexing errors,
-    let indexing outside of array return 0
-    =#
-    if i <=0 || i > length(a)
-        return 0
-    else
-        return a[i]
-    end
-end
-
 function to_dense(SM::SparseMat)
     #=
     Convert a SparseMat to dense
@@ -69,6 +56,25 @@ function to_dense(SM::SparseMat)
     return out
 end
 
+function to_sparse(SM::SparseMat)
+    n = SM.m^2
+    I = []
+    J = []
+    V = ComplexF64[]
+    indices = [-SM.m, -1, 0, 1, SM.m]
+    for i in 1:n
+        for j in indices
+            v = SM[i, i + j]
+            if v != 0
+                push!(I, i)
+                push!(J, i + j)
+                push!(V, v)
+            end
+        end
+    end
+    return sparse(I, J, V)
+end
+
 function *(A::SparseMat, x::Array)
     #=
     Performs matrix multiplication between SparseMat and Array
@@ -77,15 +83,18 @@ function *(A::SparseMat, x::Array)
     =#
     b = zeros(ComplexF64, length(x))
     indices = [-A.m, -1, 0, 1, A.m]  # non-zero elements of A
-    for i in 1:A.m^2
+    n = A.m^2
+    for i in 1:n
         for j in indices
-            b[i] += A[i, i + j] * over_index(x, i + j)
+            if 0 < i + j <= n
+                b[i] += A[i, i + j] * x[i + j]
+            end
         end
     end
     return b
 end
 
-function SOR(A::SparseMat, b::Array; initial_guess=0, omega=1, tol=1e-13, max_iter=1e4)
+function SOR(A::Union{SparseMat, SparseMatrixCSC}, b::Array; initial_guess=0, omega=1, tol=1e-13, max_iter=1e4)
     #=
     Performs Successive Over Relaxation to solve matrix problem Ax=b
     Starting with an initial guess of x, iteratively update it until convergence
@@ -117,21 +126,24 @@ function SOR(A::SparseMat, b::Array; initial_guess=0, omega=1, tol=1e-13, max_it
             Number of iterations required to reach convergence
     =#
     n = length(b)
+    m = Int(sqrt(n))
     if initial_guess == 0
         x = zeros(ComplexF64, n)  #  make vector of same type
     else
         x = initial_guess
     end
     iters = 0  #  count iterations needed
-    indices = [-A.m, -1, 1, A.m]
+    indices = [-m, -1, 1, m]
     while iters < max_iter # run until convergence
         iters += 1
         for i in 1:n
             Sigma = 0  # sum(Aij * xj)
             for j in indices
-                Sigma += A[i, j + i] * over_index(x, i + j)
+                if 0 < i + j <= n
+                    Sigma += A[i, j + i] * x[i + j]
+                end
             end
-            x[i] = (1 - omega) * x[i] + (omega / A.diag[i]) * (b[i] - Sigma)
+            x[i] = (1 - omega) * x[i] + (omega / A[i, i]) * (b[i] - Sigma)
         end
         residual = maximum(abs.((A * x) .- b))
         if residual < tol

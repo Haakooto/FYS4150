@@ -27,7 +27,7 @@ function make_AB(h, dt, V)
 end
 
 
-function position_to_index(position, h = 0.005)
+function position_to_index(position, h=0.005)
     #=
     Translates a spatial position to the corresponding index for the internal points
     Arguments:
@@ -36,7 +36,7 @@ function position_to_index(position, h = 0.005)
         position: float
             position of whatever is going on there
     =#
-    index = position/h
+    index = round(position/h)
     return Int(index)
 
 end
@@ -76,13 +76,13 @@ function make_V(h, v0=0, slits=1; thickness=0.02, position=0.5, aperture=0.05, s
     V = zeros(m, m)
 
 
-    x_start = position_to_index(position - thickness/2)
-    x_stop = position_to_index(position + thickness/2)
+    x_start = position_to_index(position - thickness/2, h)
+    x_stop = position_to_index(position + thickness/2, h)
 
 
     if slits == 1
-        y_start = position_to_index(0.5 - aperture/2)
-        y_stop = position_to_index(0.5 + aperture/2)
+        y_start = position_to_index(0.5 - aperture/2, h)
+        y_stop = position_to_index(0.5 + aperture/2, h)
         V[1:y_start-1, x_start:x_stop] .= v0
         V[y_stop:end, x_start:x_stop] .= v0
 
@@ -90,11 +90,11 @@ function make_V(h, v0=0, slits=1; thickness=0.02, position=0.5, aperture=0.05, s
 
 
     elseif slits == 2
-        y_start1 = position_to_index(0.5 - separator/2 - aperture)
-        y_stop1 = position_to_index(0.5 - separator/2)
+        y_start1 = position_to_index(0.5 - separator/2 - aperture, h)
+        y_stop1 = position_to_index(0.5 - separator/2, h)
 
-        y_start2 = y_start1 + position_to_index(separator + aperture)
-        y_stop2 = y_stop1 + position_to_index(separator + aperture)
+        y_start2 = y_start1 + position_to_index(separator + aperture, h)
+        y_stop2 = y_stop1 + position_to_index(separator + aperture, h)
 
         V[1 : y_start1-1, x_start:x_stop] .= v0
         V[y_stop1 : y_start2-1, x_start:x_stop] .= v0
@@ -103,14 +103,14 @@ function make_V(h, v0=0, slits=1; thickness=0.02, position=0.5, aperture=0.05, s
 
 
     else slits == 3
-        y_start1 = position_to_index(0.5 - aperture*3/2 - separator)
-        y_stop1 = position_to_index(0.5 - aperture*1/2 - separator)
+        y_start1 = position_to_index(0.5 - aperture*3/2 - separator, h)
+        y_stop1 = position_to_index(0.5 - aperture*1/2 - separator, h)
 
-        y_start2 = y_start1 + position_to_index(separator + aperture)
-        y_stop2 = y_stop1 + position_to_index(separator + aperture)
+        y_start2 = y_start1 + position_to_index(separator + aperture, h)
+        y_stop2 = y_stop1 + position_to_index(separator + aperture, h)
 
-        y_start3 = y_start2 + position_to_index(separator + aperture)
-        y_stop3 = y_stop2 + position_to_index(separator + aperture)
+        y_start3 = y_start2 + position_to_index(separator + aperture, h)
+        y_stop3 = y_stop2 + position_to_index(separator + aperture, h)
 
         V[1:y_start1-1, x_start:x_stop] .= v0
         V[y_stop1:y_start2-1, x_start:x_stop] .= v0
@@ -122,7 +122,7 @@ function make_V(h, v0=0, slits=1; thickness=0.02, position=0.5, aperture=0.05, s
     file = "npz/potential_" * string(Int(slits)) * "_slits.npz"   #write the potential to file to check what it looks like
     npzwrite(file, V)
 
-    return V
+    return transpose(V)
 
 end
 
@@ -231,6 +231,7 @@ function simulate(args, name, realimag=false)
     file = "npz/" * name * ".npz"
 
     A, B, u = initialize_system(dt, h, v0, slits, gauss_params)
+    A = to_sparse(A)
     println("Finished initialized system")
 
     M = Int(1 / h) + 1
@@ -243,6 +244,8 @@ function simulate(args, name, realimag=false)
     storage[1, 2] = (1-sum(abs2.(u)))
     storage[1, 3:end] = abs2.(u)
 
+    # @assert abs2.(u) == (real.(u) - 1im * imag.(u)) .* (real.(u) + 1im * imag.(u))
+
     # For problem 8, also save real and imag parts, seperatrely
     if realimag
         store_real = zeros(Float64, length(t), points)
@@ -253,13 +256,14 @@ function simulate(args, name, realimag=false)
 
     println("Starting simulation...")
     pbar = Progress(length(t); showspeed=true, barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',), barlen=10)
-
+    i = 30
     for time in 2:length(t)
         b = B * u  # Problem 3 part 1
-        u, i = SOR(A, b, initial_guess=u, omega=0.9)  # problem 3 part 2    #It fails at doing this
+        # u, i = SOR(A, b, initial_guess=u, omega=0.9)  # problem 3 part 2
+        ssor!(u, A, b, 0.9, maxiter=i)
         P = abs2.(u)  # Born rule
 
-        storage[time, 2] = 1-sum(P)  # total probability at time
+        storage[time, 2] = 1-sum(P)  # deviation from 1 of total probability at time
         storage[time, 3:end] = P  # probability as each points
 
         if realimag
