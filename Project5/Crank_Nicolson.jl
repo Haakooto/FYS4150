@@ -229,8 +229,6 @@ function simulate(args, name, realimag=false)
     storage[1, 2] = (1-sum(abs2.(u)))
     storage[1, 3:end] = abs2.(u)
 
-    # @assert abs2.(u) == (real.(u) - 1im * imag.(u)) .* (real.(u) + 1im * imag.(u))
-
     # For problem 8, also save real and imag parts, seperatrely
     if realimag
         store_real = zeros(Float64, length(t), points)
