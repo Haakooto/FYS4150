@@ -241,7 +241,7 @@ function simulate(args, name, realimag=false)
 
     println("Starting simulation...")
     pbar = Progress(length(t); showspeed=true, barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',), barlen=10)
-    i = 30
+    i = 30  # must be sufficiently high to give good results, but low enough to not take forever
     for time in 2:length(t)
         b = B * u  # Problem 3 part 1
         # u, i = SOR(A, b, initial_guess=u, omega=0.9)  # problem 3 part 2
