@@ -3,17 +3,20 @@ import plotly.graph_objects as go
 
 
 def position_to_index(position, h=0.005):
+    """ Convert position to index """
     index = position/h - 1
     return int(index)
 
 
 def time_to_index(time, step=2.5e-5):
+    """ Convert time to index """
     index = time/step
     return int(index)
 
 
-def animate(h=0.005):
-    data = np.load("npz/p9_one_slit.npz")
+def animate(file="p9_3_slit.npz", h=0.005):
+    """ Animate time evolution of a simulation """
+    data = np.load("npz/" + file)
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
     Z = data[:, 2:].reshape(len(t), m, m)
@@ -21,7 +24,6 @@ def animate(h=0.005):
 
     data = go.Contour(x=axes, y=axes,
                       z=Z[0],
-                      #   contours=dict(start=0, end=0.1, size=0.01, showlines=False),
                       )
 
     frames = [go.Frame(data=[go.Contour(x=axes, y=axes, z=Z[i].reshape(m, m))])
@@ -30,36 +32,12 @@ def animate(h=0.005):
     layout = go.Layout(updatemenus=[dict(type="buttons", buttons=[
                        dict(label="Play", method="animate", args=[None])])])
 
-    f = go.Figure(data=data, layout=layout, frames=frames)
-    f.show()
-
-
-def plot_states(h=0.005):
-    #prob = np.load("npz/prob.npz")
-    prob = np.load("npz/p7_no_slit_final.npz")
-    m = int(np.sqrt(prob.shape[1] - 1))
-    t = prob[:, 0]
-    p = prob[:, 2:].reshape(len(t), m, m)
-
-    x = np.linspace(h, 1-h, m)
-    fig = go.Figure(data=go.Contour(x=x, y=x, z=p[np.argmin(abs(t - 0))]))
-    fig.show()
-    fig = go.Figure(data=go.Contour(x=x, y=x, z=p[np.argmin(abs(t - 0.004))]))
-    fig.show()
-    fig = go.Figure(data=go.Contour(x=x, y=x, z=p[np.argmin(abs(t - 0.008))]))
+    fig = go.Figure(data=data, layout=layout, frames=frames)
     fig.show()
 
 
-def plot_initial_u():
-    data = np.load("initial_u.npz")
-    data = np.conj(data) * data
-    print(data)
-
-    fig = go.Figure(data=go.Contour(z=np.real(data)))
-    fig.show()
-
-
-def p7_probs_no_slit():
+def p7_no_slit():
+    """ Plot deviation from 1 of total probability as function of time """
     data = np.load("npz/p7_no_slit.npz")
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
@@ -79,7 +57,13 @@ def p7_probs_no_slit():
     fig.show()
 
 
+def p7_double_slit():
+    """ Plot deviation from 1 of total probability as function of time """
+    print("Somehow I dont exist and must be copied from p7_no_slit()")
+
+
 def animate_real_imag():
+    """ Animate the time evolution of real and imag part of the wave function """
     data = np.load("npz/p8.npz")
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
@@ -107,6 +91,7 @@ def animate_real_imag():
 
 
 def p8_three_steps(h=0.005):
+    """ Plot probability function as well as real and imag part of Ψ at 3 time points """
     data = np.load("npz/p8.npz")
     m = int(np.sqrt(data.shape[1] - 1))
     t = data[:, 0]
@@ -144,33 +129,39 @@ def p8_three_steps(h=0.005):
             fig.show()
 
 
-def p9(slits, h=0.005):
-    data = np.load(f"npz/p9_{slits}_slit.npz")
-    m = int(np.sqrt(data.shape[1] - 1))
-    t = data[:, 0]
+def p9(h=0.005):
+    """ Plot probability distribution at x=0.8 after 2ms in the case of 1, 2, 3 slits """
+    nice = {1: "one slit", 2: "two slits", 3: "three slits"}
+    for slits in [1, 2, 3]:
+        data = np.load(f"npz/p9_{slits}_slit.npz")
+        m = int(np.sqrt(data.shape[1] - 1))
+        t = data[:, 0]
 
-    t_index = time_to_index(0.002)
+        t_index = time_to_index(0.002)
 
-    p = data[:, 2:].reshape(len(t), m, m)
-    x_index = position_to_index(0.8)
+        p = data[:, 2:].reshape(len(t), m, m)
+        x_index = position_to_index(0.8)
 
-    screen = p[t_index, :, x_index]
-    screen /= np.sum(screen)  # Normalise
-    axis = np.linspace(h, 1-h, m)
+        screen = p[t_index, :, x_index]
+        screen /= np.sum(screen)  # Normalise
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=axis, y=screen,
-                  mode="lines", line=dict(width=5)))
-    fig.update_layout(
-        font_family="Garamond",
-        font_size=30,
-        title=f"Probability distribution along y-axis at x = 0.8, t = 0.002, for {slits} slits",
-        xaxis_title="Position along y-axis",
-        yaxis_title="Probability")
-    fig.show()
+        axis = np.linspace(h, 1-h, m)
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=axis, y=screen,
+                                 mode="lines", line=dict(width=5))
+                      )
+        fig.update_layout(
+            font_family="Garamond",
+            font_size=30,
+            title=f"Probability distribution along y-axis at x = 0.8, t = 0.002, for {nice(slits)}.",
+            xaxis_title="Position along y-axis",
+            yaxis_title="Probability")
+        fig.show()
 
 
-def plot_potential(slits, h=0.005):  # Just for testing what the potential looks like
+def plot_potential(slits, h=0.005):
+    """ Plot the potential in unit space """
     V = np.load(f"npz/potential_{slits}_slits.npz")
     m = V.shape[0]
     x = np.linspace(h, 1-h, m)
@@ -180,11 +171,10 @@ def plot_potential(slits, h=0.005):  # Just for testing what the potential looks
 
 if __name__ == "__main__":
     # p7_no_slit()
-    # p7_probs_no_slit()
-    animate_real_imag()
+    # p7_double_slit()
+    # animate_real_imag()
     # p8_three_steps()
     # animate()
-    # plot_potential(2)
-    # plot_states()
-    # p9("three")
-    # plot_initial_u()
+    p9(1)
+    # p9(2)
+    # p9(3)
