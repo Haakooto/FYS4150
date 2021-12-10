@@ -56,51 +56,27 @@ function problem8()
     simulate(args, name, realimag)
 end
 
-function problem9_one_slit()
+function problem9(slits)
     # Free parameters
     T = 0.002
     sy = 0.20
     v0 = 1e10
-    slits = 1
 
     # The 7 other system parameters should not be changed
     args = [0.005, 2.5e-5, T, 0.25, 0.5, 200, 0, 0.05, sy, v0, slits]
-    name = "p9_one_slit"
+    name = "p9_" * string(slits) * "_slit"
     simulate(args, name)
 end
 
-function problem9_two_slit()
-    # Free parameters
-    T = 0.002
-    sy = 0.20
-    v0 = 1e10
-    slits = 2
-
-    # The 7 other system parameters should not be changed
-    args = [0.005, 2.5e-5, T, 0.25, 0.5, 200, 0, 0.05, sy, v0, slits]
-    name = "p9_two_slit"
-    simulate(args, name)
-end
-
-function problem9_three_slit()
-    # Free parameters
-    T = 0.002
-    sy = 0.20
-    v0 = 1e10
-    slits = 3
-
-    # The 7 other system parameters should not be changed
-    args = [0.005, 2.5e-5, T, 0.25, 0.5, 200, 0, 0.05, sy, v0, slits]
-    name = "p9_three_slit"
-    simulate(args, name)
+function problem9_all()
+    for slit in [1, 2, 3]
+        problem9(slit)
+    end
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
-    # potential is not made, only this one works
-    # problem7_no_slit()
-    # problem7_double_slit()
+    problem7_no_slit()
+    problem7_double_slit()
     problem8()
-    # problem9_one_slit()
-    # problem9_two_slit()
-    # problem9_three_slit()
+    problem9_all()
 end
