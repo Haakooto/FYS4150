@@ -1,5 +1,7 @@
 import numpy as np
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.io as pio
 
 
 def position_to_index(position, h=0.005):
@@ -103,30 +105,46 @@ def p8_three_steps(h=0.005):
     axes = np.linspace(0, 1, m + 2)[1:-1]
     times = [0.0, 0.001, 0.002]
 
-    for time in times:
-        fig = go.Figure(data=go.Contour(
-            x=axes, y=axes, z=p[time_to_index(time)]))
+    for k, time in enumerate(times):
+        if time == 0.001:
+            x1 = np.argmin(abs(axes - 0.2))
+            y1 = np.argmin(abs(axes - 0.15))
+            x2 = np.argmin(abs(axes - 0.8))
+            y2 = np.argmin(abs(axes - 0.85))
+        else:
+            x1, y1, x2, y2 = 0, 0, -1, -1
+
+        fig = make_subplots(rows=3, cols=1,
+                            column_widths=[1],
+                            row_heights=[0.33, 0.33, 0.33],
+                            specs=[[{"type": "contour"}] for _ in range(3)],
+                            subplot_titles=[f"Probability distribution at time t = {time}.",
+                                            "Real part of quantum state.", "Imaginary part of quantum state."],
+                            horizontal_spacing=0.1,
+                            vertical_spacing=0.1,
+                            )
+        fig.add_trace(go.Contour(x=axes[x1:x2], y=axes[y1:y2],
+                      z=p[np.argmin(abs(time - t))][y1:y2, x1:x2], colorbar=dict(len=0.3, x=1, y=0.87)), row=1, col=1)
+        fig.add_trace(go.Contour(x=axes, y=axes,
+                      z=real[np.argmin(abs(time - t))], colorbar=dict(len=0.3, x=1, y=0.5)), row=2, col=1)
+        fig.add_trace(go.Contour(x=axes, y=axes,
+                      z=imag[np.argmin(abs(time - t))], colorbar=dict(len=0.3, x=1, y=0.13)), row=3, col=1)
+        fig.for_each_annotation(lambda a: a.update(
+            font_size=80, font_family="Garamond"))
+
+        for a in ["", "2", "3"]:
+            for xy in ["x", "y"]:
+                fig["layout"][f"{xy}axis{a}"]["title"] = {"text": xy}
+
         fig.update_layout(
             font_family="Garamond",
-            font_size=30,
-            title=f"Probability distribution at time t = {time}",
-            xaxis_title="x",
-            yaxis_title="y")
-
-        fig.show()
-
-    for time in times:
-        for name, part in zip(["Imaginary", "Real"], [imag, real]):
-            fig = go.Figure(data=go.Contour(
-                x=axes, y=axes, z=part[time_to_index(time)]))
-            fig.update_layout(
-                font_family="Garamond",
-                font_size=30,
-                title=f"{name} part of probability distribution at time t = {time}",
-                xaxis_title="x",
-                yaxis_title="y")
-
-            fig.show()
+            font_size=70,
+            coloraxis=dict(colorbar=dict(len=0.5, x=1, y=0.22)),
+            width=2000,
+            height=3000,
+        )
+        pio.write_image(fig, f"p8_{k}.pdf")
+        # fig.show()
 
 
 def p9(h=0.005):
@@ -173,8 +191,8 @@ if __name__ == "__main__":
     # p7_no_slit()
     # p7_double_slit()
     # animate_real_imag()
-    # p8_three_steps()
+    p8_three_steps()
     # animate()
-    p9(1)
+    # p9(1)
     # p9(2)
     # p9(3)
